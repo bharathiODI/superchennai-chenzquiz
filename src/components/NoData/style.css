@@ -1,0 +1,38 @@
+/* style.css */
+
+.no-data-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 1rem;
+  width: 100%;
+  min-height: 250px;
+ 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  transition: all 0.3s ease-in-out;
+}
+
+.no-data-box {
+  max-width: 600px;
+  padding: 2rem;
+  background: linear-gradient(135deg, #fcf8fb, #d00404);
+  border: 1px solid #e5e7eb;
+}
+
+.no-data-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-family: "29LT Bukra SmBd";
+  line-height: clamp(36px, 5vw, 44px);
+  color: #f7f7f7;
+}
+
+.no-data-description {
+  font-size: 1rem;
+  font-family: "29LT Bukra SmBd";
+    color: #f7f7f7;
+
+
+}

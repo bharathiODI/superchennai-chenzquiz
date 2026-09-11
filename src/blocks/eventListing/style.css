@@ -1,0 +1,194 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+.rfm-marquee {
+  z-index: 0 !important;
+}
+
+/* Container Size */
+@media (max-width: 1600px) and (min-width: 1300px) {
+  .container {
+    max-width: 1050px;
+  }
+}
+@media (max-width: 1300px) and (min-width: 1100px) {
+  .container {
+    max-width: 1000px;
+  }
+}
+/* Container Size */
+
+@media (max-width: 1000px) {
+  .notHomePageSearch {
+    /* display: none; */
+  }
+}
+
+.festparaa {
+  font-size: 16px !important;
+  font-family: 'Poppins', sans-serif;
+  color: #000;
+  line-height: 23px;
+  letter-spacing: 0;
+}
+
+.festesssss {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 20px;
+  letter-spacing: 0;
+}
+
+.festviewwdetails {
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.festheadingsss {
+  font-size: 23px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  line-height: 28px;
+  letter-spacing: 0;
+  margin-top: 0;
+}
+
+.festmainheadingsss {
+  font-size: 28px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  line-height: 28px;
+  letter-spacing: 0;
+}
+
+.festesssss svg {
+  width: 17px;
+  height: 17px;
+}
+
+.festfirstbanner .festdesktopbanner {
+  width: 100%;
+}
+
+.withoutformseccc img {
+  width: 100%;
+  border-radius: 20px;
+}
+
+.festivalbgggg {
+  background-image: url('/public/images/summerfest/festbg.jpeg');
+  background-size: contain;
+  background-position: bottom;
+  background-repeat: no-repeat;
+}
+
+.paddingsection {
+  padding-top: 70px;
+  padding-bottom: 70px;
+}
+
+.svgiconsoftheaboutt {
+  width: 68px;
+  height: 68px;
+}
+
+.underlinenone {
+  text-decoration: none;
+}
+
+.patchssswhite {
+  width: 96px;
+  height: 100%;
+}
+
+.buttonsubmitttt {
+  width: -moz-max-content;
+  width: max-content;
+  font-size: 15px;
+  padding: 5px 20px;
+  height: 44px;
+  border-radius: 5px;
+  margin-top: 33px;
+  margin-left: -149px;
+}
+
+.butooonnssss {
+  display: flex;
+  align-items: center;
+}
+
+.inputttssss {
+  padding-top: 0.8rem;
+  padding-bottom: 0.8rem;
+}
+
+.submitbuttonssss {
+  width: max-content;
+  padding: 12px 20px;
+  font-size: 15px;
+  border-radius: 5px;
+  margin-top: 40px;
+}
+
+.otpinputtsss {
+  width: max-content;
+}
+
+.otpinputss {
+  height: 52px;
+}
+
+.flexxxxcontainer {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.inputsssboxsss {
+  width: 90%;
+}
+
+.verifyottpbitt {
+  margin-top: 12px;
+  margin-left: -156px;
+}
+
+.formmaxcontainer {
+  max-width: 570px;
+}
+
+.padddddd {
+  padding-right: 0;
+}
+
+.hovereddbossss {
+    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px,
+    rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+    width: 200px;
+    padding: 10px 15px;
+}
+
+
+.paddingcarsouel {
+  padding: 10px 0 !important ;
+}
+
+
+/* Deep Rich Royal Purple Canvas Background */
+.bg-chennai-purple-canvas {
+  background-color: #4A154B; /* Deep Royal Textured Purple */
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(147, 51, 234, 0.25) 0%, transparent 70%),
+    radial-gradient(circle at 20% 80%, rgba(20, 18, 30, 0.4) 0%, transparent 60%);
+}
+
+/* Authentic Paper Grain/Noise Overlay */
+.bg-paper-fiber-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.14;
+  pointer-events: none;
+  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}

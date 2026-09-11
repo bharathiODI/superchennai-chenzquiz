@@ -1,0 +1,21 @@
+
+/* HEADING ALIGN FIX TEXT AUTO STRING  */
+
+.autoShrinkText {
+  --auto-font: 20px; /* or whatever base size you need */
+  font-size: var(--auto-font);
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  .autoShrinkText {
+    font-size: calc(var(--auto-font) * 0.65);
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .autoShrinkText {
+    font-size: calc(var(--auto-font) * 0.5);
+  }
+}

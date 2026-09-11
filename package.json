@@ -1,0 +1,134 @@
+{
+  "name": "super-chennai",
+  "version": "1.0.0",
+  "description": "Website template for Payload",
+  "license": "MIT",
+  "type": "module",
+  "main": "main.js",
+  "scripts": {
+    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "export": "next export",
+    "postbuild": "next-sitemap --config next-sitemap.config.cjs",
+    "build:static": "npm run build && npm run export && npm run postbuild",
+    "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
+    "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
+    "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
+    "dev:web": "cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev"
+  },
+  "dependencies": {
+    "@next/third-parties": "^16.2.10",
+    "@payloadcms/admin-bar": "3.33.0",
+    "@payloadcms/db-postgres": "3.33.0",
+    "@payloadcms/live-preview-react": "3.33.0",
+    "@payloadcms/next": "3.33.0",
+    "@payloadcms/payload-cloud": "3.33.0",
+    "@payloadcms/plugin-form-builder": "3.33.0",
+    "@payloadcms/plugin-nested-docs": "3.33.0",
+    "@payloadcms/plugin-redirects": "3.33.0",
+    "@payloadcms/plugin-search": "^3.33.0",
+    "@payloadcms/plugin-seo": "3.33.0",
+    "@payloadcms/richtext-lexical": "3.33.0",
+    "@payloadcms/ui": "3.33.0",
+    "@radix-ui/react-checkbox": "^1.0.4",
+    "@radix-ui/react-label": "^2.0.2",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-tooltip": "^1.2.8",
+    "@react-email/components": "^1.0.12",
+    "@react-email/render": "^2.0.8",
+    "@react-email/tailwind": "^2.0.7",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "fastest-levenshtein": "^1.0.16",
+    "file-saver": "^2.0.5",
+    "fluent-ffmpeg": "^2.1.3",
+    "framer-motion": "^12.11.0",
+    "geist": "^1.3.0",
+    "globby": "^14.1.0",
+    "graphql": "^16.8.2",
+    "graphql-request": "^7.1.2",
+    "i18next": "^25.7.1",
+    "i18next-browser-languagedetector": "^8.2.0",
+    "lucide-react": "^0.378.0",
+    "next": "15.3.6",
+    "next-sitemap": "^4.2.3",
+    "nodemailer": "^7.0.3",
+    "openai": "^6.38.0",
+    "payload": "^3.33.0",
+    "prism-react-renderer": "^2.3.1",
+    "react": "19.1.2",
+    "react-dom": "19.1.2",
+    "react-fast-marquee": "^1.6.5",
+    "react-hook-form": "7.45.4",
+    "react-i18next": "^16.4.0",
+    "react-icons": "^5.5.0",
+    "react-slick": "^0.30.3",
+    "react-toastify": "^11.1.0",
+    "sharp": "0.32.6",
+    "slick-carousel": "^1.8.1",
+    "swiper": "^12.2.0",
+    "tailwind-merge": "^2.3.0",
+    "tailwindcss-animate": "^1.0.7",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
+    "@tailwindcss/typography": "^0.5.13",
+    "@types/escape-html": "^1.0.2",
+    "@types/node": "22.5.4",
+    "@types/nodemailer": "^6.4.17",
+    "@types/react": "19.1.0",
+    "@types/react-dom": "19.1.2",
+    "@types/react-slick": "^0.23.13",
+    "autoprefixer": "^10.4.19",
+    "concurrently": "^9.2.0",
+    "copyfiles": "^2.4.1",
+    "cross-env": "^7.0.3",
+    "electron": "^37.1.0",
+    "eslint": "^9.16.0",
+    "eslint-config-next": "15.3.0",
+    "postcss": "^8.4.38",
+    "prettier": "^3.4.2",
+    "tailwindcss": "^3.4.3",
+    "typescript": "5.7.3",
+    "wait-on": "^8.0.3"
+  },
+  "engines": {
+    "node": "^18.20.2 || >=20.9.0",
+    "pnpm": "^9 || ^10"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "sharp"
+    ]
+  },
+  "build": {
+    "appId": "com.superchennai.desktop",
+    "productName": "Super Chennai Desktop",
+    "files": [
+      "out/**/*",
+      "node_modules/**/*",
+      "electron.js",
+      "package.json"
+    ],
+    "directories": {
+      "buildResources": "build",
+      "output": "release"
+    },
+    "win": {
+      "icon": "build/app-icon.ico",
+      "target": [
+        "nsis"
+      ]
+    },
+    "mac": {
+      "icon": "build/app-icon.icns",
+      "target": [
+        "dmg"
+      ]
+    }
+  }
+}

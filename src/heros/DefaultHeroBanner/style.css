@@ -1,0 +1,11 @@
+@media (max-width:700px) {
+    .mobileimagessss {
+        height: 700px;
+        width: 100%;
+    }
+
+
+    .mobileeebannerrrsss {
+        justify-content: center !important;
+    }
+}

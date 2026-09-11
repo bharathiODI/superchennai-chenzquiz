@@ -1,0 +1,35 @@
+.herobannerSection {
+  position: relative;
+  z-index: 1;
+}
+
+.herobannerSection .relative {
+  z-index: 0;
+}
+
+@media (max-width: 580px) {
+  .DesktopBanner {
+    display: none;
+  }
+
+  .heroSliderDots {
+    bottom: 6%;
+  }
+}
+
+@media (min-width: 580px) {
+  .MobileBanner {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .mobileBanneerHeroSlider {
+    height: 80vh !important;
+    object-fit: contain !important;
+    margin-top: 60px;
+  }
+  .herobannerSection {
+    margin-top: 40px;
+  }
+}

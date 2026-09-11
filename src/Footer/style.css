@@ -1,0 +1,341 @@
+.FooterBackground {
+
+  background-image: url("../assets/images/footer-background-image.png"),
+    url("../assets/images/footer-background.png");
+}
+
+
+.FooterHeading {
+  font-family: "29LT Bukra";
+  font-family: "29LT Bukra SmBd";
+  color: #d5d5d5;
+  font-size: 16px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  line-height: 26px;
+}
+
+.FooterSectionDiv {
+  display: flex;
+  column-gap: 45px;
+}
+
+.FooterSectionDiv h5 {
+  font-family: "29LT Bukra";
+  font-family: "29LT-Bukra-Light";
+  color: #ae95bb;
+  font-size: 13px;
+  line-height: 27px;
+  text-transform: uppercase;
+  font-weight: 200;
+  width: max-content;
+}
+
+.SectionLeft {
+  padding-left: 20px;
+  border-left: 1px solid rgba(112, 94, 120, 0.3);
+}
+
+.firstsectionwidth {
+  width: 23%;
+}
+
+.containerSection {
+  display: wrap;
+  column-gap: 25px;
+  flex-wrap: wrap;
+  row-gap: 4.5rem;
+}
+
+.footerthirdSection {
+  display: flex;
+  flex-direction: column;
+  row-gap: 50px;
+  border-left: 1px solid rgba(112, 94, 120, 0.3);
+  width: 20%;
+}
+
+.footerthirdSection .SectionLeft {
+  border: none;
+}
+
+.SectionConatinerSecond {
+  margin-top: 100px;
+}
+
+.SectionConatinerSecond1 {
+  margin-top: 100px;
+  border-top: 1px solid rgba(112, 94, 120, 0.3);
+}
+
+.SectionLeft1 {
+  width: 25%;
+  padding-left: 20px;
+  border-left: 1px solid rgba(112, 94, 120, 0.3);
+}
+
+.iconsFlex {
+  display: flex;
+  column-gap: 15px;
+}
+
+.followUs {
+  display: flex;
+  flex-direction: column;
+  row-gap: 14px;
+}
+
+.followUs h3 {
+  font-family: "Poppinsbold";
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 22px;
+  color: #d5d5d5;
+  line-height: 29px;
+  padding-left: 10px;
+}
+
+.LogoandFollow {
+  display: flex;
+  align-items: center;
+  column-gap: 50px;
+}
+
+.iconsFlex img {
+  width: 45px;
+}
+
+.designBy {
+  display: flex;
+  align-items: center;
+  column-gap: 16px;
+  margin-top: 11px;
+}
+
+.footermainsection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 50px;
+}
+
+.copyrights {}
+
+.copyrights h5 {
+  font-family: "29LT Bukra";
+  text-transform: uppercase;
+  color: #a4a4a4;
+}
+
+.designBy img {
+  width: 36px;
+}
+
+.FooterBackground h5 {
+  position: relative;
+  cursor: pointer;
+}
+
+.FooterBackground h5::after {
+  /* background: #705e78; */
+  background: rgba(112, 94, 120, 0.3);
+  bottom: 0;
+  color: #0000;
+  content: ".";
+  height: 1px;
+  left: 0;
+  margin: auto;
+  position: absolute;
+  right: 0;
+  width: 0;
+  transition: all 0.5s ease;
+}
+
+.FooterBackground h5:hover:after {
+  height: 0.5px;
+  width: 100%;
+}
+
+.copyrights h4 {
+  font-family: "29LT Bukra";
+  text-transform: uppercase;
+  color: #a4a4a4;
+}
+
+@media (max-width: 768px) {
+
+  .credaiLogo {
+    margin-top: 25px;
+  }
+
+  .SectionConatinerSecond {
+    margin-top: 15px;
+    padding-left: 35px;
+    padding-right: 38px;
+  }
+
+  .containerSection {
+    flex-direction: column;
+  }
+
+  .firstsectionwidth {
+    width: 100%;
+  }
+
+  .footerthirdSection {
+    width: 100%;
+    row-gap: 15px;
+  }
+
+  .SectionLeft1 {
+    width: 100%;
+    border: none;
+    padding-left: 0;
+  }
+
+  .FooterSectionDiv {
+    flex-direction: column;
+    padding-left: 15px;
+    margin-top: 15px;
+  }
+
+  .FooterSectionDiv h5 {
+    font-size: 14px;
+    line-height: 28px;
+    text-align: center;
+  }
+
+  .containerSection {
+    row-gap: 15px;
+  }
+
+  .SectionLeft {
+    padding-left: 0px;
+    border-left: none;
+  }
+
+  .footerthirdSection {
+    border-left: none;
+  }
+
+  .FooterHeading {
+    position: relative;
+    border-bottom: 1px solid rgba(112, 94, 120, 0.3);
+    padding-bottom: 10px;
+    margin-bottom: 0;
+    font-size: 14px;
+    letter-spacing: 2px;
+    line-height: 24px;
+  }
+
+  /* .FooterHeading::before {
+    content: "+";
+    right: 0;
+    position: absolute;
+    font-weight: 200;
+    font-size: 15px;
+  } */
+  .FooterHeading {
+    position: relative;
+    padding-right: 20px;
+    cursor: pointer;
+  }
+
+  .symbol {
+    position: absolute;
+    right: 0;
+    font-weight: 200;
+    font-size: 15px;
+  }
+
+  .LogoandFollow {
+    flex-direction: column;
+    row-gap: 0px;
+    width: 100%;
+  }
+
+  .footermainsection {
+    flex-direction: column;
+    row-gap: 0px;
+    padding-top: 10px;
+  }
+
+  .iconsFlex img {
+    width: 30px;
+  }
+
+  .logoFooterimage {
+    width: max-content;
+    display: flex;
+    justify-content: center;
+    border-bottom: 1px solid rgba(112, 94, 120, 0.3);
+    padding-bottom: 20px;
+    width: 90%;
+  }
+
+  .logoFooterimage img {
+    width: 35%;
+  }
+
+  .followUs h3 {
+    font-size: 16px;
+    line-height: 26px;
+    text-align: center;
+  }
+
+  .copyrights {
+    width: 100%;
+    margin-top: 25px;
+  }
+
+  .copyrights h5 {
+    font-size: 13px;
+    line-height: 25px;
+    text-align: center;
+  }
+
+  .designBy {
+    justify-content: center;
+  }
+
+  .designBy img {
+    width: 30px;
+  }
+
+  .SectionConatinerSecond1 {
+    margin-top: 20px;
+
+    border-top: none;
+  }
+
+  .followUs {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(112, 94, 120, 0.3);
+    width: 90%;
+  }
+
+  .iconsFlex {
+    justify-content: center;
+  }
+
+  .FooterSectionDiv div a {
+    width: 90%;
+  }
+
+  .copyrights h4 {
+    font-size: 13px;
+  }
+}
+
+
+@media (min-width: 768px) {
+  .symbol {
+    display: none;
+  }
+
+  .credaiLogo {
+    margin-top: 42px;
+    margin-left: -110px;
+  }
+}
