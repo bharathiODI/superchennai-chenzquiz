@@ -64,6 +64,7 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'quiz-users': QuizUserAuthOperations;
   };
   blocks: {};
   collections: {
@@ -71,11 +72,10 @@ export interface Config {
     posts: Post;
     media: Media;
     users: User;
-    'lets-talks-chennai': LetsTalksChennai;
-    talkcategories: Talkcategory;
-    'event-form-fields': EventFormField;
-    'summer-registrations': SummerRegistration;
-    'event-dashboard': EventDashboard;
+    'quiz-users': QuizUser;
+    quizzes: Quiz;
+    questions: Question;
+    'user-submissions': UserSubmission;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -91,11 +91,10 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    'lets-talks-chennai': LetsTalksChennaiSelect<false> | LetsTalksChennaiSelect<true>;
-    talkcategories: TalkcategoriesSelect<false> | TalkcategoriesSelect<true>;
-    'event-form-fields': EventFormFieldsSelect<false> | EventFormFieldsSelect<true>;
-    'summer-registrations': SummerRegistrationsSelect<false> | SummerRegistrationsSelect<true>;
-    'event-dashboard': EventDashboardSelect<false> | EventDashboardSelect<true>;
+    'quiz-users': QuizUsersSelect<false> | QuizUsersSelect<true>;
+    quizzes: QuizzesSelect<false> | QuizzesSelect<true>;
+    questions: QuestionsSelect<false> | QuestionsSelect<true>;
+    'user-submissions': UserSubmissionsSelect<false> | UserSubmissionsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -117,9 +116,13 @@ export interface Config {
     footer: FooterSelect<false> | FooterSelect<true>;
   };
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user:
+    | (User & {
+        collection: 'users';
+      })
+    | (QuizUser & {
+        collection: 'quiz-users';
+      });
   jobs: {
     tasks: {
       schedulePublish: TaskSchedulePublish;
@@ -132,6 +135,24 @@ export interface Config {
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface QuizUserAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -457,9 +478,50 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "lets-talks-chennai".
+ * via the `definition` "quiz-users".
  */
-export interface LetsTalksChennai {
+export interface QuizUser {
+  id: number;
+  name: string;
+  phone?: string | null;
+  /**
+   * Total XP earned by playing daily quizzes
+   */
+  totalXP?: number | null;
+  avatar?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quizzes".
+ */
+export interface Quiz {
+  id: number;
+  quizTitle: string;
+  /**
+   * Auto-generated unique URL slug
+   */
+  slug: string;
+  quizDate: string;
+  questions: (number | Question)[];
+  status?: ('draft' | 'active' | 'completed') | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "questions".
+ */
+export interface Question {
   id: number;
   title: string;
   heroImage?: (number | null) | Media;
@@ -479,47 +541,134 @@ export interface LetsTalksChennai {
     };
     [k: string]: unknown;
   } | null;
-  eventFields: {
-    /**
-     * Select dynamic category created from Categories collection.
-     */
-    TalkCategories: (number | Talkcategory)[];
-    shortDescription?: string | null;
-    familyFriendly?: boolean | null;
-    featured?: boolean | null;
-    link?: string | null;
-    linkbutton?: string | null;
-    enableExternalRedirect?: boolean | null;
-    externalUrl?: string | null;
-    openInNewTab?: boolean | null;
+  quiz: number | Quiz;
+  questionNumber: number;
+  gameType: 'mcq' | 'dropdown' | 'wordle' | 'word_finder' | 'match_following' | 'spot_lie' | 'reorder' | 'drag_drop';
+  questionTitle: string;
+  category?: ('chennai' | 'gk' | 'science' | 'geography') | null;
+  mcqGroup?: {
+    questionText: {
+      root: {
+        type: string;
+        children: {
+          type: string;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+    questionImage?: (number | null) | Media;
+    options: {
+      optionText: string;
+      optionImage?: (number | null) | Media;
+      id?: string | null;
+    }[];
+    correctOptionIndex: number;
   };
-  regSettings?: {
-    isRegistrationOpen?: boolean | null;
-    enableOTP?: boolean | null;
-    maxRegistrations?: number | null;
-    thankYouMessage?: string | null;
+  dropdownGroup?: {
+    sentenceText: string;
+    dropdownLabel?: string | null;
+    options: {
+      optionText: string;
+      id?: string | null;
+    }[];
+    correctAnswer: string;
   };
-  /**
-   * Admin Dashboard-இல் உருவாக்கிய Field-களை இங்கு Select செய்து கொள்ளவும் (e.g., Reel Duration, Submitter Name, Nominee Info).
-   */
-  customFields?: (number | EventFormField)[] | null;
+  wordleGroup?: {
+    clueText: string;
+    answerWord: string;
+    attempts?: number | null;
+    hint?: string | null;
+    hintImage?: (number | null) | Media;
+  };
+  wordFinderGroup?: {
+    instruction?: string | null;
+    gridRows: {
+      rowString: string;
+      id?: string | null;
+    }[];
+    wordsToFind: {
+      word: string;
+      id?: string | null;
+    }[];
+  };
+  matchGroup?: {
+    instruction?: string | null;
+    pairs: {
+      leftItem: string;
+      rightItem: string;
+      id?: string | null;
+    }[];
+  };
+  spotLieGroup?: {
+    statements: {
+      statementText: string;
+      isLie?: boolean | null;
+      id?: string | null;
+    }[];
+  };
+  reorderGroup?: {
+    instruction: string;
+    itemsInCorrectOrder: {
+      itemText: string;
+      id?: string | null;
+    }[];
+  };
+  dragDropGroup?: {
+    instruction: string;
+    dragMode?: ('categories' | 'sentence') | null;
+    sentenceWordsOrder?:
+      | {
+          word: string;
+          id?: string | null;
+        }[]
+      | null;
+    dropZones?:
+      | {
+          zoneTitle: string;
+          zoneItems?:
+            | {
+                itemText: string;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  timeLimit?: number | null;
+  points?: number | null;
+  negativePoints?: number | null;
+  difficulty?: ('Easy' | 'Medium' | 'Hard') | null;
+  enableDoubleUp?: boolean | null;
+  explanation?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
   meta?: {
     title?: string | null;
+    description?: string | null;
     /**
      * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
      */
     image?: (number | null) | Media;
-    description?: string | null;
   };
-  schema?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
   publishedAt?: string | null;
   /**
    * குறைந்த எண் (1, 2, 3) முதலில் தோன்றும்.
@@ -533,75 +682,14 @@ export interface LetsTalksChennai {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "talkcategories".
+ * via the `definition` "user-submissions".
  */
-export interface Talkcategory {
+export interface UserSubmission {
   id: number;
-  name: string;
-  /**
-   * Frontend URL or tab filtering-ku use aagum (e.g. people-of-chennai)
-   */
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "event-form-fields".
- */
-export interface EventFormField {
-  id: number;
-  /**
-   * Form-இல் பயனருக்குத் தெரியும் தலைப்பு (e.g., "Nominee Name")
-   */
-  label: string;
-  /**
-   * Database / API-இல் சேமிக்கப்படும் பெயரின் identifier (e.g., "nomineeName")
-   */
-  name: string;
-  type: 'text' | 'email' | 'number' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'file' | 'richText';
-  placeholder?: string | null;
-  /**
-   * Field-க்கு கீழே காட்டப்படும் சிறு விளக்கம் (e.g., "Reels duration must be 90s")
-   */
-  description?: string | null;
-  required?: boolean | null;
-  validation?: {
-    /**
-     * Minimum Value (e.g., 0)
-     */
-    min?: number | null;
-    /**
-     * Maximum Value (e.g., 90 for Reels)
-     */
-    max?: number | null;
-  };
-  options?:
-    | {
-        label: string;
-        value: string;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "summer-registrations".
- */
-export interface SummerRegistration {
-  id: number;
-  summer: number | LetsTalksChennai;
-  status?: ('pending' | 'confirmed' | 'rejected') | null;
-  name: string;
-  email: string;
-  phone?: string | null;
-  company?: string | null;
-  /**
-   * Dynamic form values submitted by the user
-   */
-  values?:
+  user: number | QuizUser;
+  quiz: number | Quiz;
+  score: number;
+  answers?:
     | {
         [k: string]: unknown;
       }
@@ -610,35 +698,6 @@ export interface SummerRegistration {
     | number
     | boolean
     | null;
-  /**
-   * Uploaded images, reels, or documents from dynamic fields
-   */
-  attachments?:
-    | {
-        /**
-         * Target field identifier
-         */
-        fieldName?: string | null;
-        file?: (number | null) | Media;
-        id?: string | null;
-      }[]
-    | null;
-  thankYouMailSent?: boolean | null;
-  confirmedAt?: string | null;
-  /**
-   * This message will be included in the confirmation email.
-   */
-  adminMessage?: string | null;
-  mailResponse?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "event-dashboard".
- */
-export interface EventDashboard {
-  id: number;
   updatedAt: string;
   createdAt: string;
 }
@@ -1005,24 +1064,20 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
-        relationTo: 'lets-talks-chennai';
-        value: number | LetsTalksChennai;
+        relationTo: 'quiz-users';
+        value: number | QuizUser;
       } | null)
     | ({
-        relationTo: 'talkcategories';
-        value: number | Talkcategory;
+        relationTo: 'quizzes';
+        value: number | Quiz;
       } | null)
     | ({
-        relationTo: 'event-form-fields';
-        value: number | EventFormField;
+        relationTo: 'questions';
+        value: number | Question;
       } | null)
     | ({
-        relationTo: 'summer-registrations';
-        value: number | SummerRegistration;
-      } | null)
-    | ({
-        relationTo: 'event-dashboard';
-        value: number | EventDashboard;
+        relationTo: 'user-submissions';
+        value: number | UserSubmission;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1045,10 +1100,15 @@ export interface PayloadLockedDocument {
         value: number | PayloadJob;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'quiz-users';
+        value: number | QuizUser;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -1058,10 +1118,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: number;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'quiz-users';
+        value: number | QuizUser;
+      };
   key?: string | null;
   value?:
     | {
@@ -1298,43 +1363,174 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "lets-talks-chennai_select".
+ * via the `definition` "quiz-users_select".
  */
-export interface LetsTalksChennaiSelect<T extends boolean = true> {
+export interface QuizUsersSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
+  totalXP?: T;
+  avatar?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quizzes_select".
+ */
+export interface QuizzesSelect<T extends boolean = true> {
+  quizTitle?: T;
+  slug?: T;
+  quizDate?: T;
+  questions?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "questions_select".
+ */
+export interface QuestionsSelect<T extends boolean = true> {
   title?: T;
   heroImage?: T;
   mobileImage?: T;
   content?: T;
-  eventFields?:
+  quiz?: T;
+  questionNumber?: T;
+  gameType?: T;
+  questionTitle?: T;
+  category?: T;
+  mcqGroup?:
     | T
     | {
-        TalkCategories?: T;
-        shortDescription?: T;
-        familyFriendly?: T;
-        featured?: T;
-        link?: T;
-        linkbutton?: T;
-        enableExternalRedirect?: T;
-        externalUrl?: T;
-        openInNewTab?: T;
+        questionText?: T;
+        questionImage?: T;
+        options?:
+          | T
+          | {
+              optionText?: T;
+              optionImage?: T;
+              id?: T;
+            };
+        correctOptionIndex?: T;
       };
-  regSettings?:
+  dropdownGroup?:
     | T
     | {
-        isRegistrationOpen?: T;
-        enableOTP?: T;
-        maxRegistrations?: T;
-        thankYouMessage?: T;
+        sentenceText?: T;
+        dropdownLabel?: T;
+        options?:
+          | T
+          | {
+              optionText?: T;
+              id?: T;
+            };
+        correctAnswer?: T;
       };
-  customFields?: T;
+  wordleGroup?:
+    | T
+    | {
+        clueText?: T;
+        answerWord?: T;
+        attempts?: T;
+        hint?: T;
+        hintImage?: T;
+      };
+  wordFinderGroup?:
+    | T
+    | {
+        instruction?: T;
+        gridRows?:
+          | T
+          | {
+              rowString?: T;
+              id?: T;
+            };
+        wordsToFind?:
+          | T
+          | {
+              word?: T;
+              id?: T;
+            };
+      };
+  matchGroup?:
+    | T
+    | {
+        instruction?: T;
+        pairs?:
+          | T
+          | {
+              leftItem?: T;
+              rightItem?: T;
+              id?: T;
+            };
+      };
+  spotLieGroup?:
+    | T
+    | {
+        statements?:
+          | T
+          | {
+              statementText?: T;
+              isLie?: T;
+              id?: T;
+            };
+      };
+  reorderGroup?:
+    | T
+    | {
+        instruction?: T;
+        itemsInCorrectOrder?:
+          | T
+          | {
+              itemText?: T;
+              id?: T;
+            };
+      };
+  dragDropGroup?:
+    | T
+    | {
+        instruction?: T;
+        dragMode?: T;
+        sentenceWordsOrder?:
+          | T
+          | {
+              word?: T;
+              id?: T;
+            };
+        dropZones?:
+          | T
+          | {
+              zoneTitle?: T;
+              zoneItems?:
+                | T
+                | {
+                    itemText?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+      };
+  timeLimit?: T;
+  points?: T;
+  negativePoints?: T;
+  difficulty?: T;
+  enableDoubleUp?: T;
+  explanation?: T;
   meta?:
     | T
     | {
         title?: T;
-        image?: T;
         description?: T;
+        image?: T;
       };
-  schema?: T;
   publishedAt?: T;
   order?: T;
   slug?: T;
@@ -1345,72 +1541,13 @@ export interface LetsTalksChennaiSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "talkcategories_select".
+ * via the `definition` "user-submissions_select".
  */
-export interface TalkcategoriesSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "event-form-fields_select".
- */
-export interface EventFormFieldsSelect<T extends boolean = true> {
-  label?: T;
-  name?: T;
-  type?: T;
-  placeholder?: T;
-  description?: T;
-  required?: T;
-  validation?:
-    | T
-    | {
-        min?: T;
-        max?: T;
-      };
-  options?:
-    | T
-    | {
-        label?: T;
-        value?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "summer-registrations_select".
- */
-export interface SummerRegistrationsSelect<T extends boolean = true> {
-  summer?: T;
-  status?: T;
-  name?: T;
-  email?: T;
-  phone?: T;
-  company?: T;
-  values?: T;
-  attachments?:
-    | T
-    | {
-        fieldName?: T;
-        file?: T;
-        id?: T;
-      };
-  thankYouMailSent?: T;
-  confirmedAt?: T;
-  adminMessage?: T;
-  mailResponse?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "event-dashboard_select".
- */
-export interface EventDashboardSelect<T extends boolean = true> {
+export interface UserSubmissionsSelect<T extends boolean = true> {
+  user?: T;
+  quiz?: T;
+  score?: T;
+  answers?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1792,8 +1929,8 @@ export interface TaskSchedulePublish {
           value: number | Post;
         } | null)
       | ({
-          relationTo: 'lets-talks-chennai';
-          value: number | LetsTalksChennai;
+          relationTo: 'questions';
+          value: number | Question;
         } | null);
     global?: string | null;
     user?: (number | null) | User;

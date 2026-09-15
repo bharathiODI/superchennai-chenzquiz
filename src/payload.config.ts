@@ -3,22 +3,20 @@ import 'dotenv/config'
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import sharp from 'sharp'
+import { defaultLexical } from 'src/fields/defaultLexical'
 import { fileURLToPath } from 'url'
+import { Questions } from './collections/Games'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
-import { defaultLexical } from 'src/fields/defaultLexical'
-import { EventDashboard } from './collections/EventDashboard'
-import { LetsTalkChennai } from './collections/LetsTalkChennai'
-import { EventFormFields } from './collections/LetsTalkChennai/options/EventFormFields'
-import { TalkCategories } from './collections/LetsTalkChennai/options/TalkCategory'
-import { SummerRegistrations } from './collections/LetsTalkChennai/SummerRegistrations'
+import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
-import { verifyOTP } from './endpoints/verifyOTP'
 import Footer from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { getServerSideURL } from './utilities/getURL'
-import { Posts } from './collections/Posts'
+import { QuizUsers } from './collections/Games/QuizUsers'
+import { Quizzes } from './collections/Games/Quizzes'
+import { UserSubmissions } from './collections/Games/UserSubmissions'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -79,11 +77,10 @@ export default buildConfig({
     Posts,
     Media,
     Users,
-    LetsTalkChennai,
-    TalkCategories,
-    EventFormFields,
-    SummerRegistrations,
-    EventDashboard,
+    QuizUsers,
+    Quizzes,
+    Questions,
+    UserSubmissions,
   ],
 
   // #################################################################################
