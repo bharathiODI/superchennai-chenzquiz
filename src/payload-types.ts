@@ -76,6 +76,7 @@ export interface Config {
     quizzes: Quiz;
     questions: Question;
     'user-submissions': UserSubmission;
+    'quiz-attempts': QuizAttempt;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -95,6 +96,7 @@ export interface Config {
     quizzes: QuizzesSelect<false> | QuizzesSelect<true>;
     questions: QuestionsSelect<false> | QuestionsSelect<true>;
     'user-submissions': UserSubmissionsSelect<false> | UserSubmissionsSelect<true>;
+    'quiz-attempts': QuizAttemptsSelect<false> | QuizAttemptsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -703,6 +705,23 @@ export interface UserSubmission {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-attempts".
+ */
+export interface QuizAttempt {
+  id: number;
+  user: number | User;
+  quiz: number | Quiz;
+  score: number;
+  totalQuestions: number;
+  correctAnswers: number;
+  timeTaken: number;
+  completedAt: string;
+  rankAtCompletion?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1078,6 +1097,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'user-submissions';
         value: number | UserSubmission;
+      } | null)
+    | ({
+        relationTo: 'quiz-attempts';
+        value: number | QuizAttempt;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1548,6 +1571,22 @@ export interface UserSubmissionsSelect<T extends boolean = true> {
   quiz?: T;
   score?: T;
   answers?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-attempts_select".
+ */
+export interface QuizAttemptsSelect<T extends boolean = true> {
+  user?: T;
+  quiz?: T;
+  score?: T;
+  totalQuestions?: T;
+  correctAnswers?: T;
+  timeTaken?: T;
+  completedAt?: T;
+  rankAtCompletion?: T;
   updatedAt?: T;
   createdAt?: T;
 }
