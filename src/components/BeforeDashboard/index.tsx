@@ -80,6 +80,26 @@ const BeforeDashboard: React.FC = () => {
           >
             <Compass size={16} /> Test Live Games <ExternalLink size={14} />
           </a>
+          <a
+            href="/dashboard"
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              background: '#0284c7',
+              color: '#fff',
+              padding: '10px 16px',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: '600',
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'background 0.2s ease',
+            }}
+          >
+            <Compass size={16} /> Dashboard Live Games <ExternalLink size={14} />
+          </a>
         </div>
 
         <div

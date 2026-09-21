@@ -17,6 +17,7 @@ import { getServerSideURL } from './utilities/getURL'
 import { QuizUsers } from './collections/Games/QuizUsers'
 import { Quizzes } from './collections/Games/Quizzes'
 import { UserSubmissions } from './collections/Games/UserSubmissions'
+import { QuizAttempts } from './collections/Games/QuizAttempts'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -81,6 +82,7 @@ export default buildConfig({
     Quizzes,
     Questions,
     UserSubmissions,
+    QuizAttempts,
   ],
 
   // #################################################################################
