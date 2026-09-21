@@ -1,51 +1,4 @@
-// import type { CollectionConfig } from 'payload'
 
-// export const Quizzes: CollectionConfig = {
-//   slug: 'quizzes',
-//   admin: {
-//     useAsTitle: 'quizTitle',
-//     defaultColumns: ['quizTitle', 'quizDate', 'status'],
-//   },
-//   access: {
-//     read: () => true,
-//   },
-//   fields: [
-//     {
-//       name: 'quizTitle',
-//       type: 'text',
-//       required: true,
-//       label: 'Quiz Title (e.g., Daily Super Quiz - 12 Sep 2026)',
-//     },
-//     {
-//       name: 'quizDate',
-//       type: 'date',
-//       required: true,
-//       admin: {
-//         date: {
-//           pickerAppearance: 'dayOnly',
-//         },
-//       },
-//     },
-//     {
-//       name: 'questions',
-//       type: 'relationship',
-//       relationTo: 'questions',
-//       hasMany: true,
-//       required: true,
-//       label: 'Select Games/Questions for Today',
-//     },
-//     {
-//       name: 'status',
-//       type: 'select',
-//       options: [
-//         { label: 'Draft', value: 'draft' },
-//         { label: 'Scheduled / Active', value: 'active' },
-//         { label: 'Completed', value: 'completed' },
-//       ],
-//       defaultValue: 'draft',
-//     },
-//   ],
-// }
 import type { CollectionConfig } from 'payload'
 
 const formatSlug = (val: string): string =>
@@ -94,13 +47,16 @@ export const Quizzes: CollectionConfig = {
         ],
       },
     },
+
     {
       name: 'quizDate',
       type: 'date',
       required: true,
+      label: 'Quiz Start Date & Time',
       admin: {
         date: {
-          pickerAppearance: 'dayOnly',
+          pickerAppearance: 'dayAndTime',
+          timeIntervals: 15,
         },
       },
     },

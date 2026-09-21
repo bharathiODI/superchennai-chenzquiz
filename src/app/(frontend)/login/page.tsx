@@ -20,6 +20,7 @@ import { useEffect, useState } from 'react'
 
 export default function LoginPage() {
   const [isRegister, setIsRegister] = useState(false)
+  const [checkingAuth, setCheckingAuth] = useState(true)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -42,6 +43,7 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const router = useRouter()
+  
 
   // Resend OTP Countdown Effect
   useEffect(() => {
@@ -53,6 +55,28 @@ export default function LoginPage() {
     }
     return () => clearInterval(interval)
   }, [resendTimer])
+
+  // 1. Token irundha /quizzes page-ku redirect pannum
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      router.replace('/quizzes')
+    } else {
+      setCheckingAuth(false)
+    }
+  }, [router])
+
+  // 2. Auth check mudiyura varaikum screen flicker aagama irukka indha loading UI
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-[#11145A] text-white">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-purple-400 border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm font-semibold tracking-wide text-purple-200">Checking Session...</p>
+        </div>
+      </div>
+    )
+  }
 
   // 1. Send OTP Function
   const handleSendOtp = async () => {
