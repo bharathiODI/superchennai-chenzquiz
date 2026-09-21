@@ -20,23 +20,19 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(
-    180deg,
-    #004b87 0%,
-    #004b87 50%,
-    #004b87 100%
-  );
+  background: linear-gradient(180deg,
+      #004b87 0%,
+      #004b87 50%,
+      #004b87 100%);
   border-radius: 20px;
   border: 2px solid #faf8f5;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(
-    180deg,
-    #003764 0%,
-    #004b87 50%,
-    #004b87 100%
-  );
+  background: linear-gradient(180deg,
+      #003764 0%,
+      #004b87 50%,
+      #004b87 100%);
 }
 
 
@@ -179,8 +175,7 @@ html {
   margin-bottom: 20px !important;
 }
 
-.sliderrrrcomponenstssssSummer {
-}
+.sliderrrrcomponenstssssSummer {}
 
 .summerfestcardsslider .slick-slide {
   padding: 20px;
@@ -191,6 +186,41 @@ html {
   background-color: #005b70;
   color: #fff;
 }
+
+.triviabgsection {
+  background-image: url("/images/aboutsbg.png");
+  height: 890px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: left;
+}
+
+.loginsignupbg {
+  background-image: url("/images/loginsignupbg.png");
+  height: 700px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+.howitworkssectionbg {
+  background-image: url("/images/howitworksbg.png");
+  height: 700px;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+}
+
+body .paragraphfont {
+  font-size: 16px;
+  line-height: 20px;
+}
+
+
+.herbannersections {
+  height: 80vh;
+}
+
 
 @media (max-width: 768px) {
   .summerfestcardsslider .slick-slide {

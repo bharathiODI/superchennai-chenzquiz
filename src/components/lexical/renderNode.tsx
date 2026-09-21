@@ -8,6 +8,9 @@ import CodeBlock from './blocks/CodeBlock'
 import ImageBlock from './blocks/ImageBlock'
 import MediaBlock from './blocks/MediaBlock'
 import VideoBlock from './blocks/VideoBlock'
+import TriviaAuthComponent from '@/collections/Games/Blocks/ReadytoPlay/component'
+import AboutTriviaComponent from '@/collections/Games/Blocks/AboutTriviaPage/component'
+import HowItWorksComponent from '@/collections/Games/Blocks/HowItWorksSection/component'
 
 export function renderNode(node: any, idx: number, eventData?: any): React.ReactNode {
   /* ------------------------------------------------
@@ -90,8 +93,6 @@ export function renderNode(node: any, idx: number, eventData?: any): React.React
         return <MediaBlock key={idx} node={node} />
       }
 
- 
-
       /* =========================================================
          EVENT REGISTRATION BLOCK (Multiple Name Fallbacks)
       ========================================================= */
@@ -122,8 +123,17 @@ export function renderNode(node: any, idx: number, eventData?: any): React.React
         return <VideoGalleryBlockComponent key={idx} {...node.fields} />
       }
 
+      if (blockType === 'TriviaAuthBlock') {
+        return <TriviaAuthComponent key={idx} {...node.fields} />
+      }
 
+      if (blockType === 'AboutTriviaBlock') {
+        return <AboutTriviaComponent key={idx} {...node.fields} />
+      }
 
+      if (blockType === 'HowItWorksBlock') {
+        return <HowItWorksComponent key={idx} {...node.fields} />
+      }
 
       console.warn('UNHANDLED BLOCK TYPE =>', blockType)
       return null

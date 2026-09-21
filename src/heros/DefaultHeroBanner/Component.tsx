@@ -99,13 +99,17 @@ export const DefaultHeroBanner: React.FC<Props> = ({ heading, image, mobileImage
     }
   }
   return (
-    <Link href="#upcomingevents" onClick={handleScroll} className="block cursor-pointer headerrrheeight">
-      <div className="w-full relative overflow-hidden">
+    <Link
+      href="#upcomingevents"
+      onClick={handleScroll}
+      className="block cursor-pointer headerrrheeight"
+    >
+      <div className="w-full relative overflow-hidden herbannersections">
         {/* Desktop Image */}
         <img
           src={imageUrl || defaultImage.src}
           alt="Banner"
-          className="hidden sm:block w-full h-auto object-contain"
+          className="hidden sm:block w-full h-[100%] object-cover"
         />
 
         {/* Mobile Image */}
