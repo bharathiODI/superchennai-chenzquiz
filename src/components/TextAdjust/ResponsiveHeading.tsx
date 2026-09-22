@@ -1,3 +1,4 @@
+import React from "react"
 import { JSX } from "react"
 
 type ResponsiveHeadingProps = {
@@ -17,5 +18,12 @@ export const ResponsiveHeading: React.FC<ResponsiveHeadingProps> = ({
     return 'text-2xl'
   }
 
-  return <Tag className={`${getHeadingSize(text)} ${className}`}>{text}</Tag>
+  // return <Tag className={`${getHeadingSize(text)} ${className}`}>{text}</Tag>
+  return React.createElement(
+    Tag,
+    {
+      className: `${getHeadingSize(text)} ${className}`,
+    },
+    text
+  )
 }

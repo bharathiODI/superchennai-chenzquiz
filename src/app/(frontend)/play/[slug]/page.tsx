@@ -1,101 +1,3 @@
-// import type { Metadata } from 'next/types'
-// import { notFound } from 'next/navigation'
-// import { getPayload } from 'payload'
-// import configPromise from 'src/payload.config'
-// import GameEngineClient from '../GameEngineClient'
-// import { Question } from '@/payload-types'
-
-// export const revalidate = 0
-
-// type Args = {
-//   params: Promise<{
-//     slug: string
-//   }>
-// }
-
-// export default async function PlayPage({ params: paramsPromise }: Args) {
-//   const { slug } = await paramsPromise
-
-//   const payload = await getPayload({ config: configPromise })
-
-//   const quizQuery = await payload
-//     .find({
-//       collection: 'quizzes',
-//       where: {
-//         slug: { equals: slug },
-//       },
-//       depth: 3,
-//       limit: 1,
-//       overrideAccess: true,
-//     })
-//     .catch(() => null)
-
-//   const rawQuiz = quizQuery?.docs?.[0]
-
-//   if (!rawQuiz) {
-//     notFound()
-//   }
-
-//   let populatedQuestions = rawQuiz.questions || []
-
-//   const isShallow = populatedQuestions.some(
-//     (q: any) => typeof q === 'object' && !q.gameType && q.id,
-//   )
-
-//   if (isShallow) {
-//     const questionIds = populatedQuestions.map((q: any) => (typeof q === 'object' ? q.id : q))
-
-//     const fullQuestions = await payload.find({
-//       collection: 'questions',
-//       where: {
-//         id: { in: questionIds },
-//       },
-//       depth: 2,
-//       limit: 100,
-//       overrideAccess: true,
-//     })
-
-//     populatedQuestions = questionIds
-//       .map((id: number | string) => fullQuestions.docs.find((doc) => doc.id === id))
-//       .filter((question): question is Question => Boolean(question))
-//   }
-
-//   const quiz = {
-//     ...rawQuiz,
-//     questions: populatedQuestions,
-//   }
-
-//   return (
-//     <div className="min-h-screen bg-slate-100 text-slate-800 pt-16 pb-24">
-//       <div className="container mx-auto px-4 max-w-3xl">
-//         <GameEngineClient quiz={quiz} />
-//       </div>
-//     </div>
-//   )
-// }
-
-// export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
-//   const { slug } = await paramsPromise
-//   const payload = await getPayload({ config: configPromise })
-
-//   const quizQuery = await payload
-//     .find({
-//       collection: 'quizzes',
-//       where: {
-//         slug: { equals: slug },
-//       },
-//       depth: 1,
-//       limit: 1,
-//       overrideAccess: true,
-//     })
-//     .catch(() => null)
-
-//   const quiz = quizQuery?.docs?.[0]
-
-//   return {
-//     title: quiz ? `Playing: ${quiz.quizTitle}` : 'Play Super Chennai Quiz',
-//   }
-// }
 import type { Metadata } from 'next/types'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
@@ -163,9 +65,27 @@ export default async function PlayPage({ params: paramsPromise }: Args) {
   let rawQuestions = rawQuiz.questions || []
 
   // Handle shallow relationships if IDs are returned instead of documents
-  const isShallow = rawQuestions.some(
-    (q: any) => typeof q === 'object' && !q.gameType && q.id,
-  )
+  const isShallow = rawQuestions.some((q: any) => typeof q === 'object' && !q.gameType && q.id)
+
+  // if (isShallow) {
+  //   const questionIds = rawQuestions.map((q: any) => (typeof q === 'object' ? q.id : q))
+
+  //   const fullQuestions = await payload.find({
+  //     collection: 'questions',
+  //     where: {
+  //       id: { in: questionIds },
+  //     },
+  //     depth: 3,
+  //     limit: 100,
+  //     overrideAccess: true,
+  //   })
+
+  //   rawQuestions = questionIds
+  //     .map((id: number | string) => fullQuestions.docs.find((doc) => doc.id === id))
+  //     .filter(Boolean)
+  // }
+
+  // Format and restructure all question parameters into client ready payload
 
   if (isShallow) {
     const questionIds = rawQuestions.map((q: any) => (typeof q === 'object' ? q.id : q))
@@ -180,12 +100,11 @@ export default async function PlayPage({ params: paramsPromise }: Args) {
       overrideAccess: true,
     })
 
+    // FIX: Type assertion or filter check to satisfy TypeScript
     rawQuestions = questionIds
       .map((id: number | string) => fullQuestions.docs.find((doc) => doc.id === id))
-      .filter(Boolean)
+      .filter((q): q is NonNullable<typeof q> => q !== undefined)
   }
-
-  // Format and restructure all question parameters into client ready payload
   const formattedQuestions = rawQuestions.map((q: any) => {
     return {
       id: q.id,
@@ -194,7 +113,7 @@ export default async function PlayPage({ params: paramsPromise }: Args) {
       gameType: q.gameType,
       category: q.category,
       questionNumber: q.questionNumber,
-      
+
       // Global Media & Content
       heroImage: resolveImageUrl(q.heroImage),
       mobileImage: resolveImageUrl(q.mobileImage),

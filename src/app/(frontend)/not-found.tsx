@@ -157,34 +157,6 @@ class SoundFX {
 
 const audioFX = new SoundFX()
 
-// // ==========================================
-// // 2. ENVIRONMENT COMPONENTS
-// // ==========================================
-// function PineTree({ position }: { position: [number, number, number] }) {
-//   return (
-//     <group position={position}>
-//       <mesh position={[0, 0.6, 0]} castShadow>
-//         <cylinderGeometry args={[0.15, 0.25, 1.2, 8]} />
-//         <meshStandardMaterial color="#4A2E1A" roughness={0.9} />
-//       </mesh>
-
-//       <mesh position={[0, 1.6, 0]} castShadow>
-//         <coneGeometry args={[1.1, 1.4, 7]} />
-//         <meshStandardMaterial color="#15803D" roughness={0.8} flatShading />
-//       </mesh>
-
-//       <mesh position={[0, 2.4, 0]} castShadow>
-//         <coneGeometry args={[0.85, 1.2, 7]} />
-//         <meshStandardMaterial color="#166534" roughness={0.8} flatShading />
-//       </mesh>
-
-//       <mesh position={[0, 3.1, 0]} castShadow>
-//         <coneGeometry args={[0.55, 1.0, 7]} />
-//         <meshStandardMaterial color="#22C55E" roughness={0.7} flatShading />
-//       </mesh>
-//     </group>
-//   )
-// }
 
 export function PineTree({ position }: { position: [number, number, number] }) {
   const { scene } = useGLTF('/models/pine_tree.glb')
@@ -433,16 +405,6 @@ function HighwayScene({
   >([])
   const [treesState, setTreesState] = useState<{ id: number; x: number; z: number }[]>([])
 
-  // useEffect(() => {
-  //   const initialTrees = []
-  //   for (let i = 0; i < 24; i++) {
-  //     const z = -140 + i * 12
-  //     initialTrees.push({ id: Math.random(), x: -10 - Math.random() * 4, z })
-  //     initialTrees.push({ id: Math.random(), x: 10 + Math.random() * 4, z })
-  //   }
-  //   treesRef.current = initialTrees
-  //   setTreesState(initialTrees)
-  // }, [])
 
 useEffect(() => {
     const initialTrees = []

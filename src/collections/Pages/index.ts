@@ -102,11 +102,8 @@ export const Pages: CollectionConfig<'pages'> = {
                         MediaBlock,
                         VideoBlock,
                         EventListing,
-                        MediaBlock,
-
                         MediaCarousel,
                         VideoGalleryBlock,
-
                         TriviaAuthBlock,
                         AboutTriviaBlock,
                         HowItWorksBlock,
