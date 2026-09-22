@@ -18,15 +18,21 @@ import {
   Flame,
   Home,
   Sun,
+  Camera,
 } from 'lucide-react'
 
-// Dynamic Import for Canvas to prevent SSR & Memory Overheads when page is not rendered
+import { useGLTF } from '@react-three/drei'
+
+// Dynamic Import for Canvas to prevent SSR & Memory Overheads
 const Canvas = dynamic(() => import('@react-three/fiber').then((m) => m.Canvas), {
   ssr: false,
 })
 
+// Camera Types
+type CameraMode = 'CHASE' | 'FIRST_PERSON'
+
 // ==========================================
-// 1. SOUND SYNTHESIZER (WITH CLEANUP)
+// 1. SOUND SYNTHESIZER
 // ==========================================
 class SoundFX {
   private ctx: AudioContext | null = null
@@ -36,7 +42,9 @@ class SoundFX {
 
   private init() {
     if (!this.ctx) {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+      const AudioCtx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
       if (AudioCtx) {
         this.ctx = new AudioCtx()
       }
@@ -79,7 +87,9 @@ class SoundFX {
       try {
         this.engineOsc.stop()
         this.engineOsc.disconnect()
-      } catch (e) {}
+      } catch (e) {
+        // Silently catch audio stop errors
+      }
       this.engineOsc = null
     }
   }
@@ -105,7 +115,9 @@ class SoundFX {
 
       osc.start()
       osc.stop(this.ctx.currentTime + 0.5)
-    } catch (e) {}
+    } catch (e) {
+      // Silently catch audio play errors
+    }
   }
 
   public playClick() {
@@ -129,7 +141,9 @@ class SoundFX {
 
       osc.start()
       osc.stop(this.ctx.currentTime + 0.08)
-    } catch (e) {}
+    } catch (e) {
+      // Silently catch audio play errors
+    }
   }
 
   public destroy() {
@@ -143,86 +157,155 @@ class SoundFX {
 
 const audioFX = new SoundFX()
 
-// ==========================================
-// 2. PROCEDURAL ENVIRONMENT
-// ==========================================
-function PineTree({ position }: { position: [number, number, number] }) {
+// // ==========================================
+// // 2. ENVIRONMENT COMPONENTS
+// // ==========================================
+// function PineTree({ position }: { position: [number, number, number] }) {
+//   return (
+//     <group position={position}>
+//       <mesh position={[0, 0.6, 0]} castShadow>
+//         <cylinderGeometry args={[0.15, 0.25, 1.2, 8]} />
+//         <meshStandardMaterial color="#4A2E1A" roughness={0.9} />
+//       </mesh>
+
+//       <mesh position={[0, 1.6, 0]} castShadow>
+//         <coneGeometry args={[1.1, 1.4, 7]} />
+//         <meshStandardMaterial color="#15803D" roughness={0.8} flatShading />
+//       </mesh>
+
+//       <mesh position={[0, 2.4, 0]} castShadow>
+//         <coneGeometry args={[0.85, 1.2, 7]} />
+//         <meshStandardMaterial color="#166534" roughness={0.8} flatShading />
+//       </mesh>
+
+//       <mesh position={[0, 3.1, 0]} castShadow>
+//         <coneGeometry args={[0.55, 1.0, 7]} />
+//         <meshStandardMaterial color="#22C55E" roughness={0.7} flatShading />
+//       </mesh>
+//     </group>
+//   )
+// }
+
+export function PineTree({ position }: { position: [number, number, number] }) {
+  const { scene } = useGLTF('/models/pine_tree.glb')
+
+  const treeModel = useMemo(() => {
+    const cloned = scene.clone()
+    cloned.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        child.castShadow = true
+        child.receiveShadow = true
+      }
+    })
+    return cloned
+  }, [scene])
+
   return (
     <group position={position}>
-      <mesh position={[0, 0.6, 0]} castShadow>
-        <cylinderGeometry args={[0.15, 0.25, 1.2, 8]} />
-        <meshStandardMaterial color="#4A2E1A" roughness={0.9} />
-      </mesh>
-
-      <mesh position={[0, 1.6, 0]} castShadow>
-        <coneGeometry args={[1.1, 1.4, 7]} />
-        <meshStandardMaterial color="#15803D" roughness={0.8} flatShading />
-      </mesh>
-
-      <mesh position={[0, 2.4, 0]} castShadow>
-        <coneGeometry args={[0.85, 1.2, 7]} />
-        <meshStandardMaterial color="#166534" roughness={0.8} flatShading />
-      </mesh>
-
-      <mesh position={[0, 3.1, 0]} castShadow>
-        <coneGeometry args={[0.55, 1.0, 7]} />
-        <meshStandardMaterial color="#22C55E" roughness={0.7} flatShading />
-      </mesh>
+      {/* 🛠️ CHANGED: scale-a 0.18-la irunthu 0.07-ku kammi panirken (perusa theriyathu) */}
+      <primitive object={treeModel} scale={0.07} />
     </group>
   )
 }
 
-function MountainRange({ side }: { side: 'left' | 'right' }) {
-  const xOffset = side === 'left' ? -38 : 38
+useGLTF.preload('/models/pine_tree.glb')
 
-  const mountainPeaks = useMemo(() => {
-    const peaks = []
-    for (let i = 0; i < 9; i++) {
-      peaks.push({
-        id: i,
-        x: xOffset + (Math.random() * 12 - 6),
-        z: -140 + i * 22,
-        scale: [12 + Math.random() * 8, 14 + Math.random() * 12, 12 + Math.random() * 8] as [
-          number,
-          number,
-          number,
-        ],
-        color: i % 2 === 0 ? '#334155' : '#1E293B',
-      })
-    }
-    return peaks
-  }, [xOffset])
-
-  return (
-    <group>
-      {mountainPeaks.map((peak) => (
-        <mesh key={peak.id} position={[peak.x, peak.scale[1] / 2 - 2, peak.z]} castShadow>
-          <coneGeometry args={[1, 1, 5]} />
-          <meshStandardMaterial color={peak.color} roughness={0.95} flatShading />
-        </mesh>
-      ))}
-    </group>
-  )
-}
-
-// ==========================================
-// 3. SPORTS CAR MODEL
-// ==========================================
-function SportsCar({
+export function SportsCar({
   position,
   rotation = [0, 0, 0],
   color = '#4B20D8',
   isPlayer = false,
   isSteering = 0,
+  cameraMode = 'CHASE',
 }: {
   position: [number, number, number]
   rotation?: [number, number, number]
   color?: string
   isPlayer?: boolean
   isSteering?: number
+  cameraMode?: CameraMode
 }) {
   const carRef = useRef<THREE.Group>(null)
-  const wheelRefs = useRef<THREE.Mesh[]>([])
+  const steeringWheelRef = useRef<THREE.Mesh>(null)
+
+  // 🛞 Wheels reference array to store extracted model wheels
+  const modelWheelsRef = useRef<THREE.Mesh[]>([])
+
+  // 1. Load GLB Model & Extract Wheels Automatically
+  const { scene } = useGLTF('/models/car.glb')
+
+  const carModel = useMemo(() => {
+    const cloned = scene.clone()
+    modelWheelsRef.current = [] // Reset wheels array on re-clone
+
+    cloned.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh
+        mesh.castShadow = true
+        mesh.receiveShadow = true
+
+        const meshName = mesh.name.toLowerCase()
+
+        // 🛞 Automatically detect wheels from GLB model names
+        if (meshName.includes('wheel') || meshName.includes('tyre') || meshName.includes('rim')) {
+          modelWheelsRef.current.push(mesh)
+        }
+
+        // Glass transparency fix
+        if (
+          meshName.includes('glass') ||
+          meshName.includes('window') ||
+          meshName.includes('windshield')
+        ) {
+          if (mesh.material) {
+            const mat = mesh.material as THREE.MeshPhysicalMaterial
+            mat.transparent = true
+            mat.opacity = 0.3
+            mat.roughness = 0.1
+            mat.metalness = 0.9
+          }
+        } else {
+          if (mesh.material) {
+            if ('roughness' in mesh.material)
+              (mesh.material as THREE.MeshStandardMaterial).roughness = 0.4
+            if ('metalness' in mesh.material)
+              (mesh.material as THREE.MeshStandardMaterial).metalness = 0.6
+          }
+        }
+      }
+    })
+    return cloned
+  }, [scene])
+
+  // Dynamic Canvas Texture for Chennai Number Plate
+  const numberPlateTexture = useMemo(() => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 512
+    canvas.height = 128
+    const ctx = canvas.getContext('2d')
+
+    if (ctx) {
+      ctx.fillStyle = '#f0f0f0'
+      ctx.fillRect(0, 0, 512, 128)
+
+      ctx.strokeStyle = '#000000'
+      ctx.lineWidth = 12
+      ctx.strokeRect(6, 6, 500, 116)
+
+      ctx.fillStyle = '#1D4ED8'
+      ctx.fillRect(12, 12, 50, 104)
+
+      ctx.fillStyle = '#000000'
+      ctx.font = 'bold 50px monospace'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.fillText('Super Chennai', 290, 64)
+    }
+
+    const texture = new THREE.CanvasTexture(canvas)
+    texture.needsUpdate = true
+    return texture
+  }, [])
 
   useFrame((_, delta) => {
     if (carRef.current && isPlayer) {
@@ -236,81 +319,78 @@ function SportsCar({
         isSteering * 0.14,
         0.12,
       )
+
+      if (steeringWheelRef.current) {
+        steeringWheelRef.current.rotation.z = THREE.MathUtils.lerp(
+          steeringWheelRef.current.rotation.z,
+          -isSteering * 1.8,
+          0.15,
+        )
+      }
     }
 
-    wheelRefs.current.forEach((wheel) => {
-      if (wheel) wheel.rotation.x += delta * 15
+    // 🛞 Automatically spin all detected wheels inside the GLB model
+    modelWheelsRef.current.forEach((wheel) => {
+      if (wheel) {
+        wheel.rotation.x -= delta * 20
+      }
     })
   })
 
   return (
     <group ref={carRef} position={position} rotation={rotation}>
-      <mesh position={[0, 0.3, 0]} castShadow receiveShadow>
-        <boxGeometry args={[1.75, 0.35, 3.9]} />
-        <meshStandardMaterial color={color} roughness={0.15} metalness={0.85} />
-      </mesh>
-
-      <mesh position={[0, 0.68, -0.15]} castShadow>
-        <boxGeometry args={[1.35, 0.42, 1.9]} />
-        <meshPhysicalMaterial
-          color="#1E293B"
-          roughness={0.05}
-          metalness={0.9}
-          transmission={0.4}
-          transparent
-          opacity={0.85}
+      {/* 
+        🛠️ [FIXED FLOATING ISSUE]: 
+        0.9-a iruntha height-a 0.1-ku or 0.0-ku mathiruken. 
+        Innum car mela paranthuchina inga irukkira Y value-a (0.1) innum kammi pannunga (e.g. 0.0 or -0.1).
+      */}
+      <group position={[0, 0.1, 0]}>
+        <primitive
+          object={carModel}
+          scale={1}
+          rotation={[0, Math.PI, 0]}
+          castShadow
+          receiveShadow
         />
+      </group>
+
+      {/* REAR NUMBER PLATE */}
+      <mesh position={[0, 0.35, 1.8]}>
+        <planeGeometry args={[0.7, 0.18]} />
+        <meshStandardMaterial map={numberPlateTexture} roughness={0.3} />
       </mesh>
 
-      <mesh position={[0, 0.48, 1.15]} castShadow>
-        <boxGeometry args={[1.2, 0.1, 1.2]} />
-        <meshStandardMaterial color={color} roughness={0.15} metalness={0.85} />
-      </mesh>
+      {/* INTERIOR DASHBOARD (First Person View) */}
+      {isPlayer && cameraMode === 'FIRST_PERSON' && (
+        <group position={[0, 0.4, -0.2]}>
+          <mesh position={[0, 0.1, -0.35]}>
+            <boxGeometry args={[1.35, 0.18, 0.4]} />
+            <meshStandardMaterial color="#0F172A" roughness={0.8} />
+          </mesh>
 
-      <mesh position={[-0.62, 0.4, 1.96]}>
-        <boxGeometry args={[0.32, 0.1, 0.05]} />
-        <meshStandardMaterial color="#38BDF8" emissive="#38BDF8" emissiveIntensity={4} />
-      </mesh>
-      <mesh position={[0.62, 0.4, 1.96]}>
-        <boxGeometry args={[0.32, 0.1, 0.05]} />
-        <meshStandardMaterial color="#38BDF8" emissive="#38BDF8" emissiveIntensity={4} />
-      </mesh>
+          <mesh position={[-0.28, 0.18, -0.18]} rotation={[-0.25, 0, 0]}>
+            <planeGeometry args={[0.25, 0.09]} />
+            <meshStandardMaterial color="#38BDF8" emissive="#38BDF8" emissiveIntensity={3} />
+          </mesh>
 
-      <mesh position={[0, 0.48, -1.96]}>
-        <boxGeometry args={[1.6, 0.08, 0.05]} />
-        <meshStandardMaterial color="#EF4444" emissive="#EF4444" emissiveIntensity={5} />
-      </mesh>
-
-      <mesh position={[0, 0.88, -1.8]} castShadow>
-        <boxGeometry args={[1.85, 0.06, 0.35]} />
-        <meshStandardMaterial color="#0F172A" roughness={0.2} metalness={0.9} />
-      </mesh>
-
-      {[
-        [-0.92, 0.3, 1.15],
-        [0.92, 0.3, 1.15],
-        [-0.92, 0.3, -1.25],
-        [0.92, 0.3, -1.25],
-      ].map((pos, i) => (
-        <group key={i} position={pos as [number, number, number]}>
           <mesh
-            ref={(el) => {
-              if (el) wheelRefs.current[i] = el
-            }}
-            rotation={[0, 0, Math.PI / 2]}
-            castShadow
+            ref={steeringWheelRef}
+            position={[-0.28, 0.16, -0.1]}
+            rotation={[-Math.PI / 5, 0, 0]}
           >
-            <cylinderGeometry args={[0.32, 0.32, 0.26, 32]} />
-            <meshStandardMaterial color="#1E293B" roughness={0.7} />
+            <torusGeometry args={[0.095, 0.02, 12, 24]} />
+            {/* 🛠️ Fixed typo from meshStandardName to meshStandardMaterial */}
+            <meshStandardMaterial color="#1E293B" roughness={0.4} />
           </mesh>
         </group>
-      ))}
+      )}
     </group>
   )
 }
 
+useGLTF.preload('/models/car.glb')
 // ==========================================
-// 4. HIGHWAY SCENE WITH TEXTURE CLEANUP
+// 4. HIGHWAY SCENE WITH DYNAMIC CAMERA SWITCHING
 // ==========================================
 function HighwayScene({
   gameState,
@@ -318,6 +398,7 @@ function HighwayScene({
   setScore,
   setSpeed,
   setHighScore,
+  cameraMode,
 }: {
   gameState: 'START' | 'PLAYING' | 'GAMEOVER'
   setGameState: (state: 'START' | 'PLAYING' | 'GAMEOVER') => void
@@ -325,11 +406,14 @@ function HighwayScene({
   setSpeed: React.Dispatch<React.SetStateAction<number>>
   highScore: number
   setHighScore: React.Dispatch<React.SetStateAction<number>>
+  cameraMode: CameraMode
 }) {
   const playerXRef = useRef(0)
   const speedRef = useRef(0)
   const distanceRef = useRef(0)
   const scoreRef = useRef(0)
+
+  const cameraRef = useRef<THREE.PerspectiveCamera>(null)
 
   const keysRef = useRef<{ left: boolean; right: boolean; up: boolean; down: boolean }>({
     left: false,
@@ -349,12 +433,27 @@ function HighwayScene({
   >([])
   const [treesState, setTreesState] = useState<{ id: number; x: number; z: number }[]>([])
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   const initialTrees = []
+  //   for (let i = 0; i < 24; i++) {
+  //     const z = -140 + i * 12
+  //     initialTrees.push({ id: Math.random(), x: -10 - Math.random() * 4, z })
+  //     initialTrees.push({ id: Math.random(), x: 10 + Math.random() * 4, z })
+  //   }
+  //   treesRef.current = initialTrees
+  //   setTreesState(initialTrees)
+  // }, [])
+
+useEffect(() => {
     const initialTrees = []
-    for (let i = 0; i < 24; i++) {
-      const z = -140 + i * 12
-      initialTrees.push({ id: Math.random(), x: -10 - Math.random() * 4, z })
-      initialTrees.push({ id: Math.random(), x: 10 + Math.random() * 4, z })
+    for (let i = 0; i < 10; i++) {
+      const z = -140 + i * 28
+      // 🛠️ CHANGED: x position-a innum 14-ku mela increase panirken (appothaan road-la irunthu veliya pogum)
+      const leftX = -14 - Math.random() * 8
+      const rightX = 14 + Math.random() * 8
+
+      initialTrees.push({ id: Math.random(), x: leftX, z })
+      initialTrees.push({ id: Math.random(), x: rightX, z })
     }
     treesRef.current = initialTrees
     setTreesState(initialTrees)
@@ -365,6 +464,8 @@ function HighwayScene({
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keysRef.current.left = true
       if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keysRef.current.right = true
       if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keysRef.current.up = true
+
+      // ✅ FIXED: Down / S key press panpodhu true aaganum
       if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keysRef.current.down = true
     }
 
@@ -372,6 +473,8 @@ function HighwayScene({
       if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keysRef.current.left = false
       if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keysRef.current.right = false
       if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keysRef.current.up = false
+
+      // ✅ FIXED: Kai eduthathum thaan false aaganum
       if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keysRef.current.down = false
     }
 
@@ -396,9 +499,62 @@ function HighwayScene({
     }
   }, [gameState])
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
+    // 1. OPTIMIZED CLEAR CAMERA POSITIONING
+    if (cameraRef.current) {
+      if (cameraMode === 'FIRST_PERSON') {
+        // High Cockpit Seat Angle to clear Dashboard obstacles
+        const targetCamX = playerXRef.current - 0.28
+        const targetCamY = 1.12 // Raised height from 0.88 to 1.12
+        const targetCamZ = -0.15 // Moved slightly forward
+
+        cameraRef.current.position.x = THREE.MathUtils.lerp(
+          cameraRef.current.position.x,
+          targetCamX,
+          0.15,
+        )
+        cameraRef.current.position.y = THREE.MathUtils.lerp(
+          cameraRef.current.position.y,
+          targetCamY,
+          0.15,
+        )
+        cameraRef.current.position.z = THREE.MathUtils.lerp(
+          cameraRef.current.position.z,
+          targetCamZ,
+          0.15,
+        )
+
+        // Look straight down the track line
+        cameraRef.current.lookAt(playerXRef.current, 0.45, -25)
+      } else {
+        // Standard Chase Camera View
+        const targetCamX = playerXRef.current * 0.45
+        const targetCamY = 3.4
+        const targetCamZ = 7.2
+
+        cameraRef.current.position.x = THREE.MathUtils.lerp(
+          cameraRef.current.position.x,
+          targetCamX,
+          0.1,
+        )
+        cameraRef.current.position.y = THREE.MathUtils.lerp(
+          cameraRef.current.position.y,
+          targetCamY,
+          0.1,
+        )
+        cameraRef.current.position.z = THREE.MathUtils.lerp(
+          cameraRef.current.position.z,
+          targetCamZ,
+          0.1,
+        )
+
+        cameraRef.current.lookAt(playerXRef.current, 0.5, -10)
+      }
+    }
+
     if (gameState !== 'PLAYING') return
 
+    // 2. STEERING & MOVEMENT
     if (keysRef.current.left) playerXRef.current = Math.max(-5.2, playerXRef.current - 13 * delta)
     if (keysRef.current.right) playerXRef.current = Math.min(5.2, playerXRef.current + 13 * delta)
 
@@ -431,25 +587,38 @@ function HighwayScene({
     })
     setTreesState([...treesRef.current])
 
-    if (Math.random() < 0.038) {
+    // 3. TRAFFIC SPAWN LOGIC
+    if (Math.random() < 0.022) {
       const lanes = [-3.8, -1.3, 1.3, 3.8]
-      const randomLane = lanes[Math.floor(Math.random() * lanes.length)]
-      const brightCarColors = ['#E11D48', '#2563EB', '#D97706', '#059669', '#7C3AED']
 
-      trafficRef.current.push({
-        id: Math.random(),
-        x: randomLane,
-        z: -125,
-        speed: 25 + Math.random() * 35,
-        color: brightCarColors[Math.floor(Math.random() * brightCarColors.length)],
-      })
+      const occupiedLanesAtSpawn = trafficRef.current.filter((c) => c.z < -95).map((c) => c.x)
+
+      const availableLanes = lanes.filter((lane) => !occupiedLanesAtSpawn.includes(lane))
+
+      if (availableLanes.length >= 2) {
+        const randomLane = availableLanes[Math.floor(Math.random() * availableLanes.length)]
+
+        // Ensure your array is typed explicitly as string[] or const tuple
+        const brightCarColors = ['#ff0000', '#00ff00', '#0000ff'] as const
+
+        // Pick a random color safely
+        const randomColor =
+          brightCarColors[Math.floor(Math.random() * brightCarColors.length)] || '#ff0000'
+
+        trafficRef.current.push({
+          id: Math.random(),
+          x: randomLane ?? 0,
+          z: -125,
+          speed: 25 + Math.random() * 30,
+          color: randomColor,
+        })
+      }
     }
 
     const playerX = playerXRef.current
-    const updatedTraffic = []
+    const updatedTraffic: { id: number; x: number; z: number; speed: number; color: string }[] = []
 
-    for (let i = 0; i < trafficRef.current.length; i++) {
-      const vehicle = trafficRef.current[i]
+    for (const vehicle of trafficRef.current) {
       const relativeSpeed = currentSpeed - vehicle.speed
       vehicle.z += (relativeSpeed * delta) / 3.6
 
@@ -470,6 +639,9 @@ function HighwayScene({
         updatedTraffic.push(vehicle)
       }
     }
+
+    trafficRef.current = updatedTraffic
+    setTrafficState([...trafficRef.current])
 
     trafficRef.current = updatedTraffic
     setTrafficState([...trafficRef.current])
@@ -514,7 +686,6 @@ function HighwayScene({
     return texture
   }, [])
 
-  // Memory Dispose when component unmounts
   useEffect(() => {
     return () => {
       roadTexture.dispose()
@@ -525,7 +696,7 @@ function HighwayScene({
 
   return (
     <>
-      <PerspectiveCamera makeDefault position={[0, 3.4, 7.2]} fov={58} />
+      <PerspectiveCamera ref={cameraRef} makeDefault position={[0, 3.4, 7.2]} fov={62} />
 
       <ambientLight intensity={0.9} />
       <directionalLight
@@ -544,8 +715,8 @@ function HighwayScene({
         mieDirectionalG={0.8}
       />
 
-      <MountainRange side="left" />
-      <MountainRange side="right" />
+      {/* <MountainRange side="left" /> */}
+      {/* <MountainRange side="right" /> */}
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, -40]} receiveShadow>
         <planeGeometry args={[14, 180]} />
@@ -572,6 +743,7 @@ function HighwayScene({
         color="#4B20D8"
         isPlayer={true}
         isSteering={steeringDir}
+        cameraMode={cameraMode}
       />
 
       {trafficState.map((vehicle) => (
@@ -579,7 +751,8 @@ function HighwayScene({
           key={vehicle.id}
           position={[vehicle.x, 0, vehicle.z]}
           color={vehicle.color}
-          rotation={[0, Math.PI, 0]}
+          // rotation={[0, Math.PI, 0]}
+          rotation={[0, 0, 0]}
         />
       ))}
     </>
@@ -587,7 +760,7 @@ function HighwayScene({
 }
 
 // ==========================================
-// 5. MAIN PAGE & CLEANUP OVERLAY
+// 5. MAIN PAGE & UI OVERLAY
 // ==========================================
 export default function NotFound() {
   const [gameState, setGameState] = useState<'START' | 'PLAYING' | 'GAMEOVER'>('START')
@@ -595,8 +768,8 @@ export default function NotFound() {
   const [highScore, setHighScore] = useState(0)
   const [speed, setSpeed] = useState(0)
   const [isMuted, setIsMuted] = useState(false)
+  const [cameraMode, setCameraMode] = useState<CameraMode>('CHASE')
 
-  // Destroy Web Audio Instance when user navigates away from 404 page
   useEffect(() => {
     return () => {
       audioFX.destroy()
@@ -607,6 +780,11 @@ export default function NotFound() {
     audioFX.isMuted = !isMuted
     setIsMuted(!isMuted)
     audioFX.playClick()
+  }
+
+  const toggleCamera = () => {
+    audioFX.playClick()
+    setCameraMode((prev) => (prev === 'CHASE' ? 'FIRST_PERSON' : 'CHASE'))
   }
 
   const startGame = () => {
@@ -626,7 +804,19 @@ export default function NotFound() {
           <ArrowLeft className="w-4 h-4 text-[#4B20D8]" /> Exit Game
         </Link>
 
-        <div className="pointer-events-auto flex items-center gap-3">
+        <div className="pointer-events-auto flex items-center gap-2 sm:gap-3">
+          {/* CAMERA TOGGLE BUTTON */}
+          <button
+            onClick={toggleCamera}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200 text-slate-800 font-extrabold text-xs shadow-lg hover:border-[#4B20D8] transition cursor-pointer"
+            aria-label="Toggle Camera View"
+          >
+            <Camera className="w-4 h-4 text-[#4B20D8]" />
+            <span className="hidden sm:inline">
+              {cameraMode === 'CHASE' ? 'Driver View' : 'Chase View'}
+            </span>
+          </button>
+
           <button
             onClick={toggleMute}
             className="p-2.5 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200 text-slate-700 hover:text-[#4B20D8] shadow-lg transition cursor-pointer"
@@ -635,17 +825,17 @@ export default function NotFound() {
             {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
           </button>
 
-          <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md border border-slate-200 px-4 py-2.5 rounded-2xl text-xs font-bold text-amber-600 shadow-lg">
+          <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md border border-slate-200 px-3.5 py-2.5 rounded-2xl text-xs font-bold text-amber-600 shadow-lg">
             <Trophy className="w-4 h-4 text-amber-500" /> BEST: {highScore}m
           </div>
 
-          <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md border border-slate-200 px-4 py-2.5 rounded-2xl text-xs font-bold text-[#4B20D8] shadow-lg">
+          <div className="flex items-center gap-1.5 bg-white/80 backdrop-blur-md border border-slate-200 px-3.5 py-2.5 rounded-2xl text-xs font-bold text-[#4B20D8] shadow-lg">
             <Gauge className="w-4 h-4 text-[#4B20D8]" /> {speed} KM/H
           </div>
         </div>
       </header>
 
-      {/* 3D CANVAS SCENE WITH DYNAMIC SSR FALSE */}
+      {/* 3D CANVAS SCENE */}
       <div className="w-full h-full absolute inset-0 z-0">
         <Canvas shadows gl={{ antialias: true, powerPreference: 'high-performance' }}>
           <Suspense fallback={null}>
@@ -656,6 +846,7 @@ export default function NotFound() {
               setSpeed={setSpeed}
               highScore={highScore}
               setHighScore={setHighScore}
+              cameraMode={cameraMode}
             />
           </Suspense>
         </Canvas>
@@ -674,12 +865,12 @@ export default function NotFound() {
             </div>
 
             <h1 className="text-5xl sm:text-6xl font-black text-[#11145A] tracking-tight leading-none">
-              Error 404
+              404
             </h1>
 
             <p className="text-sm text-[#74799A] leading-relaxed font-medium">
-              You&apos;ve drifted off the main route! Cruise past pine forests and mountain ranges
-              while dodging daytime highway traffic.
+              You&apos;ve drifted off the main route! Switch camera modes to drive inside the
+              cockpit or enjoy the third-person highway chase view.
             </p>
 
             <button
@@ -735,7 +926,7 @@ export default function NotFound() {
 
       {/* FOOTER */}
       <footer className="absolute bottom-4 left-0 right-0 z-20 text-center text-[11px] font-semibold text-slate-500 pointer-events-none">
-        TRIVIA by Super Chennai • 3D Daylight Edition
+        TRIVIA by Super Chennai
       </footer>
     </section>
   )

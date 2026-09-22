@@ -1,4 +1,4 @@
-// src/app/(frontend)/profile/components/ProfileLayouts.tsx
+/* eslint-disable @next/next/no-img-element */
 import Link from 'next/link'
 import { 
   Calendar, 
@@ -10,14 +10,14 @@ import {
   Target, 
   Flame, 
   ChevronRight,
-  ArrowRight
+  ArrowRight,
+  Play
 } from 'lucide-react'
 import { EditProfileModal } from './ClientActions'
 
-// 1. Profile Header Card
 export function ProfileHeaderCard({ user }: { user: any }) {
   const memberYear = user?.createdAt ? new Date(user.createdAt).getFullYear() : 2026
-  const initial = user?.name ? user.name.charAt(0).toUpperCase() : 'S'
+  const initial = user?.name ? user.name.trim().charAt(0).toUpperCase() : 'S'
 
   return (
     <div className="bg-white/90 backdrop-blur-md border border-slate-100/80 rounded-3xl p-6 md:p-8 shadow-xl shadow-indigo-950/5 mb-8 transition-all hover:shadow-2xl hover:shadow-indigo-950/10">
@@ -27,7 +27,7 @@ export function ProfileHeaderCard({ user }: { user: any }) {
           <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-[#5B2EFF] to-[#a855f7] p-1 shadow-lg shadow-[#5B2EFF]/20 flex-shrink-0">
             {user?.avatar ? (
               <img
-                src={user.avatar}
+                src={typeof user.avatar === 'object' ? user.avatar.url : user.avatar}
                 alt={user?.name || 'User'}
                 className="w-full h-full rounded-full object-cover"
               />
@@ -52,7 +52,16 @@ export function ProfileHeaderCard({ user }: { user: any }) {
           </div>
         </div>
 
-        <div className="self-center sm:self-start">
+        {/* Action Buttons: Play Quiz + Edit Profile */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 self-center sm:self-start w-full sm:w-auto">
+          <Link
+            href="/quizzes"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#5B2EFF] hover:bg-[#4a22dd] text-white font-bold text-sm rounded-2xl shadow-lg shadow-[#5B2EFF]/25 transition transform active:scale-95 cursor-pointer"
+          >
+            <Play className="w-4 h-4 fill-current" />
+            <span>Play Quiz</span>
+          </Link>
+
           <EditProfileModal user={user} />
         </div>
       </div>
@@ -125,8 +134,15 @@ export function MyStatsSection({ stats }: { stats: any }) {
   )
 }
 
-// 3. Rank + Streak Section
-export function RankAndStreakSection({ stats }: { stats: any }) {
+// ProfileLayouts.tsx - Update RankAndStreakSection Component
+
+export function RankAndStreakSection({
+  stats,
+  currentRank = 1,
+}: {
+  stats: any
+  currentRank?: number
+}) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
       {/* My Rank Card */}
@@ -140,7 +156,9 @@ export function RankAndStreakSection({ stats }: { stats: any }) {
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
               Current Rank
             </p>
-            <p className="text-2xl md:text-3xl font-black text-[#11145A]">#8</p>
+            <p className="text-2xl md:text-3xl font-black text-[#11145A]">
+              #{currentRank}
+            </p>
           </div>
 
           <div className="w-[1px] h-12 bg-slate-100" />
@@ -152,7 +170,9 @@ export function RankAndStreakSection({ stats }: { stats: any }) {
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
               Best Rank
             </p>
-            <p className="text-2xl md:text-3xl font-black text-[#11145A]">#5</p>
+            <p className="text-2xl md:text-3xl font-black text-[#11145A]">
+              #{currentRank}
+            </p>
           </div>
 
           <div className="w-[1px] h-12 bg-slate-100" />
