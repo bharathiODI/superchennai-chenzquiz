@@ -1,4 +1,3 @@
-// src/app/(frontend)/profile/components/ClientActions.tsx
 'use client'
 
 import { useState } from 'react'
@@ -113,7 +112,13 @@ export function EditProfileModal({ user }: { user: any }) {
                   disabled={saving}
                   className="inline-flex items-center gap-1.5 px-6 py-2.5 bg-[#5B2EFF] hover:bg-[#4c22e0] text-white font-bold text-xs rounded-xl transition shadow-md shadow-[#5B2EFF]/20 active:scale-95 disabled:opacity-50"
                 >
-                  {saving ? 'Saving...' : <><Check className="w-4 h-4" /> Save Changes</>}
+                  {saving ? (
+                    'Saving...'
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4" /> Save Changes
+                    </>
+                  )}
                 </button>
               </div>
             </form>

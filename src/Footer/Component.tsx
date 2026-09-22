@@ -9,25 +9,25 @@ export default async function Footer() {
     const { copyright, companyInfo, socialMedia } = footer || {}
 
     return (
-      <footer className="relative w-full overflow-hidden bg-[#4A154B] text-white">
+      <footer className="relative w-full overflow-hidden bg-gradient-to-b from-[#11145A] via-[#1a1c6e] to-[#0d0f42] text-white border-t border-purple-500/20 shadow-2xl">
         {/* =====================================================
-            1. BACKGROUND ANIMATION & LIGHTING EFFECTS
+            1. GAMING NEON GLOW & LIGHTING EFFECTS
         ===================================================== */}
         <div className="pointer-events-none absolute inset-0 -z-0 overflow-hidden">
+          {/* Top Border Vibrant Glow Line */}
+          <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#5B2EFF] to-amber-400" />
+          
           {/* Subtle Ambient Radial Glows */}
-          <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-purple-500/20 blur-3xl animate-pulse" />
-          <div className="absolute right-0 bottom-0 h-80 w-80 rounded-full bg-amber-500/10 blur-3xl" />
-
-          {/* Golden Sun / Horizon Glow Overlay */}
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-400/40 to-transparent" />
+          <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-[#5B2EFF]/25 blur-3xl animate-pulse" />
+          <div className="absolute right-0 bottom-0 h-80 w-80 rounded-full bg-amber-500/15 blur-3xl" />
         </div>
 
         {/* =====================================================
-            2. CHENNAI OCEAN WAVE SVG ANIMATION LAYER
+            2. CHENNAI TRIVIA WAVE DECORATION
         ===================================================== */}
-        <div className="relative w-full overflow-hidden leading-none z-10 opacity-30">
+        <div className="relative w-full overflow-hidden leading-none z-10 opacity-20">
           <svg
-            className="relative block w-full h-12 text-[#6B21A8] animate-wave"
+            className="relative block w-full h-10 text-[#5B2EFF]"
             viewBox="0 0 1200 120"
             preserveAspectRatio="none"
           >
@@ -39,11 +39,12 @@ export default async function Footer() {
         </div>
 
         {/* =====================================================
-            3. MAIN FOOTER CONTENT AREA
+            3. MAIN FOOTER CONTENT AREA (GAMING STYLE)
         ===================================================== */}
         <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-8 px-6 py-10 md:flex-row md:items-center md:justify-between">
-          {/* LEFT SIDE — SOCIAL MEDIA (HOVER ANIMATIONS) */}
-          <div className="flex items-center gap-4 flexxxconatinerrr justify-center md:justify-start">
+          
+          {/* Social Media Icons Container */}
+          <div className="flex items-center gap-3.5 justify-center md:justify-start">
             {socialMedia?.map((item: any, index: number) => {
               const imageUrl =
                 item?.icon?.url || item?.icon?.sizes?.thumbnail?.url || defaultImage.src
@@ -54,36 +55,35 @@ export default async function Footer() {
                   href={item?.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="group relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full transition-all duration-300"
+                  className="group relative flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 p-2 border border-white/10 backdrop-blur-md transition-all duration-300 hover:bg-[#5B2EFF] hover:border-purple-400/50 hover:scale-110 hover:shadow-lg hover:shadow-[#5B2EFF]/40"
                   aria-label={item?.platform}
                 >
                   <img
                     src={imageUrl}
                     alt={item?.platform}
-                    className="h-10 w-10 object-contain  transition-all duration-300 group-hover:invert-0 group-hover:opacity-100 group-hover:scale-110"
+                    className="h-full w-full object-contain transition-all duration-300 group-hover:brightness-125"
                   />
                 </a>
               )
             })}
           </div>
 
-          {/* CENTER — COPYRIGHT & CHENNAI SPARKLE */}
+          {/* Copyright & Branding */}
           <div className="text-center">
-            <p className="text-sm font-medium tracking-wide text-purple-100/90">
-              {copyright || ''}
+            <p className="text-xs md:text-sm font-bold tracking-wide text-purple-200/90 flex items-center justify-center gap-2">
+              <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              {copyright || '© 2026 Super Chennai Trivia. All rights reserved.'}
             </p>
-            {/* <span className="mt-1 block text-[11px] font-semibold uppercase tracking-widest text-amber-400/80">
-              Crafted with Warmth in Chennai 🌊
-            </span> */}
           </div>
 
-          {/* RIGHT SIDE — COMPANY EMAIL & CONTACT */}
+          {/* Support Email Card */}
           <div className="text-center md:text-right">
             {companyInfo?.supportEmail && (
               <a
                 href={`mailto:${companyInfo?.supportEmail}`}
-                className="inline-flex items-center gap-2 rounded-full border border-purple-300/20 bg-white/5 px-5 py-2 text-xs font-semibold text-purple-100 backdrop-blur-md transition-all duration-300 hover:border-amber-400/60 hover:bg-white/15 hover:text-amber-300 shadow-sm"
+                className="inline-flex items-center gap-2.5 rounded-2xl border border-purple-400/30 bg-white/5 px-5 py-2.5 text-xs font-black tracking-wide text-purple-100 backdrop-blur-md transition-all duration-300 hover:border-amber-400/80 hover:bg-amber-400/10 hover:text-amber-300 shadow-md hover:shadow-amber-500/20 active:scale-95"
               >
+                <span className="text-amber-400 font-bold">✉ Support:</span>
                 <span>{companyInfo?.supportEmail}</span>
               </a>
             )}
@@ -94,6 +94,10 @@ export default async function Footer() {
   } catch (error) {
     console.error('Footer Error:', error)
 
-    return <footer className="bg-slate-900 py-8 text-center text-white">Footer Failed</footer>
+    return (
+      <footer className="bg-[#11145A] py-8 text-center text-white text-sm font-bold">
+        Super Chennai Trivia
+      </footer>
+    )
   }
 }

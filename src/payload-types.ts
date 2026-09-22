@@ -709,7 +709,7 @@ export interface UserSubmission {
  */
 export interface QuizAttempt {
   id: number;
-  user: number | User;
+  user: number | QuizUser;
   quiz: number | Quiz;
   score: number;
   totalQuestions: number;
