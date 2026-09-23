@@ -26,24 +26,35 @@ export default function QuizCountdown({
   const [status, setStatus] = useState<'UPCOMING' | 'LIVE' | 'EXPIRED'>('UPCOMING')
 
   useEffect(() => {
-    const startTime = new Date(quizDate).getTime()
-    // 24 Hours duration for live quiz (Adjust if needed)
-    const endTime = startTime + 24 * 60 * 60 * 1000
-
     const updateTimer = () => {
-      const now = new Date().getTime()
+      const now = new Date()
+      const quizTime = new Date(quizDate)
 
-      if (now >= endTime) {
-        // Time expired / Completed
+      // 🛠️ STRICT DATE COMPARISON FIX FOR PAST QUIZZES
+      // Ignore time for date-only comparison if needed, or compare timestamps cleanly
+      const nowDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+      const quizDateOnly = new Date(
+        quizTime.getFullYear(),
+        quizTime.getMonth(),
+        quizTime.getDate(),
+      ).getTime()
+
+      const startTime = quizTime.getTime()
+      // 24 Hours duration for active play window on the scheduled day
+      const endTime = startTime + 24 * 60 * 60 * 1000
+      const currentTime = now.getTime()
+
+      if (quizDateOnly < nowDateOnly || currentTime >= endTime) {
+        // If the quiz date is strictly in the past, or 24 hrs window has passed -> EXPIRED
         setStatus('EXPIRED')
         setTimeLeft(null)
-      } else if (now >= startTime) {
-        // Quiz is currently active
+      } else if (currentTime >= startTime && currentTime < endTime) {
+        // Quiz is currently running today within the 24-hr window -> LIVE
         setStatus('LIVE')
         setTimeLeft(null)
       } else {
-        // Upcoming quiz
-        const difference = startTime - now
+        // Quiz is scheduled for a future date -> UPCOMING
+        const difference = startTime - currentTime
         setStatus('UPCOMING')
         setTimeLeft({
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
@@ -69,7 +80,7 @@ export default function QuizCountdown({
     )
   }
 
-  /* ================= 1. EXPIRED / COMPLETED STATE ================= */
+  /* ================= 1. EXPIRED / COMPLETED / PAST STATE ================= */
   if (status === 'EXPIRED') {
     return (
       <div className="mb-14 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden border border-indigo-500/20 text-center md:text-left ">
@@ -205,7 +216,7 @@ export default function QuizCountdown({
               disabled
               className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 border border-white/20 text-indigo-200 font-bold text-base rounded-2xl cursor-not-allowed opacity-80"
             >
-              <span>🔒 Registration Open • Game Locked</span>
+              <span> Registration Open • Game Locked</span>
             </button>
           </div>
         )}

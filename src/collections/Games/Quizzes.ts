@@ -1,5 +1,5 @@
-
 import type { CollectionConfig } from 'payload'
+import { revalidateQuiz, revalidateQuizDelete } from './hooks/revalidatePage'
 
 const formatSlug = (val: string): string =>
   val
@@ -79,4 +79,8 @@ export const Quizzes: CollectionConfig = {
       defaultValue: 'draft',
     },
   ],
+  hooks: {
+    afterChange: [revalidateQuiz],
+    afterDelete: [revalidateQuizDelete],
+  },
 }
