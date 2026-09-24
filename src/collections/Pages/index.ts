@@ -34,9 +34,10 @@ import {
 } from '@payloadcms/richtext-lexical'
 
 import { isNotAdmin } from '@/access/checkRole'
-import { TriviaAuthBlock } from '../Games/Blocks/ReadytoPlay/config'
 import { AboutTriviaBlock } from '../Games/Blocks/AboutTriviaPage/config'
 import { HowItWorksBlock } from '../Games/Blocks/HowItWorksSection/config'
+import { LetsTalkChennaiFAQBlock } from '../Games/Blocks/LetsTalkChennaiFAQ/config'
+import { TriviaAuthBlock } from '../Games/Blocks/ReadytoPlay/config'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -107,6 +108,7 @@ export const Pages: CollectionConfig<'pages'> = {
                         TriviaAuthBlock,
                         AboutTriviaBlock,
                         HowItWorksBlock,
+                        LetsTalkChennaiFAQBlock,
                       ],
                     }),
                     FixedToolbarFeature(),
