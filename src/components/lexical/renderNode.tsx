@@ -13,6 +13,7 @@ import AboutTriviaComponent from '@/collections/Games/Blocks/AboutTriviaPage/com
 import HowItWorksComponent from '@/collections/Games/Blocks/HowItWorksSection/component'
 import React from 'react'
 import LetsTalkChennaiFAQBlockComponent from '@/collections/Games/Blocks/LetsTalkChennaiFAQ/LetsTalkChennaiFAQBlockComponent'
+import { CreativeHeroBlock } from '@/collections/Games/Blocks/CreativeHero/Component'
 // import LetsTalkChennaiFAQBlockComponent from '@/collections/Games/Blocks/FAQ/FAQBlockComponent'
 
 export function renderNode(node: any, idx: number, eventData?: any): React.ReactNode {
@@ -158,6 +159,10 @@ export function renderNode(node: any, idx: number, eventData?: any): React.React
         return <LetsTalkChennaiFAQBlockComponent key={idx} {...node.fields} />
       }
 
+            if (blockType === 'creativeHero') {
+              return <CreativeHeroBlock key={idx} {...node.fields} />
+            }
+        
 
       console.warn('UNHANDLED BLOCK TYPE =>', blockType)
       return null

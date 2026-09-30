@@ -38,6 +38,7 @@ import { AboutTriviaBlock } from '../Games/Blocks/AboutTriviaPage/config'
 import { HowItWorksBlock } from '../Games/Blocks/HowItWorksSection/config'
 import { LetsTalkChennaiFAQBlock } from '../Games/Blocks/LetsTalkChennaiFAQ/config'
 import { TriviaAuthBlock } from '../Games/Blocks/ReadytoPlay/config'
+import { CreativeHeroBlock } from '../Games/Blocks/CreativeHero/config'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -109,6 +110,7 @@ export const Pages: CollectionConfig<'pages'> = {
                         AboutTriviaBlock,
                         HowItWorksBlock,
                         LetsTalkChennaiFAQBlock,
+                        CreativeHeroBlock,
                       ],
                     }),
                     FixedToolbarFeature(),

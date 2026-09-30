@@ -1,6 +1,142 @@
+// 'use client'
+
+// import React from 'react'
+// import Link from 'next/link'
+
+// type CardItem = {
+//   id?: string
+//   title: string
+//   description: string
+//   buttonText: string
+//   buttonUrl: string
+//   cardBgColor?: 'white' | 'cream' | string
+// }
+
+// type TriviaAuthProps = {
+//   topSubtitle?: string
+//   mainTitle?: string
+//   highlightText?: string
+//   subDescription?: string
+//   cards?: CardItem[]
+// }
+
+// export default function TriviaAuthComponent({
+//   topSubtitle = 'CHENZ QUIZ',
+//   mainTitle = 'Ready to Play',
+//   highlightText = 'Trivia?',
+//   subDescription = 'Join the Chennai Trivia community.',
+//   cards = [
+//     {
+//       title: 'Login',
+//       description: 'Already have an account? Jump back in and continue your quiz journey.',
+//       buttonText: 'Login',
+//       buttonUrl: '/login',
+//       cardBgColor: 'white',
+//     },
+//     {
+//       title: 'Sign Up',
+//       description:
+//         'New to CHENZ Quiz? Create your account and start testing your Chennai knowledge.',
+//       buttonText: 'Sign Up',
+//       buttonUrl: '/signup',
+//       cardBgColor: 'cream',
+//     },
+//   ],
+// }: TriviaAuthProps) {
+//   return (
+//     <section className="relative w-full py-16 px-4 bg-gradient-to-b from-[#f3f0ff] via-[#f7f5ff] to-[#e8e3ff] overflow-hidden loginsignupbg">
+//       {/* Title Header */}
+//       <div className="text-center mb-10 relative z-10">
+//         <div className="inline-block w-12 h-1 bg-[#6c42f5] rounded-full mb-2" />
+//         <p className="text-sm font-bold text-[#6c42f5] uppercase mb-2 paragraphfont">
+//           {topSubtitle}
+//         </p>
+//         <h2 className="text-3xl sm:text-4xl md:text-5xl   font-bold font-black text-[#0f172a] ">
+//           {mainTitle} <span className="text-[#5122f2]">{highlightText}</span>
+//         </h2>
+//         <p className="text-gray-600 mt-2 font-medium text-base sm:text-lg">{subDescription}</p>
+//       </div>
+
+//       {/* Cards Container */}
+//       <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10 px-2">
+//         {cards?.map((card, idx) => {
+//           const isCream = card.cardBgColor === 'cream'
+//           const isSignUp = card.title.toLowerCase().includes('sign')
+
+//           return (
+//             <div
+//               key={card.id || idx}
+//               className={`rounded-[32px] p-8 sm:p-10 flex flex-col items-center text-center shadow-xl shadow-purple-500/5 backdrop-blur-md transition-transform duration-300 hover:-translate-y-1 ${
+//                 isCream
+//                   ? 'bg-[#fdfbf7]/90 border border-[#f5efe6]'
+//                   : 'bg-white/90 border border-white'
+//               }`}
+//             >
+//               {/* Card Icon */}
+//               <div className="w-20 h-20 rounded-2xl bg-[#eeeaff] flex items-center justify-center mb-6 relative">
+//                 {isSignUp ? (
+//                   <div className="relative">
+//                     <svg
+//                       className="w-10 h-10 text-[#5122f2]"
+//                       fill="currentColor"
+//                       viewBox="0 0 24 24"
+//                     >
+//                       <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+//                     </svg>
+//                     <span className="absolute -bottom-1 -right-1 bg-[#5122f2] text-white rounded-full w-5 h-5 text-xs flex items-center justify-center font-bold">
+//                       +
+//                     </span>
+//                   </div>
+//                 ) : (
+//                   <svg
+//                     className="w-10 h-10 text-[#5122f2]"
+//                     fill="none"
+//                     stroke="currentColor"
+//                     strokeWidth="2.5"
+//                     viewBox="0 0 24 24"
+//                   >
+//                     <path
+//                       strokeLinecap="round"
+//                       strokeLinejoin="round"
+//                       d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+//                     />
+//                   </svg>
+//                 )}
+//               </div>
+
+//               {/* Title & Description */}
+//               <h3 className="text-2xl font-bold text-[#111827] mb-3">{card.title}</h3>
+//               <p className="text-gray-500 text-sm leading-relaxed paragraphfont mb-6 max-w-xs min-h-[48px]">
+//                 {card.description}
+//               </p>
+
+//               {/* Redirect Action Button */}
+//               <Link
+//                 href={card.buttonUrl}
+//                 className="w-full mt-auto py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#5122f2] to-[#6d3aff] text-white font-semibold text-base shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:opacity-95 transition-all flex items-center justify-center gap-2 group"
+//               >
+//                 <span>{card.buttonText}</span>
+//                 <svg
+//                   className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1"
+//                   fill="none"
+//                   stroke="currentColor"
+//                   strokeWidth="3"
+//                   viewBox="0 0 24 24"
+//                 >
+//                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
+//                   <path strokeLinecap="round" strokeLinejoin="round" d="m12 5 7 7-7 7" />
+//                 </svg>
+//               </Link>
+//             </div>
+//           )
+//         })}
+//       </div>
+//     </section>
+//   )
+// }
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 
 type CardItem = {
@@ -43,93 +179,149 @@ export default function TriviaAuthComponent({
     },
   ],
 }: TriviaAuthProps) {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null)
+
+  // Check login state securely from localStorage
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    const user = localStorage.getItem('user')
+    if (token || user) {
+      setIsLoggedIn(true)
+    } else {
+      setIsLoggedIn(false)
+    }
+  }, [])
+
   return (
     <section className="relative w-full py-16 px-4 bg-gradient-to-b from-[#f3f0ff] via-[#f7f5ff] to-[#e8e3ff] overflow-hidden loginsignupbg">
       {/* Title Header */}
       <div className="text-center mb-10 relative z-10">
         <div className="inline-block w-12 h-1 bg-[#6c42f5] rounded-full mb-2" />
-        <p className="text-sm font-bold text-[#6c42f5] uppercase mb-2 paragraphfont">
+        <p className="text-sm font-bold text-[#6c42f5] uppercase mb-2 paragraphfont tracking-wider">
           {topSubtitle}
         </p>
-        <h2 className="text-3xl sm:text-4xl md:text-5xl   font-bold font-black text-[#0f172a] ">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#0f172a]">
           {mainTitle} <span className="text-[#5122f2]">{highlightText}</span>
         </h2>
         <p className="text-gray-600 mt-2 font-medium text-base sm:text-lg">{subDescription}</p>
       </div>
 
-      {/* Cards Container */}
-      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10 px-2">
-        {cards?.map((card, idx) => {
-          const isCream = card.cardBgColor === 'cream'
-          const isSignUp = card.title.toLowerCase().includes('sign')
-
-          return (
-            <div
-              key={card.id || idx}
-              className={`rounded-[32px] p-8 sm:p-10 flex flex-col items-center text-center shadow-xl shadow-purple-500/5 backdrop-blur-md transition-transform duration-300 hover:-translate-y-1 ${
-                isCream
-                  ? 'bg-[#fdfbf7]/90 border border-[#f5efe6]'
-                  : 'bg-white/90 border border-white'
-              }`}
+      {/* Dynamic Content Container */}
+      <div className="max-w-4xl mx-auto relative z-10 px-2 min-h-[300px] flex items-center justify-center">
+        {isLoggedIn === null ? (
+          // Loading spinner to avoid layout jitter
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-4 border-[#5122f2] border-t-transparent rounded-full animate-spin" />
+            <p className="text-xs font-semibold text-gray-500">Checking session...</p>
+          </div>
+        ) : isLoggedIn ? (
+          /* PROFESSIONAL LOGGED-IN STATE BANNER */
+          <div className="w-full max-w-xl bg-white/95 backdrop-blur-xl rounded-[32px] p-8 sm:p-10 border border-purple-100 shadow-2xl shadow-purple-500/10 text-center transform transition-all animate-fade-in">
+            <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-[#5122f2] to-[#7c54ff] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/30 text-white">
+              <svg className="w-10 h-10 fill-white animate-pulse" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            </div>
+            <h3 className="text-2xl sm:text-3xl font-black text-[#0f172a] mb-3">
+              You&lsquo;re All Set to Play!
+            </h3>
+            <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-8 max-w-md mx-auto">
+              Your session is active. Jump straight into the action, beat your high scores, and
+              climb the Chennai leaderboard.
+            </p>
+            <Link
+              href="/quizzes"
+              className="w-full py-4 px-8 rounded-2xl bg-gradient-to-r from-[#5122f2] to-[#6d3aff] text-white font-bold text-lg shadow-xl shadow-purple-500/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 group"
             >
-              {/* Card Icon */}
-              <div className="w-20 h-20 rounded-2xl bg-[#eeeaff] flex items-center justify-center mb-6 relative">
-                {isSignUp ? (
-                  <div className="relative">
+              <span>Play Now</span>
+              <svg
+                className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="m12 5 7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+        ) : (
+          /* GUEST STATE CARDS */
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+            {cards?.map((card, idx) => {
+              const isCream = card.cardBgColor === 'cream'
+              const isSignUp = card.title.toLowerCase().includes('sign')
+
+              return (
+                <div
+                  key={card.id || idx}
+                  className={`rounded-[32px] p-8 sm:p-10 flex flex-col items-center text-center shadow-xl shadow-purple-500/5 backdrop-blur-md transition-transform duration-300 hover:-translate-y-1 ${
+                    isCream
+                      ? 'bg-[#fdfbf7]/90 border border-[#f5efe6]'
+                      : 'bg-white/90 border border-white'
+                  }`}
+                >
+                  {/* Card Icon */}
+                  <div className="w-20 h-20 rounded-2xl bg-[#eeeaff] flex items-center justify-center mb-6 relative">
+                    {isSignUp ? (
+                      <div className="relative">
+                        <svg
+                          className="w-10 h-10 text-[#5122f2]"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                        </svg>
+                        <span className="absolute -bottom-1 -right-1 bg-[#5122f2] text-white rounded-full w-5 h-5 text-xs flex items-center justify-center font-bold">
+                          +
+                        </span>
+                      </div>
+                    ) : (
+                      <svg
+                        className="w-10 h-10 text-[#5122f2]"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+                        />
+                      </svg>
+                    )}
+                  </div>
+
+                  {/* Title & Description */}
+                  <h3 className="text-2xl font-bold text-[#111827] mb-3">{card.title}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed paragraphfont mb-6 max-w-xs min-h-[48px]">
+                    {card.description}
+                  </p>
+
+                  {/* Redirect Action Button */}
+                  <Link
+                    href={card.buttonUrl}
+                    className="w-full mt-auto py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#5122f2] to-[#6d3aff] text-white font-semibold text-base shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:opacity-95 transition-all flex items-center justify-center gap-2 group"
+                  >
+                    <span>{card.buttonText}</span>
                     <svg
-                      className="w-10 h-10 text-[#5122f2]"
-                      fill="currentColor"
+                      className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3"
                       viewBox="0 0 24 24"
                     >
-                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m12 5 7 7-7 7" />
                     </svg>
-                    <span className="absolute -bottom-1 -right-1 bg-[#5122f2] text-white rounded-full w-5 h-5 text-xs flex items-center justify-center font-bold">
-                      +
-                    </span>
-                  </div>
-                ) : (
-                  <svg
-                    className="w-10 h-10 text-[#5122f2]"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
-                    />
-                  </svg>
-                )}
-              </div>
-
-              {/* Title & Description */}
-              <h3 className="text-2xl font-bold text-[#111827] mb-3">{card.title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed paragraphfont mb-6 max-w-xs min-h-[48px]">
-                {card.description}
-              </p>
-
-              {/* Redirect Action Button */}
-              <Link
-                href={card.buttonUrl}
-                className="w-full mt-auto py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#5122f2] to-[#6d3aff] text-white font-semibold text-base shadow-lg shadow-purple-500/25 hover:shadow-purple-500/40 hover:opacity-95 transition-all flex items-center justify-center gap-2 group"
-              >
-                <span>{card.buttonText}</span>
-                <svg
-                  className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-1"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m12 5 7 7-7 7" />
-                </svg>
-              </Link>
-            </div>
-          )
-        })}
+                  </Link>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
     </section>
   )
