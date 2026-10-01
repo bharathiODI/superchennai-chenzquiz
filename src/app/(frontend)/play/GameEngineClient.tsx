@@ -21,12 +21,16 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
   const [answersLog, setAnswersLog] = useState<any[]>([])
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [isLoadingAuth, setIsLoadingAuth] = useState(true)
+  const [alreadyPlayedToday, setAlreadyPlayedToday] = useState(false)
+  const [lastAttemptScore, setLastAttemptScore] = useState<number | null>(null)
 
   const currentQ = questions[currentIndex]
   const questionTimeLimit = Number(currentQ?.timeLimit ?? 60)
   // Timer State
   const [timeLeft, setTimeLeft] = useState<number>(questionTimeLimit)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+
+  const [startTime] = useState<number>(Date.now())
 
   // 1. Auth Protection Check & User Extraction
   useEffect(() => {
@@ -46,6 +50,70 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
       }
     }
   }, [router])
+
+
+  useEffect(() => {
+    const checkUserAndStatus = async () => {
+      const storedUser = localStorage.getItem('user')
+      const token = localStorage.getItem('token')
+
+      if (!storedUser || !token) {
+        router.push('/login')
+        return
+      }
+
+      try {
+        const parsedUser = JSON.parse(storedUser)
+        setCurrentUser(parsedUser)
+
+        // 🔍 Check from Server if user played today
+        if (quiz?.id && parsedUser?.id) {
+          const res = await fetch(`/api/quiz-check-played?userId=${parsedUser.id}&quizId=${quiz.id}`)
+          const data = await res.json()
+
+          if (data?.hasPlayedToday) {
+            setAlreadyPlayedToday(true)
+            setLastAttemptScore(data?.lastScore ?? 0)
+          }
+        }
+      } catch (e) {
+        console.error('Error verifying daily status:', e)
+      } finally {
+        setIsLoadingAuth(false)
+      }
+    }
+
+    checkUserAndStatus()
+  }, [router, quiz?.id])
+
+
+
+  useEffect(() => {
+    if (isCompleted || !currentQ) return
+
+    setTimeLeft(questionTimeLimit)
+
+    if (timerRef.current) clearInterval(timerRef.current)
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime <= 1) {
+          if (timerRef.current) clearInterval(timerRef.current)
+          handleGameCompletion({
+            isCorrect: false,
+            pointsEarned: 0,
+            answerDetail: 'Time Out',
+          })
+          return 0
+        }
+        return prevTime - 1
+      })
+    }, 1000)
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [currentIndex, isCompleted, questionTimeLimit])
 
   // 2. Active Countdown Timer Logic
   useEffect(() => {
@@ -77,12 +145,174 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
     }
   }, [currentIndex, isCompleted, questionTimeLimit])
 
+  // const handleGameCompletion = (result: {
+  //   isCorrect: boolean
+  //   pointsEarned?: number
+  //   answerDetail?: any
+  // }) => {
+  //   // Clear timer when user submits an answer
+  //   if (timerRef.current) clearInterval(timerRef.current)
+
+  //   const defaultPoints = Number(currentQ?.points ?? 10)
+  //   const negativePoints = Number(currentQ?.negativePoints ?? 0)
+
+  //   let pointsToAdd = 0
+  //   if (result.isCorrect) {
+  //     pointsToAdd = result.pointsEarned ?? defaultPoints
+  //     if (currentQ?.enableDoubleUp) {
+  //       pointsToAdd *= 2
+  //     }
+  //   } else {
+  //     pointsToAdd = -Math.abs(negativePoints)
+  //   }
+
+  //   const updatedScore = totalScore + pointsToAdd
+  //   const currentLog = {
+  //     questionId: currentQ?.id,
+  //     title: currentQ?.questionTitle || currentQ?.title,
+  //     gameType: currentQ?.gameType,
+  //     isCorrect: result.isCorrect,
+  //     pointsEarned: pointsToAdd,
+  //     userAnswer: result.answerDetail || null,
+  //   }
+
+  //   const updatedLog = [...answersLog, currentLog]
+
+  //   setTotalScore(updatedScore)
+  //   setAnswersLog(updatedLog)
+
+  //   if (currentIndex + 1 < questions.length) {
+  //     setCurrentIndex((prev) => prev + 1)
+  //   } else {
+  //     setIsCompleted(true)
+  //     submitFinalScore(updatedScore, updatedLog)
+  //   }
+  // }
+
+  // const submitFinalScore = async (finalScore: number, logs: any[]) => {
+  //   try {
+  //     const activeUserId = currentUser?.id
+
+  //     if (!activeUserId) {
+  //       console.error('❌ User ID missing for submission')
+  //       return
+  //     }
+
+  //     const res = await fetch('/api/quiz-submit', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({
+  //         quizId: quiz?.id,
+  //         userId: activeUserId,
+  //         scoreEarned: finalScore,
+  //         answers: logs,
+  //       }),
+  //     })
+
+  //     const data = await res.json()
+
+  //     if (!res.ok) {
+  //       console.error('❌ API Error submitting score:', data)
+  //     } else {
+  //       console.log('✅ Score submitted successfully!', data)
+  //     }
+  //   } catch (err) {
+  //     console.error('❌ Error submitting score:', err)
+  //   }
+  // }
+
+  //   const handleGameCompletion = (result: {
+  //   isCorrect: boolean
+  //   pointsEarned?: number
+  //   answerDetail?: any
+  // }) => {
+  //   if (timerRef.current) clearInterval(timerRef.current)
+
+  //   const defaultPoints = Number(currentQ?.points ?? 10)
+  //   const negativePoints = Number(currentQ?.negativePoints ?? 0)
+
+  //   let pointsToAdd = 0
+  //   if (result.isCorrect) {
+  //     pointsToAdd = result.pointsEarned ?? defaultPoints
+  //     if (currentQ?.enableDoubleUp) {
+  //       pointsToAdd *= 2
+  //     }
+  //   } else {
+  //     pointsToAdd = -Math.abs(negativePoints)
+  //   }
+
+  //   const updatedScore = totalScore + pointsToAdd
+  //   const currentLog = {
+  //     questionId: currentQ?.id,
+  //     title: currentQ?.questionTitle || currentQ?.title,
+  //     gameType: currentQ?.gameType,
+  //     isCorrect: result.isCorrect,
+  //     pointsEarned: pointsToAdd,
+  //     userAnswer: result.answerDetail || null,
+  //   }
+
+  //   const updatedLog = [...answersLog, currentLog]
+
+  //   setTotalScore(updatedScore)
+  //   setAnswersLog(updatedLog)
+
+  //   if (currentIndex + 1 < questions.length) {
+  //     setCurrentIndex((prev) => prev + 1)
+  //   } else {
+  //     setIsCompleted(true)
+
+  //     // ⏱️ 2. கேம் முடிவடைந்ததும் மொத்த நேரத்தை Seconds-ஆகக் கணக்கிடுதல்:
+  //     const totalTimeSpentInSeconds = Math.max(1, Math.round((Date.now() - startTime) / 1000))
+
+  //     // API-க்கு Time Taken-உடன் அனுப்புதல்
+  //     submitFinalScore(updatedScore, updatedLog, totalTimeSpentInSeconds)
+  //   }
+  // }
+
+  // // ⏱️ 3. submitFinalScore ஃபங்க்ஷனில் timeTaken அளவு சேர்க்கப்பட்டுள்ளது
+  // const submitFinalScore = async (finalScore: number, logs: any[], timeSpentSeconds: number) => {
+  //   try {
+  //     const activeUserId = currentUser?.id
+
+  //     if (!activeUserId) {
+  //       console.error('❌ User ID missing for submission')
+  //       return
+  //     }
+
+  //     const res = await fetch('/api/quiz-submit', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({
+  //         quizId: quiz?.id,
+  //         userId: activeUserId,
+  //         scoreEarned: finalScore,
+  //         answers: logs,
+  //         timeTaken: timeSpentSeconds, // 👈 அனுப்பப்படும் மொத்த நேரம்!
+  //       }),
+  //     })
+
+  //     const data = await res.json()
+
+  //     if (!res.ok) {
+  //       console.error('❌ API Error submitting score:', data)
+  //     } else {
+  //       console.log('✅ Score & Time submitted successfully!', data)
+  //     }
+  //   } catch (err) {
+  //     console.error('❌ Error submitting score:', err)
+  //   }
+  // }
+
+  // GameEngineClient.tsx
+
+  // 1. Component துவங்கும் போது ஆரம்ப நேரத்தை பதிவு செய்யவும்
+  const startTimeRef = useRef<number>(Date.now())
+
   const handleGameCompletion = (result: {
     isCorrect: boolean
     pointsEarned?: number
     answerDetail?: any
   }) => {
-    // Clear timer when user submits an answer
     if (timerRef.current) clearInterval(timerRef.current)
 
     const defaultPoints = Number(currentQ?.points ?? 10)
@@ -117,11 +347,16 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
       setCurrentIndex((prev) => prev + 1)
     } else {
       setIsCompleted(true)
-      submitFinalScore(updatedScore, updatedLog)
+
+      // ⏱️ மொத்தமாக விளையாடிய நேரம் (வினாடிகளில்)
+      const timeSpentInSeconds = Math.max(1, Math.round((Date.now() - startTimeRef.current) / 1000))
+
+      // 🚀 கணக்கிடப்பட்ட மதிப்புகளை நேரடியாக அனுப்புகிறோம்
+      submitFinalScore(updatedScore, updatedLog, timeSpentInSeconds)
     }
   }
 
-  const submitFinalScore = async (finalScore: number, logs: any[]) => {
+  const submitFinalScore = async (finalScore: number, logs: any[], timeSpentSeconds: number) => {
     try {
       const activeUserId = currentUser?.id
 
@@ -129,6 +364,13 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         console.error('❌ User ID missing for submission')
         return
       }
+
+      console.log('Sending Payload:', {
+        quizId: quiz?.id,
+        userId: activeUserId,
+        scoreEarned: finalScore,
+        timeTaken: timeSpentSeconds,
+      })
 
       const res = await fetch('/api/quiz-submit', {
         method: 'POST',
@@ -138,21 +380,22 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
           userId: activeUserId,
           scoreEarned: finalScore,
           answers: logs,
+          timeTaken: timeSpentSeconds, 
         }),
       })
 
       const data = await res.json()
 
-      if (!res.ok) {
-        console.error('❌ API Error submitting score:', data)
+      if (!res.ok && data.alreadyPlayed) {
+        setAlreadyPlayedToday(true)
       } else {
-        console.log('✅ Score submitted successfully!', data)
+        console.log('✅ Response:', data)
       }
+      console.log('✅ Response:', data)
     } catch (err) {
       console.error('❌ Error submitting score:', err)
     }
   }
-
 
   if (isLoadingAuth) {
     return (
@@ -215,6 +458,58 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
           </span>
           Authenticating player profile...
         </p>
+      </div>
+    )
+  }
+
+  if (alreadyPlayedToday) {
+    return (
+      <div className="relative overflow-hidden bg-white/95 backdrop-blur-xl border border-amber-200/80 rounded-3xl p-8 sm:p-10 text-center shadow-xl shadow-amber-500/5 max-w-lg mx-auto my-6">
+        <div className="absolute -top-12 -left-12 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 -right-12 w-40 h-40 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Icon */}
+        <div className="relative mx-auto w-20 h-20 mb-6 flex items-center justify-center bg-amber-100 rounded-full text-4xl shadow-inner border border-amber-200">
+          ⏳
+        </div>
+
+        {/* Title */}
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-2 tracking-tight">
+          Already Played Today!
+        </h2>
+
+        {/* Description */}
+        <p className="text-slate-600 text-sm leading-relaxed mb-6">
+          You have already completed this daily quiz today. To maintain a fair leaderboard, you can
+          attempt this challenge again{' '}
+          <span className="font-extrabold text-amber-700">Tomorrow!</span>
+        </p>
+
+        {/* Previous Score Display (Optional) */}
+        {lastAttemptScore !== null && (
+          <div className="bg-amber-50/80 border border-amber-200/60 rounded-2xl p-4 max-w-xs mx-auto mb-8">
+            <span className="text-xs font-bold text-amber-700 uppercase tracking-wider block mb-0.5">
+              Today&lsquo;s Score
+            </span>
+            <span className="text-3xl font-black text-amber-900">+{lastAttemptScore} XP</span>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Link
+            href="/leaderboard"
+            className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-sm rounded-2xl shadow-lg shadow-purple-500/20 transition-all duration-200"
+          >
+            Check Leaderboard
+          </Link>
+          <Link
+            href="/quizzes"
+            className="w-full sm:w-auto px-6 py-3.5 bg-slate-100 hover:bg-slate-200/80 text-slate-700 font-bold text-sm rounded-2xl transition-all duration-200"
+          >
+            Explore Other Quizzes
+          </Link>
+        </div>
       </div>
     )
   }
