@@ -78,11 +78,11 @@ export default function AboutTriviaComponent({
   const renderIcon = (type?: string) => {
     switch (type) {
       case 'star':
-        return <img src="/images/icons/pulb-new.png" alt="" className="svgtopngicon" />
+        return <img src="/images/icons/quizzzz.png" alt="" className="svgtopngicon" />
       case 'fire':
-        return <img src="/images/icons/pulb-new.png" alt="" className="svgtopngicon" />
+        return <img src="/images/icons/personm.png" alt="" className="svgtopngicon" />
       case 'chart':
-        return <img src="/images/icons/pulb-new.png" alt="" className="svgtopngicon" />
+        return <img src="/images/icons/win-icons.png" alt="" className="svgtopngicon" />
       default:
         return (
           // <svg

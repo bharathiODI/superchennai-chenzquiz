@@ -69,6 +69,7 @@ export default function HowItWorksComponent({
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
             />
           </svg>
+          // <img src="/images/icons/signup-icon.png" alt="" className="svgtopngicon" />
         )
       case 'trophy':
         return (
@@ -131,7 +132,7 @@ export default function HowItWorksComponent({
 
       <div className="text-center mb-10 relative z-10 flex flex-col items-center">
         {/* Top Badge/Subheading */}
-        <p className="text-[18px] font-extrabold  uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#6576FF] via-[#9F16DA] to-[#9F16DA] mb-0">
+        <p className="text-[18px] font-extrabold  uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#FBFAFF] via-[#FBFAFF] to-[#EA0690] mb-0">
           {topSubtitle || 'READY TO PLAY'}
         </p>
 
