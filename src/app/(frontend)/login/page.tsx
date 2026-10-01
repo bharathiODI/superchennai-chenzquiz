@@ -192,7 +192,7 @@ export default function LoginPage() {
         <div className="absolute -bottom-20 left-10 w-96 h-96 rounded-full bg-[#17145C]/60 blur-2xl pointer-events-none" />
 
         {/* Top Branding Section */}
-        {/* <div className="relative z-10">
+        <div className="relative z-10">
           <div className="inline-block">
             <h1 className="text-4xl lg:text-6xl font-black tracking-tight leading-none text-white drop-shadow-md">
               TRIVIA
@@ -201,7 +201,7 @@ export default function LoginPage() {
               by Super Chennai
             </p>
           </div>
-        </div> */}
+        </div>
 
         {/* Middle Mascot / Character Graphic */}
         <div className="relative z-10 hidden lg:flex flex-col items-center justify-center my-auto py-8">
