@@ -486,6 +486,7 @@ export interface QuizUser {
   id: number;
   name: string;
   phone?: string | null;
+  email?: string | null;
   /**
    * Total XP earned by playing daily quizzes
    */
@@ -493,14 +494,6 @@ export interface QuizUser {
   avatar?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1391,17 +1384,11 @@ export interface UsersSelect<T extends boolean = true> {
 export interface QuizUsersSelect<T extends boolean = true> {
   name?: T;
   phone?: T;
+  email?: T;
   totalXP?: T;
   avatar?: T;
   updatedAt?: T;
   createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

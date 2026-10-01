@@ -2,7 +2,11 @@ import type { CollectionConfig } from 'payload'
 
 export const QuizUsers: CollectionConfig = {
   slug: 'quiz-users',
-  auth: true,
+
+  auth: {
+    disableLocalStrategy: true,
+    tokenExpiration: 2592000,
+  },
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'email', 'totalXP', 'createdAt'],
@@ -22,6 +26,15 @@ export const QuizUsers: CollectionConfig = {
     {
       name: 'phone',
       type: 'text',
+      required: false,
+    },
+    {
+      name: 'email',
+      type: 'text',
+      required: false,
+      admin: {
+        placeholder: 'example@domain.com',
+      },
     },
     {
       name: 'totalXP',
