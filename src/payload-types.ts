@@ -487,10 +487,15 @@ export interface QuizUser {
   name: string;
   phone?: string | null;
   email?: string | null;
+  message?: string | null;
   /**
    * Total XP earned by playing daily quizzes
    */
   totalXP?: number | null;
+  /**
+   * Total time taken in seconds across all quizzes
+   */
+  totalTimeTaken?: number | null;
   avatar?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
@@ -1385,7 +1390,9 @@ export interface QuizUsersSelect<T extends boolean = true> {
   name?: T;
   phone?: T;
   email?: T;
+  message?: T;
   totalXP?: T;
+  totalTimeTaken?: T;
   avatar?: T;
   updatedAt?: T;
   createdAt?: T;

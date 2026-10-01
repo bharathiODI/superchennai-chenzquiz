@@ -37,11 +37,27 @@ export const QuizUsers: CollectionConfig = {
       },
     },
     {
+      name: 'message',
+      type: 'textarea',
+      required: false,
+      admin: {
+        placeholder: 'Enter optional message or note',
+      },
+    },
+    {
       name: 'totalXP',
       type: 'number',
       defaultValue: 0,
       admin: {
         description: 'Total XP earned by playing daily quizzes',
+      },
+    },
+    {
+      name: 'totalTimeTaken', 
+      type: 'number',
+      defaultValue: 0,
+      admin: {
+        description: 'Total time taken in seconds across all quizzes',
       },
     },
     {
