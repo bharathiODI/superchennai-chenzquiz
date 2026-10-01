@@ -11,6 +11,10 @@ import VideoBlock from './blocks/VideoBlock'
 import TriviaAuthComponent from '@/collections/Games/Blocks/ReadytoPlay/component'
 import AboutTriviaComponent from '@/collections/Games/Blocks/AboutTriviaPage/component'
 import HowItWorksComponent from '@/collections/Games/Blocks/HowItWorksSection/component'
+import React from 'react'
+import LetsTalkChennaiFAQBlockComponent from '@/collections/Games/Blocks/LetsTalkChennaiFAQ/LetsTalkChennaiFAQBlockComponent'
+import { CreativeHeroBlock } from '@/collections/Games/Blocks/CreativeHero/Component'
+// import LetsTalkChennaiFAQBlockComponent from '@/collections/Games/Blocks/FAQ/FAQBlockComponent'
 
 export function renderNode(node: any, idx: number, eventData?: any): React.ReactNode {
   /* ------------------------------------------------
@@ -29,19 +33,35 @@ export function renderNode(node: any, idx: number, eventData?: any): React.React
         </p>
       )
 
+    // /* ------------------------------------------------
+    //  HEADING
+    // ------------------------------------------------ */
+    // case 'heading': {
+    //   const Tag = (node.tag || 'h2') as React.ElementType
+
+    //   return (
+    //     <Tag
+    //       key={idx}
+    //       className={`paragaphhlexical text-center blog-${node.tag || 'h2'} text-[#005b70] text-3xl font-bold tracking-wide mt-0 mb-0`}
+    //     >
+    //       {renderText(node.children)}
+    //     </Tag>
+    //   )
+    // }
+
     /* ------------------------------------------------
      HEADING
     ------------------------------------------------ */
     case 'heading': {
-      const Tag = (node.tag || 'h2') as React.ElementType
+      const tag = node.tag || 'h2'
 
-      return (
-        <Tag
-          key={idx}
-          className={`paragaphhlexical text-center blog-${node.tag || 'h2'} text-[#005b70] text-3xl font-bold tracking-wide mt-0 mb-0`}
-        >
-          {renderText(node.children)}
-        </Tag>
+      return React.createElement(
+        tag,
+        {
+          key: idx,
+          className: `paragaphhlexical text-center blog-${tag} text-[#005b70] text-3xl font-bold tracking-wide mt-0 mb-0`,
+        },
+        renderText(node.children),
       )
     }
 
@@ -134,6 +154,15 @@ export function renderNode(node: any, idx: number, eventData?: any): React.React
       if (blockType === 'HowItWorksBlock') {
         return <HowItWorksComponent key={idx} {...node.fields} />
       }
+
+      if (blockType === 'letsTalkChennaiFaq') {
+        return <LetsTalkChennaiFAQBlockComponent key={idx} {...node.fields} />
+      }
+
+            if (blockType === 'creativeHero') {
+              return <CreativeHeroBlock key={idx} {...node.fields} />
+            }
+        
 
       console.warn('UNHANDLED BLOCK TYPE =>', blockType)
       return null

@@ -1,0 +1,204 @@
+.heroSection {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: 32px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  isolation: isolate;
+  background-color: #ffffff;
+}
+
+.topBar {
+  position: relative;
+  z-index: 50;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.eyebrow {
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+  margin-bottom: 20px;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px 28px;
+  background: #000;
+  color: #fff;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cta:hover {
+  transform: translateY(-4px) scale(1.02);
+}
+
+.arrow {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.menu {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  opacity: 0.7;
+}
+
+/* =========================================
+   MAIN VISUAL AREA (Water / Paint Effect Container)
+========================================= */
+
+.heroVisual {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  /* SVG Water Filter a mangpataiti liquid distortion effect */
+  filter: url(#waterWarp);
+}
+
+/* =========================================
+   LIQUID PAINT BRUSH / BLOB EFFECT
+========================================= */
+
+.liquidBlob {
+  position: absolute;
+  width: min(60vw, 900px);
+  aspect-ratio: 1 / 0.65;
+  background: #000;
+  z-index: 5;
+  pointer-events: none;
+  transform-origin: center;
+  will-change: transform, opacity;
+  
+  opacity: 0;
+  transform: scale(0.85) translate3d(0, 0, 0);
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+
+  clip-path: polygon(
+    7% 35%, 14% 20%, 24% 26%, 32% 10%, 44% 16%, 54% 5%, 
+    65% 14%, 76% 8%, 86% 22%, 92% 37%, 96% 52%, 88% 65%, 
+    93% 80%, 79% 88%, 66% 82%, 57% 95%, 46% 85%, 35% 92%, 
+    25% 78%, 14% 84%, 6% 70%, 11% 55%, 3% 45%
+  );
+}
+
+.heroVisual:hover .liquidBlob {
+  opacity: 1;
+  transform: scale(1) translate3d(0, 0, 0);
+}
+
+/* =========================================
+   BASE OUTLINE TEXT
+========================================= */
+
+.heroHeading {
+  position: relative;
+  z-index: 10;
+  margin: 0;
+  width: 100%;
+  text-align: center;
+  white-space: nowrap;
+  font-size: clamp(5rem, 16vw, 20rem);
+  line-height: 0.7;
+  letter-spacing: -0.075em;
+  font-weight: 900;
+  color: transparent;
+  -webkit-text-stroke: 2px #000;
+  user-select: none;
+  pointer-events: none;
+  transform: scaleX(0.92);
+}
+
+/* =========================================
+   IMAGE REVEAL ON HOVER
+========================================= */
+
+.textImageReveal {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  overflow: hidden;
+  will-change: transform, opacity;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.heroVisual:hover .textImageReveal {
+  opacity: 1;
+}
+
+.maskedText {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  font-size: clamp(5rem, 16vw, 20rem);
+  line-height: 0.7;
+  letter-spacing: -0.075em;
+  font-weight: 900;
+  white-space: nowrap;
+  color: transparent;
+  background-image: var(--hero-image);
+  background-size: cover;
+  background-position: var(--mouse-x) var(--mouse-y);
+  -webkit-background-clip: text;
+  background-clip: text;
+  transform: scaleX(0.92);
+}
+
+/* =========================================
+   BOTTOM BAR
+========================================= */
+
+.bottomBar {
+  position: relative;
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 30px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  font-size: 11px;
+}
+
+.bottomBar p {
+  margin: 0;
+  max-width: 300px;
+  line-height: 1.5;
+  opacity: 0.75;
+}
+
+.bottomBar span {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.5;
+  font-weight: 500;
+}

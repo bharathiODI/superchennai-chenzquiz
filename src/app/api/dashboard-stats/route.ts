@@ -9,9 +9,13 @@ export async function GET() {
     const headersList = await headers()
     const { user } = await payload.auth({ headers: headersList })
 
-    if (!user || user.role !== 'admin') {
+    if (!user || !('role' in user) || user.role !== 'admin') {
       return NextResponse.json({ error: 'Forbidden: Super Admin access required' }, { status: 403 })
     }
+
+    // if (!user || user.role !== 'admin') {
+    //   return NextResponse.json({ error: 'Forbidden: Super Admin access required' }, { status: 403 })
+    // }
 
     // 1. Fetch Total Counts
     const usersCount = await payload.count({ collection: 'users' })

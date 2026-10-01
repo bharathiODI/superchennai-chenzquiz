@@ -13,7 +13,7 @@ const getEventsSitemap = unstable_cache(
       'https://example.com'
 
     const results = await payload.find({
-      collection: 'lets-talks-chennai',
+      collection: 'quizzes',
       overrideAccess: false,
       draft: false,
       depth: 0,

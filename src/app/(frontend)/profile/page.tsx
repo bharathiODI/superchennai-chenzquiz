@@ -25,7 +25,6 @@ export default async function ProfilePage() {
     redirect('/login')
   }
 
-  // 1. Get All User Attempts
   const attemptsRes = await payload.find({
     collection: 'quiz-attempts',
     where: {
@@ -37,10 +36,7 @@ export default async function ProfilePage() {
     limit: 10,
   })
 
-  // 2. Calculate Rank based on Total XP
   const userXP = Number((user as any)?.totalXP || 0)
-
-  // High XP Users counting for Rank
   const higherXPUsers = await payload.count({
     collection: 'quiz-users',
     where: {
@@ -52,7 +48,6 @@ export default async function ProfilePage() {
 
   // Rank = Higher XP Users + 1
   const currentRank = higherXPUsers.totalDocs + 1
-
   const attempts = attemptsRes.docs as any[]
   const userStats = calculateUserStats(attempts)
 

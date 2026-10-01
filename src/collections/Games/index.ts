@@ -29,7 +29,8 @@ import { slugField } from 'src/fields/slug'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
-import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
+
+import { revalidateQuiz, revalidateQuizDelete } from './hooks/revalidatePage' // (Or wherever your hook file is located)
 
 export const Questions: CollectionConfig<'questions'> = {
   slug: 'questions',
@@ -527,9 +528,9 @@ export const Questions: CollectionConfig<'questions'> = {
     ...slugField(),
   ],
   hooks: {
-    afterChange: [revalidatePage],
+    afterChange: [revalidateQuiz],
     beforeChange: [populatePublishedAt],
-    afterDelete: [revalidateDelete],
+    afterDelete: [revalidateQuizDelete],
   },
   versions: {
     drafts: {

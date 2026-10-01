@@ -1,54 +1,47 @@
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload'
-
 import { revalidatePath, revalidateTag } from 'next/cache'
+import type { Quiz } from '../../../payload-types' // Unga payload types path ku etha mathri mathikonga
 
-import type { Page } from '../../../payload-types'
-
-export const revalidatePage: CollectionAfterChangeHook<Page> = ({
+export const revalidateQuiz: CollectionAfterChangeHook<Quiz> = ({
   doc,
   previousDoc,
   req: { payload, context },
 }) => {
   if (!context.disableRevalidate) {
-    if (doc._status === 'published') {
-      const path = doc.slug === 'home' ? '/' : `/${doc.slug}`
+    // 🛠️ FIX: Custom status field check ('active' irundha mattum revalidate aagum)
+    if (doc.status === 'active') {
+      const path = doc.slug === 'home' ? '/quizzes' : `/quizzes/${doc.slug}`
 
-      payload.logger.info(`Revalidating events at path: ${path}`)
+      payload.logger.info(`Revalidating quiz at path: ${path}`)
 
       revalidatePath(path)
-      revalidateTag('events-sitemap')
+      revalidatePath('/quizzes') 
+      revalidateTag('quizzes-sitemap')
     }
 
-    // If the page was previously published, we need to revalidate the old path
-    if (previousDoc?._status === 'published' && doc._status !== 'published') {
-      const oldPath = previousDoc.slug === 'home' ? '/' : `/${previousDoc.slug}`
+    // 🛠️ FIX: Previous status 'active' irundhu ippo 'draft' / 'completed' aana old path-um revalidate aagum
+    if (previousDoc?.status === 'active' && doc.status !== 'active') {
+      const oldPath = previousDoc.slug === 'home' ? '/quizzes' : `/quizzes/${previousDoc.slug}`
 
-      payload.logger.info(`Revalidating old events at path: ${oldPath}`)
+      payload.logger.info(`Revalidating old quiz at path: ${oldPath}`)
 
       revalidatePath(oldPath)
-      revalidateTag('events-sitemap')
+      revalidatePath('/quizzes')
+      revalidateTag('quizzes-sitemap')
     }
   }
   return doc
 }
 
-// export const revalidateDelete: CollectionAfterDeleteHook<Page> = ({ doc, req: { context } }) => {
-//   if (!context.disableRevalidate) {
-//     const path = doc?.slug === 'home' ? '/' : `/${doc?.slug}`
-//     revalidatePath(path)
-//     revalidateTag('events-sitemap')
-//   }
-
-//   return doc
-// }
-export const revalidateDelete: CollectionAfterDeleteHook = async ({ doc }) => {
+export const revalidateQuizDelete: CollectionAfterDeleteHook = async ({ doc }) => {
   process.nextTick(() => {
     try {
-      revalidatePath('/events')
+      revalidatePath('/quizzes')
 
       if (doc?.slug) {
-        revalidatePath(`/events/${doc.slug}`)
+        revalidatePath(`/quizzes/${doc.slug}`)
       }
+      revalidateTag('quizzes-sitemap')
     } catch (err) {
       console.error(err)
     }

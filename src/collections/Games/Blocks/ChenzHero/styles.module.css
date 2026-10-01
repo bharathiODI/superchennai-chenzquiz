@@ -1,0 +1,193 @@
+.heroSection {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: 32px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  isolation: isolate;
+  background-color: #0d061f; /* Deep vibrant quiz-themed dark space background */
+  transition: background 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.topBar {
+  position: relative;
+  z-index: 50;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.eyebrow {
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #00f0ff; /* Cyan accent matching the logo */
+  margin-bottom: 16px;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #ff007f, #7928ca);
+  color: #fff;
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  box-shadow: 0 10px 30px rgba(255, 0, 127, 0.4);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+
+.cta:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 15px 40px rgba(0, 240, 255, 0.5);
+}
+
+.arrow {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.menu {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #ffcc00; /* Yellow accent from logo */
+}
+
+/* =========================================
+   MAIN HERO VISUAL CONTAINER
+========================================= */
+
+.heroVisual {
+  position: relative;
+  width: 100%;
+  flex: 1;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  /* SVG Water / Paint Warp filter */
+  filter: url(#magicLiquidWarp);
+}
+
+/* =========================================
+   MAGIC GLOWING MULTI-COLOR BLOB
+========================================= */
+
+.liquidBlob {
+  position: absolute;
+  width: min(55vw, 850px);
+  aspect-ratio: 1 / 0.7;
+  background: radial-gradient(circle, rgba(255,0,127,0.8) 0%, rgba(0,240,255,0.6) 50%, rgba(121,40,202,0.9) 100%);
+  border-radius: 50%;
+  filter: blur(50px);
+  z-index: 2;
+  pointer-events: none;
+  transform-origin: center;
+  will-change: transform, opacity;
+  
+  opacity: 0.3;
+  transform: scale(0.9) translate3d(0, 0, 0);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.heroVisual:hover .liquidBlob {
+  opacity: 0.85;
+  transform: scale(1.1) translate3d(0, 0, 0);
+}
+
+/* =========================================
+   LOGO CONTAINER WITH DYNAMIC ANIMATION
+========================================= */
+
+.logoWrapper {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: min(65vw, 700px);
+  transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  user-select: none;
+}
+
+.logoImage {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.6));
+  animation: floatLogo 6s ease-in-out infinite;
+}
+
+@keyframes floatLogo {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(0.5deg);
+  }
+}
+
+/* =========================================
+   BOTTOM INFO BAR
+========================================= */
+
+.bottomBar {
+  position: relative;
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 30px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  font-size: 12px;
+  color: #ffffff;
+}
+
+.bottomBar p {
+  margin: 0;
+  max-width: 320px;
+  line-height: 1.5;
+  opacity: 0.8;
+}
+
+.bottomBar span {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #ff007f;
+  font-weight: 700;
+}
+
+/* =========================================
+   RESPONSIVE LAYOUT
+========================================= */
+
+@media (max-width: 768px) {
+  .heroSection {
+    min-height: 100svh;
+    padding: 20px;
+  }
+  .heroVisual {
+    min-height: 55vh;
+  }
+  .bottomBar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+}

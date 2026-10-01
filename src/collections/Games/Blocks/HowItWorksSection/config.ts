@@ -38,7 +38,7 @@ export const HowItWorksBlock: Block = {
       name: 'steps',
       type: 'array',
       label: 'Step Cards',
-      minRows: 4,
+      minRows: 3,
       maxRows: 4,
       fields: [
         {

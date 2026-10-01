@@ -31,160 +31,200 @@ const Canvas = dynamic(() => import('@react-three/fiber').then((m) => m.Canvas),
 // Camera Types
 type CameraMode = 'CHASE' | 'FIRST_PERSON'
 
+// // ==========================================
+// // 1. SOUND SYNTHESIZER
+// // ==========================================
+// class SoundFX {
+//   private ctx: AudioContext | null = null
+//   private engineOsc: OscillatorNode | null = null
+//   private engineGain: GainNode | null = null
+//   public isMuted: boolean = false
+
+//   private init() {
+//     if (!this.ctx) {
+//       const AudioCtx =
+//         window.AudioContext ||
+//         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+//       if (AudioCtx) {
+//         this.ctx = new AudioCtx()
+//       }
+//     }
+//     if (this.ctx && this.ctx.state === 'suspended') {
+//       this.ctx.resume()
+//     }
+//   }
+
+//   public startEngine() {
+//     if (this.isMuted) return
+//     this.init()
+//     if (!this.ctx || this.engineOsc) return
+
+//     try {
+//       this.engineOsc = this.ctx.createOscillator()
+//       this.engineGain = this.ctx.createGain()
+
+//       this.engineOsc.type = 'sawtooth'
+//       this.engineOsc.frequency.setValueAtTime(50, this.ctx.currentTime)
+//       this.engineGain.gain.setValueAtTime(0.04, this.ctx.currentTime)
+
+//       this.engineOsc.connect(this.engineGain)
+//       this.engineGain.connect(this.ctx.destination)
+//       this.engineOsc.start()
+//     } catch (e) {
+//       console.error(e)
+//     }
+//   }
+
+//   public updateEnginePitch(speed: number) {
+//     if (this.engineOsc && this.ctx) {
+//       const pitch = 50 + (speed / 240) * 180
+//       this.engineOsc.frequency.setValueAtTime(pitch, this.ctx.currentTime)
+//     }
+//   }
+
+//   public stopEngine() {
+//     if (this.engineOsc) {
+//       try {
+//         this.engineOsc.stop()
+//         this.engineOsc.disconnect()
+//       } catch (e) {
+//         // Silently catch audio stop errors
+//       }
+//       this.engineOsc = null
+//     }
+//   }
+
+//   public playCrash() {
+//     if (this.isMuted) return
+//     this.init()
+//     if (!this.ctx) return
+
+//     try {
+//       const osc = this.ctx.createOscillator()
+//       const gain = this.ctx.createGain()
+
+//       osc.type = 'sawtooth'
+//       osc.frequency.setValueAtTime(180, this.ctx.currentTime)
+//       osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.5)
+
+//       gain.gain.setValueAtTime(0.6, this.ctx.currentTime)
+//       gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.5)
+
+//       osc.connect(gain)
+//       gain.connect(this.ctx.destination)
+
+//       osc.start()
+//       osc.stop(this.ctx.currentTime + 0.5)
+//     } catch (e) {
+//       // Silently catch audio play errors
+//     }
+//   }
+
+//   public playClick() {
+//     if (this.isMuted) return
+//     this.init()
+//     if (!this.ctx) return
+
+//     try {
+//       const osc = this.ctx.createOscillator()
+//       const gain = this.ctx.createGain()
+
+//       osc.type = 'sine'
+//       osc.frequency.setValueAtTime(800, this.ctx.currentTime)
+//       osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.08)
+
+//       gain.gain.setValueAtTime(0.1, this.ctx.currentTime)
+//       gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08)
+
+//       osc.connect(gain)
+//       gain.connect(this.ctx.destination)
+
+//       osc.start()
+//       osc.stop(this.ctx.currentTime + 0.08)
+//     } catch (e) {
+//       // Silently catch audio play errors
+//     }
+//   }
+
+//   public destroy() {
+//     this.stopEngine()
+//     if (this.ctx) {
+//       this.ctx.close()
+//       this.ctx = null
+//     }
+//   }
+// }
+
 // ==========================================
-// 1. SOUND SYNTHESIZER
+// 1. SOUND SYNTHESIZER (WITH REAL AUDIO FILE SUPPORT)
 // ==========================================
 class SoundFX {
-  private ctx: AudioContext | null = null
-  private engineOsc: OscillatorNode | null = null
-  private engineGain: GainNode | null = null
+  private audioEl: HTMLAudioElement | null = null
   public isMuted: boolean = false
 
-  private init() {
-    if (!this.ctx) {
-      const AudioCtx =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
-      if (AudioCtx) {
-        this.ctx = new AudioCtx()
-      }
-    }
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume()
+  constructor() {
+    if (typeof window !== 'undefined') {
+      // Create an audio element for engine sound
+      this.audioEl = new Audio('/audio/engine.mp3')
+      this.audioEl.loop = true
+      this.audioEl.volume = 0.5
     }
   }
 
   public startEngine() {
-    if (this.isMuted) return
-    this.init()
-    if (!this.ctx || this.engineOsc) return
-
-    try {
-      this.engineOsc = this.ctx.createOscillator()
-      this.engineGain = this.ctx.createGain()
-
-      this.engineOsc.type = 'sawtooth'
-      this.engineOsc.frequency.setValueAtTime(50, this.ctx.currentTime)
-      this.engineGain.gain.setValueAtTime(0.04, this.ctx.currentTime)
-
-      this.engineOsc.connect(this.engineGain)
-      this.engineGain.connect(this.ctx.destination)
-      this.engineOsc.start()
-    } catch (e) {
-      console.error(e)
-    }
+    if (this.isMuted || !this.audioEl) return
+    this.audioEl.currentTime = 0
+    this.audioEl.play().catch((e) => {
+      console.log('Audio play blocked/failed:', e)
+    })
   }
 
   public updateEnginePitch(speed: number) {
-    if (this.engineOsc && this.ctx) {
-      const pitch = 50 + (speed / 240) * 180
-      this.engineOsc.frequency.setValueAtTime(pitch, this.ctx.currentTime)
-    }
+    if (!this.audioEl || this.isMuted) return
+
+    // Speed ku etha mathri playbackRate (pitch & speed) maathrom (Min: 0.8, Max: 2.2)
+    const rate = 0.8 + (speed / 230) * 1.4
+    this.audioEl.playbackRate = Math.max(0.8, Math.min(rate, 2.2))
+
+    // Volume-um speed ku etha mathri high aagum
+    this.audioEl.volume = Math.min(0.2 + (speed / 230) * 0.6, 0.8)
   }
 
   public stopEngine() {
-    if (this.engineOsc) {
-      try {
-        this.engineOsc.stop()
-        this.engineOsc.disconnect()
-      } catch (e) {
-        // Silently catch audio stop errors
-      }
-      this.engineOsc = null
+    if (this.audioEl) {
+      this.audioEl.pause()
+      this.audioEl.currentTime = 0
     }
   }
 
   public playCrash() {
     if (this.isMuted) return
-    this.init()
-    if (!this.ctx) return
-
     try {
-      const osc = this.ctx.createOscillator()
-      const gain = this.ctx.createGain()
-
-      osc.type = 'sawtooth'
-      osc.frequency.setValueAtTime(180, this.ctx.currentTime)
-      osc.frequency.exponentialRampToValueAtTime(30, this.ctx.currentTime + 0.5)
-
-      gain.gain.setValueAtTime(0.6, this.ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.5)
-
-      osc.connect(gain)
-      gain.connect(this.ctx.destination)
-
-      osc.start()
-      osc.stop(this.ctx.currentTime + 0.5)
+      const crashAudio = new Audio('/audio/crash.mp3')
+      crashAudio.volume = 0.7
+      crashAudio.play()
     } catch (e) {
-      // Silently catch audio play errors
+      // Fallback synthetic crash if file missing
     }
   }
 
   public playClick() {
     if (this.isMuted) return
-    this.init()
-    if (!this.ctx) return
-
     try {
-      const osc = this.ctx.createOscillator()
-      const gain = this.ctx.createGain()
-
-      osc.type = 'sine'
-      osc.frequency.setValueAtTime(800, this.ctx.currentTime)
-      osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.08)
-
-      gain.gain.setValueAtTime(0.1, this.ctx.currentTime)
-      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08)
-
-      osc.connect(gain)
-      gain.connect(this.ctx.destination)
-
-      osc.start()
-      osc.stop(this.ctx.currentTime + 0.08)
+      const clickAudio = new Audio('/audio/click.mp3')
+      clickAudio.volume = 0.3
+      clickAudio.play()
     } catch (e) {
-      // Silently catch audio play errors
+      // Fallback
     }
   }
 
   public destroy() {
     this.stopEngine()
-    if (this.ctx) {
-      this.ctx.close()
-      this.ctx = null
-    }
+    this.audioEl = null
   }
 }
-
 const audioFX = new SoundFX()
-
-// // ==========================================
-// // 2. ENVIRONMENT COMPONENTS
-// // ==========================================
-// function PineTree({ position }: { position: [number, number, number] }) {
-//   return (
-//     <group position={position}>
-//       <mesh position={[0, 0.6, 0]} castShadow>
-//         <cylinderGeometry args={[0.15, 0.25, 1.2, 8]} />
-//         <meshStandardMaterial color="#4A2E1A" roughness={0.9} />
-//       </mesh>
-
-//       <mesh position={[0, 1.6, 0]} castShadow>
-//         <coneGeometry args={[1.1, 1.4, 7]} />
-//         <meshStandardMaterial color="#15803D" roughness={0.8} flatShading />
-//       </mesh>
-
-//       <mesh position={[0, 2.4, 0]} castShadow>
-//         <coneGeometry args={[0.85, 1.2, 7]} />
-//         <meshStandardMaterial color="#166534" roughness={0.8} flatShading />
-//       </mesh>
-
-//       <mesh position={[0, 3.1, 0]} castShadow>
-//         <coneGeometry args={[0.55, 1.0, 7]} />
-//         <meshStandardMaterial color="#22C55E" roughness={0.7} flatShading />
-//       </mesh>
-//     </group>
-//   )
-// }
 
 export function PineTree({ position }: { position: [number, number, number] }) {
   const { scene } = useGLTF('/models/pine_tree.glb')
@@ -433,18 +473,7 @@ function HighwayScene({
   >([])
   const [treesState, setTreesState] = useState<{ id: number; x: number; z: number }[]>([])
 
-  // useEffect(() => {
-  //   const initialTrees = []
-  //   for (let i = 0; i < 24; i++) {
-  //     const z = -140 + i * 12
-  //     initialTrees.push({ id: Math.random(), x: -10 - Math.random() * 4, z })
-  //     initialTrees.push({ id: Math.random(), x: 10 + Math.random() * 4, z })
-  //   }
-  //   treesRef.current = initialTrees
-  //   setTreesState(initialTrees)
-  // }, [])
-
-useEffect(() => {
+  useEffect(() => {
     const initialTrees = []
     for (let i = 0; i < 10; i++) {
       const z = -140 + i * 28
