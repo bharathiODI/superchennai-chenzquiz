@@ -1,4 +1,3 @@
-
 'use client'
 
 import React from 'react'
@@ -43,11 +42,11 @@ export function FAQItemCard({ item, index, isOpen, onToggle }: FAQItemCardProps)
         aria-expanded={isOpen}
         aria-controls={answerId}
         onClick={onToggle}
-        className="flex w-full items-center justify-between p-5 md:p-6 lg:p-7 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 rounded-2xl"
+        className="flex paddingtopssss w-full items-center justify-between p-5 md:p-6 lg:p-7 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 rounded-2xl"
       >
         <div className="flex items-center gap-4 md:gap-6 pr-4">
           {/* Decorative Number Shield Badge */}
-          <div className="relative flex h-11 w-11 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-50 to-violet-50 shadow-inner">
+          <div className="relative flex h-9 w-9 md:h-9 md:w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-50 to-violet-50 shadow-inner">
             <span className="text-lg md:text-xl font-extrabold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
               {formattedNumber}
             </span>
@@ -61,7 +60,7 @@ export function FAQItemCard({ item, index, isOpen, onToggle }: FAQItemCardProps)
 
         {/* Plus / Rotating Action Button */}
         <div
-          className={`flex h-10 w-10 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-full border-2 border-indigo-600/30 text-indigo-600 transition-all duration-300 ${
+          className={`flex h-8 w-8 md:h-8 md:w-8 shrink-0 items-center justify-center rounded-full border-2 border-indigo-600/30 text-indigo-600 transition-all duration-300 ${
             isOpen
               ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white border-transparent rotate-45 shadow-md'
               : 'bg-white group-hover:border-indigo-600 group-hover:bg-indigo-50/50'

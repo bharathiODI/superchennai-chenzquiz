@@ -196,7 +196,8 @@ html {
 }
 
 .loginsignupbg {
-  background-image: url("/images/loginsignupbg.png");
+  /* background-image: url("/images/loginsignupbg.png"); */
+  background-image: url("/images/readytoplaysection.png");
   height: 700px;
   background-repeat: no-repeat;
   background-size: cover;
@@ -204,7 +205,8 @@ html {
 }
 
 .howitworkssectionbg {
-  background-image: url("/images/section-how-it.jpeg");
+  /* background-image: url("/images/section-how-it.jpeg"); */
+  background-image: url("/images/how-it-works.png");
   height: 700px;
   background-repeat: no-repeat;
   background-size: cover;
@@ -221,6 +223,124 @@ body .paragraphfont {
   height: 80vh;
 }
 
+.headingtexttriviaaa {
+  font-size: 25px;
+  line-height: 27px;
+  margin-bottom: 10px;
+  color: #0A0D3D;
+}
+
+.triviaaaimage {
+  width: 60px;
+  height: 60px;
+  border-radius: 100%;
+}
+
+.triviaaaimage svg {
+  width: 35px;
+  height: 35px;
+}
+
+.triviaaboutbga:first-child {
+  background-color: #F6F3FE;
+  border: 1px solid #DCD5F2;
+}
+
+.triviaaboutbga:first-child .triviaaaimage {
+  background-color: #E0D6F5;
+}
+
+.triviaaboutbga:nth-child(2) {
+  background-color: #FFEFF9;
+  border: 1px solid #e8c3d3;
+}
+
+.triviaaboutbga:nth-child(2) .triviaaaimage {
+
+  background-color: #FDD7ED;
+}
+
+.triviaaboutbga1:first-child {
+  background-color: #EEF5FD;
+  border: 1px solid #C6DCED;
+}
+
+
+.triviaaboutbga1:first-child .triviaaaimage {
+  background-color: #D1E5FD;
+}
+
+.triviaaboutbga1:nth-child(2) {
+  background-color: #FBE8FE;
+  border: 1px solid #d9aad9;
+}
+
+.triviaaboutbga1:nth-child(2) .triviaaaimage {
+  background-color: #EECCFE;
+}
+
+
+.newsectionnssstrivia:first-child {
+  background-color: #FEEDF7;
+  border: 1px solid #FBEAF4;
+}
+
+
+
+.newsectionnssstrivia:first-child a {
+  background: #FC0182;
+  border-radius: 60px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+
+.newsectionnssstrivia:nth-of-type(2) {
+  background-color: #EEE6FD;
+  border: 1px solid #FBEAF4;
+}
+
+.newsectionnssstrivia:nth-of-type(2) a {
+  background: #5403FD;
+  border-radius: 60px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.newsectionnssstrivia:first-child .w-20 {
+  background: #FFD2EA;
+}
+
+.newsectionnssstrivia:nth-of-type(2) .w-20 {
+  background: #DACFFF;
+}
+
+.newsectionnssstrivia:first-child svg text {
+  /* fill: #FC0282; */
+}
+
+
+.iconssuperrr {
+  filter: brightness(5.5);
+}
+
+.scrolleddddheaderrr .iconssuperrr {
+  filter: none !important;
+}
+
+
+.svgtopngicon {
+  height: 37px;
+  width: 37px;
+}
+
+
+.paddingtopssss {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+  padding-top: 20px !important;
+  padding-bottom: 20px !important;
+}
 
 @media (max-width: 768px) {
   .summerfestcardsslider .slick-slide {
@@ -261,4 +381,3 @@ body .paragraphfont {
     height: 190px;
   }
 }
-

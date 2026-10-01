@@ -112,7 +112,7 @@ export default function QuizCountdown({
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
             <Link
               href="/leaderboard"
-              className="inline-flex items-center gap-2 px-6 py-3.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-sm rounded-xl shadow-lg transition transform hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-[#5122f2] to-[#6d3aff] text-white font-semibold font-black text-sm rounded-xl shadow-lg transition transform hover:-translate-y-0.5"
             >
               <span>🏆 View Final Leaderboard</span>
             </Link>
