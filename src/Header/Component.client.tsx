@@ -386,7 +386,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
     <div className="w-full">
       <header
         className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${
-          scrolled ? 'bg-white shadow-md' : 'bg-transparent'
+          scrolled ? 'bg-white shadow-md scrolleddddheaderrr' : 'bg-transparent'
         }`}
       >
         {/* #################### DESKTOP MENU NAVBAR ########################### */}
@@ -396,7 +396,6 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
               activeMenu ? 'bg-white shadow-md' : ''
             }`}
           >
-            {/* LOGO */}
             <div className="flex justify-start">
               <a href="https://www.superchennai.com/" aria-label="Home">
                 {mainLogoUrl && (
@@ -405,13 +404,12 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
                     alt={mainLogoAlt}
                     width={150}
                     height={60}
-                    className="h-auto w-[100px] object-contain"
+                    className="h-auto w-[100px] object-contain iconssuperrr"
                   />
                 )}
               </a>
             </div>
 
-            {/* DESKTOP MENU CENTER */}
             <div className="flex justify-center">
               <ul className="flex items-center gap-8">
                 {menuItems.map((item, i) => (
@@ -426,7 +424,6 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
               </ul>
             </div>
 
-            {/* RIGHT SIDE */}
             <div className="flex justify-end">
               <a href="/" aria-label="Home">
                 {secondaryLogoUrl && (

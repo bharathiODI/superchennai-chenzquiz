@@ -1,6 +1,7 @@
 'use client'
 
 import React from 'react'
+import { motion } from 'framer-motion'
 
 type StepItem = {
   id?: string
@@ -118,46 +119,107 @@ export default function HowItWorksComponent({
   return (
     <section className="relative w-full py-16 px-4 bg-gradient-to-b from-[#f3f0ff] via-[#f7f5ff] to-[#e8e3ff] overflow-hidden howitworkssectionbg">
       {/* Title Block */}
-      <div className="text-center mb-12 relative z-10">
-        <div className="inline-block w-12 h-1 bg-[#6c42f5] rounded-full mb-2" />
-        <p className="text-sm font-bold text-[#6c42f5] uppercase mb-2 paragraphfont">
+      {/* <div className="text-center mb-12 relative z-10">
+        <p className="text-[18px] font-extrabold  uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a] mb-0">
           {topSubtitle}
         </p>
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-black  font-bold text-[#0f172a]">
           {mainTitle} <span className="text-[#5122f2]">{highlightText}</span>
         </h2>
         <p className="text-gray-600 mt-2 font-medium text-base sm:text-lg">{subDescription}</p>
+      </div> */}
+
+      <div className="text-center mb-10 relative z-10 flex flex-col items-center">
+        {/* Top Badge/Subheading */}
+        <p className="text-[18px] font-extrabold  uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#6576FF] via-[#9F16DA] to-[#9F16DA] mb-0">
+          {topSubtitle || 'READY TO PLAY'}
+        </p>
+
+        {/* Main Heading with Side Sparkles/Dashes */}
+        <div className="relative inline-flex items-center justify-center my-2">
+          {/* Gradient Title */}
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#FBFAFF] via-[#EA0690] to-[#EA0690] px-2 py-1">
+            {mainTitle || 'Trivia?'} {highlightText}
+          </h2>
+        </div>
+
+        {/* Subtitle Description */}
+        <p className="text-[#fff] mt-2 font-medium text-base sm:text-lg">
+          {subDescription || 'Join the Chenz Quiz community.'}
+        </p>
       </div>
 
       {/* 4 Steps Section */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 relative z-10 px-2 ">
+      {/* <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 relative z-10 px-2 ">
         {steps?.map((step, idx) => (
           <div key={step.id || idx} className="relative group">
-            {/* Dotted Line Connector for Desktop */}
             {idx < steps.length - 1 && (
               <div className="hidden lg:block absolute top-1/2 -right-9 transform -translate-y-1/2 z-20 pointer-events-none">
-                <span className="text-[#a594f9] tracking-widest text-lg font-bold">•••</span>
+                <span className="text-[#fff] tracking-widest text-lg font-bold">•••</span>
               </div>
             )}
 
-            <div className="h-full bg-white/90 backdrop-blur-md rounded-[28px] p-8 border border-white shadow-xl shadow-purple-500/5 flex flex-col items-center text-center relative transition-all duration-300 hover:-translate-y-1 hover:shadow-purple-500/10">
-              {/* Step Number Tag */}
+            <div className="h-full bg-white/10 backdrop-blur-md rounded-[28px] p-8 border border-[#ffffff45] shadow-xl shadow-purple-500/5 flex flex-col items-center text-center relative transition-all duration-300 hover:-translate-y-1 hover:shadow-purple-500/10">
               <div className="absolute  rounded-[50%] top-4 left-4 bg-[#eeeaff] text-[#5122f2] text-xs font-black px-3 py-3 rounded-full">
                 {step.stepNumber}
               </div>
 
-              {/* Icon Container */}
               <div className="w-20 h-20 rounded-[50%] bg-[#eeeaff] flex items-center justify-center mt-4 mb-6 relative">
                 {renderIcon(step.iconType)}
               </div>
 
-              {/* Content */}
-              <h3 className="text-xl font-bold text-[#111827] mb-3">{step.title}</h3>
-              <p className="text-gray-500 text-xs sm:text-sm leading-relaxed paragraphfont">
-                {step.description}
-              </p>
+              <h3 className="text-xl font-semibold text-[#fff] mb-3">{step.title}</h3>
+              <div className="bg-[#fff">
+                <p className="text-[#fff] text-xs sm:text-sm leading-relaxed paragraphfont">
+                  {step.description}
+                </p>
+              </div>
             </div>
           </div>
+        ))}
+      </div> */}
+
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 relative z-10 px-2">
+        {steps?.map((step, idx) => (
+          <motion.div
+            key={step.id || idx}
+            initial={{ opacity: 0, x: -60 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{
+              duration: 1.0,
+              ease: [0.16, 1, 0.3, 1],
+              delay: idx * 0.3,
+            }}
+            className="relative group"
+          >
+            {/* Dotted Line Connector for Desktop */}
+            {idx < steps.length - 1 && (
+              <div className="hidden lg:block absolute top-1/2 -right-9 transform -translate-y-1/2 z-20 pointer-events-none">
+                <span className="text-[#fff] tracking-widest text-lg font-bold">•••</span>
+              </div>
+            )}
+
+            <div className="h-full bg-white/10 backdrop-blur-md rounded-[28px] p-8 border border-[#ffffff45] shadow-xl shadow-purple-500/5 flex flex-col items-center text-center relative transition-all duration-300 hover:-translate-y-1 hover:shadow-purple-500/10">
+              {/* Step Number Tag */}
+              <div className="absolute rounded-[50%] top-4 left-4 bg-[#eeeaff] text-[#5122f2] text-xs font-black px-3 py-3">
+                {step.stepNumber}
+              </div>
+
+              {/* Icon Container */}
+              <div className="w-16 h-16 rounded-[50%] bg-[#eeeaff] flex items-center justify-center mt-4 mb-6 relative">
+                {renderIcon(step.iconType)}
+              </div>
+
+              {/* Content */}
+              <h3 className="text-xl font-semibold text-[#fff] mb-3">{step.title}</h3>
+              <div>
+                <p className="text-[#fff] text-xs sm:text-sm leading-relaxed paragraphfont">
+                  {step.description}
+                </p>
+              </div>
+            </div>
+          </motion.div>
         ))}
       </div>
     </section>

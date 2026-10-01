@@ -1,4 +1,3 @@
-
 'use client'
 
 import axios from 'axios'
@@ -12,7 +11,7 @@ import {
   Lock,
   Mail,
   Smartphone,
-  User
+  User,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -43,7 +42,6 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
   const router = useRouter()
-  
 
   // Resend OTP Countdown Effect
   useEffect(() => {
@@ -189,12 +187,12 @@ export default function LoginPage() {
       {/* ========================================================= */}
       <div className="relative lg:w-1/2 w-full bg-gradient-to-br from-[#4B20D8] via-[#3215A8] to-[#17145C] min-h-[220px] lg:min-h-screen flex flex-col justify-between p-8 lg:p-12 overflow-hidden text-white">
         {/* Layered Organic Background Shapes */}
-        <div className="absolute -top-16 -left-16 w-80 h-80 rounded-full bg-[#5A2BE2]/30 blur-3xl pointer-events-none" />
+        {/* <div className="absolute -top-16 -left-16 w-80 h-80 rounded-full bg-[#5A2BE2]/30 blur-3xl pointer-events-none" /> */}
         <div className="absolute top-1/2 -right-20 w-96 h-96 rounded-full bg-[#4B20D8]/40 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 left-10 w-96 h-96 rounded-full bg-[#17145C]/60 blur-2xl pointer-events-none" />
 
         {/* Top Branding Section */}
-        <div className="relative z-10">
+        {/* <div className="relative z-10">
           <div className="inline-block">
             <h1 className="text-4xl lg:text-6xl font-black tracking-tight leading-none text-white drop-shadow-md">
               TRIVIA
@@ -203,7 +201,7 @@ export default function LoginPage() {
               by Super Chennai
             </p>
           </div>
-        </div>
+        </div> */}
 
         {/* Middle Mascot / Character Graphic */}
         <div className="relative z-10 hidden lg:flex flex-col items-center justify-center my-auto py-8">
