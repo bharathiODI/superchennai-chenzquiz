@@ -116,7 +116,7 @@ export const DefaultHeroBanner: React.FC<Props> = ({ heading, image, mobileImage
         <img
           src={mobileImageUrl || imageUrl || defaultImage.src}
           alt="Mobile Banner"
-          className="block sm:hidden w-full h-auto object-contain"
+          className="block sm:hidden w-full h-auto object-contain mobilbannerrimage"
         />
 
         {/* Heading */}

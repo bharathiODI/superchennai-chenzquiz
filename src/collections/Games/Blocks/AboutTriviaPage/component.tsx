@@ -106,7 +106,7 @@ export default function AboutTriviaComponent({
   }
 
   return (
-    <section className="relative w-full py-16 px-4 bg-[#fff] overflow-hidden triviabgsection-hide">
+    <section className="relative w-full py-16 px-4 bg-[#fff] overflow-hidden triviabgsection-hide padddinggmobile">
       {/* Title Area */}
       {/* <div className="text-center mb-12 relative z-10">
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-black font-bold text-[#0f172a]">
@@ -122,7 +122,7 @@ export default function AboutTriviaComponent({
         </p>
 
         {/* Main Heading with Side Sparkles/Dashes */}
-        <div className="relative inline-flex items-center justify-center my-2">
+        <div className="relative inline-flex items-center justify-center my-2 headingggtexxt">
           {/* Left Decorative Dashes */}
           <div className="hidden sm:flex flex-col gap-1.5 absolute -left-12 md:-left-16 top-1/2 -translate-y-1/2">
             <span className="w-4 h-1 bg-[#ec4899] rounded-full transform -rotate-45 -translate-x-1" />
@@ -328,7 +328,7 @@ export default function AboutTriviaComponent({
         {isLoggedIn ? (
           <Link
             href="/quizzes"
-            className="py-4 px-10 rounded-2xl bg-gradient-to-r from-[#5122f2] to-[#6d3aff] text-white font-extrabold text-lg shadow-xl shadow-purple-500/30 hover:scale-105 transition-all flex items-center gap-3 animate-pulse"
+            className="py-4 px-10 rounded-2xl bg-gradient-to-r from-[#5122f2] to-[#6d3aff] text-white font-extrabold text-lg shadow-xl shadow-purple-500/30 hover:scale-105 transition-all flex items-center gap-3 animate-pulse buttonpaaddinggg"
           >
             <svg className="w-6 h-6 fill-white" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />

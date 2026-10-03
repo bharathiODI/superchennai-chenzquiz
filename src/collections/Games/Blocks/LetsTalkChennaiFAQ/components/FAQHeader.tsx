@@ -20,7 +20,7 @@ export function FAQHeader({
         {eyebrow}
       </p>
 
-      <div className="relative inline-flex items-center justify-center my-2">
+      <div className="relative inline-flex items-center justify-center my-2 headingggtexxt">
         <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a] px-2 py-1">
           {heading}
         </h2>
