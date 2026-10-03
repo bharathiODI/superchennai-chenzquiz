@@ -91,12 +91,12 @@ export function MyStatsSection({ stats }: { stats: any }) {
       icon: Star,
       iconBg: 'bg-amber-50 text-[#F5A623]',
     },
-    {
-      label: 'Best Score',
-      value: stats.bestScore,
-      icon: Trophy,
-      iconBg: 'bg-orange-50 text-[#F97316]',
-    },
+    // {
+    //   label: 'Best Score',
+    //   value: stats.bestScore,
+    //   icon: Trophy,
+    //   iconBg: 'bg-orange-50 text-[#F97316]',
+    // },
   ]
 
   return (
