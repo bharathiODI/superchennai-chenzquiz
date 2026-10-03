@@ -134,7 +134,6 @@ export function MyStatsSection({ stats }: { stats: any }) {
   )
 }
 
-// ProfileLayouts.tsx - Update RankAndStreakSection Component
 
 export function RankAndStreakSection({
   stats,
