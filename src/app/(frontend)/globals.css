@@ -346,12 +346,12 @@ body .paragraphfont {
 
 
   background-image: url("/images/quizzesbg.jpeg");
-    background-image: url("/images/gamingpagebgg.jpeg");
+  background-image: url("/images/gamingpagebgg.jpeg");
   /* height: 700px; */
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
-    display: flex;
+  display: flex;
   align-items: center;
 }
 
@@ -492,4 +492,77 @@ body .paragraphfont {
   .howitworkssectionbg .padddinggmobile {
     gap: 25px;
   }
+
+  .padddingtopppp {
+    padding-top: 150px;
+  }
+
+  .formflexstatt {
+    justify-content: flex-start;
+  }
+
+  .loginnnpageeeee {
+    display: none;
+  }
+
+  .loginheightttt {
+    height: auto;
+    min-height: auto;
+    padding-top: 140px;
+  }
+
+  .loginheightttt1 {
+    height: auto;
+    min-height: auto;
+    padding-bottom: 50px;
+  }
+
+  .loginsignupbg {
+    height: auto;
+  }
+
+  .gamingpagebgss {
+    padding-top: 135px;
+  }
+
+  .leaderrrboardddcontainerr .container {
+    padding: 0;
+  }
+
+  .tableeeviewwws {
+    display: flex;
+    overflow-x: scroll;
+    gap: 20px;
+    scrollbar-width: thin;
+  }
+
+  .tableeeviewwws div {
+    flex-shrink: 0;
+  }
+
+  .leaderrboradflexx {
+    flex-wrap: wrap;
+    display: flex;
+    height: auto;
+    margin-bottom: 0;
+    padding-bottom: 60px;
+  }
+
+  .leaderrboradflexx .flexxxxxxs {
+    width: 100%;
+  }
+
+  .leaderrboradflexx .flex:first-child {
+    order: 2;
+    margin-top: -7px;
+  }
+
+  .leaderrboradflexx .flex:nth-of-type(2) {
+    order: 1;
+  }
+
+  .leaderrboradflexx .flex:nth-of-type(3) {
+    order: 3;
+  }
+
 }

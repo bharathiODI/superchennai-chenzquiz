@@ -41,8 +41,7 @@ export default async function LeaderboardPage({
   const rank2 = topUsers[1]
   const rank3 = topUsers[2]
 
-
-  console.log("topUsersResult",topUsersResult)
+  console.log('topUsersResult', topUsersResult)
 
   // Time Formatter Function
   function formatTime(seconds: number): string {
@@ -54,7 +53,7 @@ export default async function LeaderboardPage({
   }
 
   return (
-    <div className="min-h-screen text-slate-800 relative overflow-hidden py-12 px-4 sm:px-6 bg-[url('/images/gamingpagebgg.jpeg')] bg-no-repeat bg-cover bg-center">
+    <div className="min-h-screen text-slate-800 relative overflow-hidden py-12 px-4 sm:px-6 bg-[url('/images/gamingpagebgg.jpeg')] bg-no-repeat bg-cover bg-center padddingtopppp leaderrrboardddcontainerr">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-purple-400/10 blur-[120px] pointer-events-none rounded-full" />
 
       <div className="container mx-auto max-w-4xl relative z-10 space-y-6">
@@ -76,7 +75,7 @@ export default async function LeaderboardPage({
           </div>
 
           {/* FILTER TABS */}
-          <div className="flex items-center justify-center gap-2 mb-10 overflow-x-auto pb-2">
+          <div className="flex items-center justify-center gap-2 mb-10 overflow-x-auto pb-2 formflexstatt">
             {[
               { id: 'daily', label: 'Daily' },
               { id: 'weekly', label: 'Weekly' },
@@ -107,10 +106,10 @@ export default async function LeaderboardPage({
           ) : (
             <>
               {/* TOP 3 PODIUM SECTION */}
-              <div className="grid grid-cols-3 gap-3 sm:gap-6 items-end mb-12 pt-6 pb-4">
+              <div className="grid grid-cols-3 gap-3 sm:gap-6 items-end mb-12 pt-6 pb-4  leaderrboradflexx">
                 {/* RANK 2 (Left) */}
                 {rank2 ? (
-                  <div className="flex flex-col items-center text-center transform translate-y-4">
+                  <div className="flex flex-col items-center text-center transform translate-y-4 flexxxxxxs">
                     <div className="relative mb-3">
                       <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-200 border-4 border-[#9AA3B8] flex items-center justify-center text-slate-700 font-black text-xl sm:text-2xl shadow-md">
                         {rank2.name?.[0]?.toUpperCase() || 'P'}
@@ -137,7 +136,7 @@ export default async function LeaderboardPage({
 
                 {/* RANK 1 (Center - Champion) */}
                 {rank1 ? (
-                  <div className="flex flex-col items-center text-center z-10 -translate-y-4">
+                  <div className="flex flex-col items-center text-center z-10 -translate-y-4 flexxxxxxs">
                     <div className="relative mb-3">
                       <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-amber-500 text-xl sm:text-2xl animate-bounce">
                         👑
@@ -167,7 +166,7 @@ export default async function LeaderboardPage({
 
                 {/* RANK 3 (Right) */}
                 {rank3 ? (
-                  <div className="flex flex-col items-center text-center transform translate-y-6">
+                  <div className="flex flex-col items-center text-center transform translate-y-6 flexxxxxxs">
                     <div className="relative mb-3">
                       <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-amber-100 border-4 border-[#C96A3A] flex items-center justify-center text-[#C96A3A] font-black text-xl sm:text-2xl shadow-md">
                         {rank3.name?.[0]?.toUpperCase() || 'P'}
@@ -210,7 +209,7 @@ export default async function LeaderboardPage({
                     return (
                       <div
                         key={user.id || index}
-                        className={`grid grid-cols-12 px-4 sm:px-6 py-4 items-center text-sm transition hover:bg-slate-50/80 ${
+                        className={`grid grid-cols-12 px-4 sm:px-6 py-4 items-center text-sm transition hover:bg-slate-50/80 tableeeviewwws ${
                           rank <= 3 ? 'bg-purple-50/20 font-semibold' : ''
                         }`}
                       >
