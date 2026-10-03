@@ -330,8 +330,8 @@ body .paragraphfont {
 
 
 .svgtopngicon {
-  height: 37px;
-  width: 37px;
+  height: 30px;
+  width: 30px;
 }
 
 
@@ -340,6 +340,33 @@ body .paragraphfont {
   padding-bottom: 10px !important;
   padding-top: 20px !important;
   padding-bottom: 20px !important;
+}
+
+@media (max-width:1200px) and (min-width:1000px) {
+  .headingtexttriviaaa {
+    font-size: 17px;
+    line-height: 21px;
+  }
+
+  body .paragraphfont {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .triviaaaimage {
+    width: 50px;
+    height: 50px;
+    border-radius: 100%;
+  }
+
+  .svgtopngicon {
+    height: 25px;
+    width: 25px;
+  }
+
+  .buttonpaaddinggg {
+    padding: 10px 15px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -379,5 +406,64 @@ body .paragraphfont {
 
   .rleelleddbd {
     height: 190px;
+  }
+
+  .herbannersections {
+    height: auto;
+  }
+
+  .mobilbannerrimage {
+    height: 550px;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  .headingtexttriviaaa {
+    font-size: 20px;
+    line-height: 22px;
+  }
+
+  .triviaaaimage {
+    width: 50px;
+    height: 50px;
+  }
+
+  body .paragraphfont {
+    font-size: 14px;
+    line-height: 19px;
+  }
+
+
+  .howitworkssectionbg {
+    height: auto;
+
+  }
+
+  .padddinggmobile {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+
+  .buttonpaaddinggg {
+    padding: 10px 20px;
+  }
+
+  .svgtopngicon {
+    height: 20px;
+    width: 20px;
+  }
+
+  .playbuttonsection {
+    width: 50px;
+    height: 50px;
+    border-radius: 15px;
+  }
+
+  .headingggtexxt {
+    margin-top: -5px;
+  }
+
+  .headingggtexxt h2 {
+    line-height: 110%;
   }
 }

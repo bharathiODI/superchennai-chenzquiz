@@ -195,7 +195,7 @@ export default function TriviaAuthComponent({
   }, [])
 
   return (
-    <section className="relative w-full py-16 px-4 bg-gradient-to-b from-[#f3f0ff] via-[#f7f5ff] to-[#e8e3ff] overflow-hidden loginsignupbg">
+    <section className="relative w-full py-16 px-4 bg-gradient-to-b from-[#f3f0ff] via-[#f7f5ff] to-[#e8e3ff] overflow-hidden loginsignupbg padddinggmobile">
       {/* Title Header */}
       {/* <div className="text-center mb-10 relative z-10">
         <p className="text-[18px] font-extrabold  uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a] mb-0">
@@ -214,7 +214,7 @@ export default function TriviaAuthComponent({
         </p>
 
         {/* Main Heading with Side Sparkles/Dashes */}
-        <div className="relative inline-flex items-center justify-center my-2">
+        <div className="relative inline-flex items-center justify-center my-2 headingggtexxt">
           {/* Gradient Title */}
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a] px-2 py-1">
             {mainTitle || 'Trivia?'} {highlightText}
@@ -252,7 +252,7 @@ export default function TriviaAuthComponent({
             </p>
             <Link
               href="/quizzes"
-              className="w-full py-4 px-8 rounded-2xl bg-gradient-to-r from-[#5122f2] to-[#6d3aff] text-white font-bold text-lg shadow-xl shadow-purple-500/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 group"
+              className="w-full py-4 px-8 rounded-2xl bg-gradient-to-r from-[#5122f2] to-[#6d3aff] text-white font-bold text-lg shadow-xl shadow-purple-500/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 group buttonpaaddinggg"
             >
               <span>Play Now</span>
               <svg

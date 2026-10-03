@@ -1,4 +1,3 @@
-
 'use client'
 
 import React, { useState } from 'react'
@@ -84,7 +83,7 @@ export default function LetsTalkChennaiFAQBlockComponent({
       {/* Visually Hidden SEO H1 */}
       {seoH1 && <h1 className="sr-only">{seoH1}</h1>}
 
-      <div className="relative z-10 container max-w-6xl mx-auto px-4 sm:px-6 md:px-8">
+      <div className="relative z-10 container max-w-6xl mx-auto px-4 sm:px-6 md:px-8 padddinggmobile">
         {/* Decorative Top Section Header */}
         <FAQHeader eyebrow={eyebrow} heading={heading} description={description} />
 
