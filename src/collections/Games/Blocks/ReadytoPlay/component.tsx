@@ -238,7 +238,7 @@ export default function TriviaAuthComponent({
         ) : isLoggedIn ? (
           /* PROFESSIONAL LOGGED-IN STATE BANNER */
           <div className="w-full max-w-xl bg-white/95 backdrop-blur-xl rounded-[32px] p-8 sm:p-10 border border-purple-100 shadow-2xl shadow-purple-500/10 text-center transform transition-all animate-fade-in">
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-[#5122f2] to-[#7c54ff] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/30 text-white">
+            <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-[#5122f2] to-[#7c54ff] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/30 text-white playbuttonsec">
               <svg className="w-10 h-10 fill-white animate-pulse" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
               </svg>
