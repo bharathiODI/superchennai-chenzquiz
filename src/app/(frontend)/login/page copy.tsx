@@ -1489,9 +1489,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-white text-slate-900 font-sans">
+    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-white text-slate-900 font-sans loginheightttt1">
       {/* LEFT SIDE: BRAND PANEL */}
-      <div className="relative lg:w-1/2 w-full bg-gradient-to-br from-[#4B20D8] via-[#3215A8] to-[#17145C] min-h-[220px] lg:min-h-screen flex flex-col justify-between p-8 lg:p-12 overflow-hidden text-white">
+      <div className="relative lg:w-1/2 w-full bg-gradient-to-br from-[#4B20D8] via-[#3215A8] to-[#17145C] min-h-[220px] lg:min-h-screen flex flex-col justify-between p-8 lg:p-12 overflow-hidden text-white loginnnpageeeee">
         <div className="absolute -top-16 -left-16 w-80 h-80 rounded-full bg-[#5A2BE2]/30 blur-3xl pointer-events-none" />
         <div className="absolute top-1/2 -right-20 w-96 h-96 rounded-full bg-[#4B20D8]/40 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 left-10 w-96 h-96 rounded-full bg-[#17145C]/60 blur-2xl pointer-events-none" />
@@ -1535,7 +1535,7 @@ export default function LoginPage() {
       </div>
 
       {/* RIGHT SIDE: FORM CONTAINER */}
-      <div className="lg:w-1/2 w-full flex items-center justify-center p-6 lg:p-12 bg-white min-h-screen overflow-y-auto">
+      <div className="lg:w-1/2 w-full flex items-center justify-center p-6 lg:p-12 bg-white min-h-screen overflow-y-auto loginheightttt">
         <div className="w-full max-w-[520px] py-4">
           {/* Header */}
           <div className="text-center lg:text-left mb-8">
