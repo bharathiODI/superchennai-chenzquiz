@@ -205,7 +205,7 @@ export default async function PlayPage({ params: paramsPromise }: Args) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-800 pt-16 pb-24">
+    <div className="min-h-screen bg-slate-100 text-slate-800 pt-16 pb-24 gamingpagebgss">
       <div className="container mx-auto px-4 max-w-3xl">
         <GameEngineClient quiz={quiz} />
       </div>

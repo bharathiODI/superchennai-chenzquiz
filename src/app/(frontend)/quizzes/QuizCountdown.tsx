@@ -128,7 +128,7 @@ export default function QuizCountdown({
 
   /* ================= 2. LIVE & UPCOMING STATES ================= */
   return (
-    <div className="mb-14 bg-gradient-to-br from-indigo-900 via-slate-900 to-purple-950 text-white rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden border border-indigo-500/20 ">
+    <div className="mb-1 bg-gradient-to-br from-indigo-900 via-slate-900 to-purple-950 text-white rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden border border-indigo-500/20 ">
       {/* Background Decorative Lighting */}
       <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />

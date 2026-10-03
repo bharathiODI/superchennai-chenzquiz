@@ -906,7 +906,9 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
     return (
       <div className="relative overflow-hidden bg-white/95 backdrop-blur-xl border border-amber-200/80 rounded-3xl p-8 sm:p-10 text-center shadow-xl max-w-lg mx-auto my-6">
         <div className="text-4xl mb-4">⏳</div>
-        <h2 className="text-2xl font-black text-slate-900 mb-2">Already Played Today!</h2>
+        <h2 className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a] mb-2">
+          Already Played Today!
+        </h2>
         <p className="text-slate-600 text-sm mb-6">
           You can attempt this challenge again tomorrow.
         </p>
@@ -1002,13 +1004,13 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
 
       <div className="flex items-center justify-between border-b border-slate-100 pb-5 mb-6 flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <span className="px-3 py-1 bg-indigo-50 text-indigo-700 font-bold text-xs rounded-full uppercase">
+          <span className="px-3 py-1 bg-indigo-50 text-indigo-700 font-bold text-[18px] rounded-full uppercase">
             Game {currentIndex + 1} of {questions.length}
           </span>
           <span
-            className={`px-3 py-1 font-bold text-xs rounded-full ${isTimeLow ? 'bg-rose-100 text-rose-700 animate-pulse' : 'bg-slate-100 text-slate-700'}`}
+            className={`px-3 py-1 font-bold text-[18px]  rounded-full ${isTimeLow ? 'bg-rose-100 text-rose-700 animate-pulse' : 'bg-slate-100 text-slate-700'}`}
           >
-            ⏱️ {timeLeft}s
+            ⏱️ 00 : {timeLeft}s
           </span>
         </div>
         <span className="font-extrabold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full text-xs">
@@ -1022,7 +1024,9 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         </div>
       )}
 
-      <h2 className="text-2xl font-black text-slate-900 mb-2">{questionTitle}</h2>
+      <h2 className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a] mb-2">
+        {questionTitle}
+      </h2>
       {contentText && <p className="text-slate-600 text-sm leading-relaxed mb-6">{contentText}</p>}
 
       <div className="min-h-[250px] mt-4">

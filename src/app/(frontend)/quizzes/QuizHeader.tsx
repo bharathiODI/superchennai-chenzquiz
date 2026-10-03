@@ -33,7 +33,9 @@ export default function QuizHeader() {
         <span className="inline-block px-3 py-1 bg-amber-100 text-amber-800 font-semibold text-xs rounded-full uppercase tracking-wider mb-3">
           ⚡ Daily Brain Challenge
         </span>
-        <h1 className="text-4xl font-black text-slate-900 tracking-tight">Super Chennai Quizzes</h1>
+        <h1 className="text-4xl font-black text-slate-900 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a]">
+          Super Chennai Quizzes
+        </h1>
         <p className="text-slate-500 mt-2 text-base max-w-xl">
           Play today assigned interactive games, climb the local leaderboard, and claim your Chennai
           master badge!

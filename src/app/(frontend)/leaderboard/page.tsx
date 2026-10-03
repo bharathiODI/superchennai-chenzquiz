@@ -51,7 +51,7 @@ export default async function LeaderboardPage({
   }
 
   return (
-    <div className="min-h-screen text-slate-800 relative overflow-hidden py-12 px-4 sm:px-6 bg-[url('/app-images/background-three.png')]">
+    <div className="min-h-screen text-slate-800 relative overflow-hidden py-12 px-4 sm:px-6 bg-[url('/images/gamingpagebgg.jpeg')] bg-no-repeat bg-cover bg-center">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-purple-400/10 blur-[120px] pointer-events-none rounded-full" />
 
       <div className="container mx-auto max-w-4xl relative z-10 space-y-6">

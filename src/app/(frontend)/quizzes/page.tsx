@@ -31,7 +31,7 @@ export default async function QuizzesPage() {
 
   return (
     /* BACKGROUND IMAGE STYLES ADDED HERE */
-    <div className="relative min-h-screen text-slate-800 pt-16 pb-24 border-t border-slate-100 bg-cover bg-center bg-no-repeat bg-fixed bg-[url('/app-images/background-one.png')]">
+    <div className="relative min-h-screen text-slate-800 pt-16 pb-24 border-t border-slate-100 bg-cover bg-center bg-no-repeat bg-fixed quizeesspageee">
       {/* Light Overlay for readability (optional: change bg-slate-50/90 if needed) */}
       {/* <div className="absolute inset-0 bg-slate-50/85 backdrop-blur-[2px] pointer-events-none" /> */}
 
@@ -106,4 +106,3 @@ export default async function QuizzesPage() {
     </div>
   )
 }
-

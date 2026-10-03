@@ -589,7 +589,6 @@
 //     )
 //   }
 
- 
 //   const handleSendOtp = async () => {
 //     try {
 //       setError('')
@@ -614,7 +613,6 @@
 //     }
 //   }
 
-  
 //   const handleVerifyOtp = () => {
 //     setError('')
 //     setSuccessMsg('')
@@ -627,7 +625,6 @@
 //     }
 //   }
 
-  
 //   const handleResetPassword = async (e: React.FormEvent) => {
 //     e.preventDefault()
 //     setError('')
@@ -667,7 +664,6 @@
 //     }
 //   }
 
- 
 //   const handleSubmit = async (e: React.FormEvent) => {
 //     e.preventDefault()
 //     setError('')
@@ -1235,7 +1231,6 @@
 //   )
 // }
 
-
 /* eslint-disable @next/next/no-html-link-for-pages */
 'use client'
 
@@ -1270,7 +1265,6 @@ export default function LoginPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [name, setName] = useState('')
   const [agreeTerms, setAgreeTerms] = useState(false)
-
 
   // Login Mode: 'password' | 'otp'
   const [loginMethod, setLoginMethod] = useState<'password' | 'otp'>('password')
@@ -1452,7 +1446,7 @@ export default function LoginPage() {
       if (loginMethod === 'otp') {
         // OTP-based custom login handle panna custom API route call pannanum
         endpoint = '/api/quiz-users/login-otp'
-        body = { phone: formattedPhone,otp: otp }
+        body = { phone: formattedPhone, otp: otp }
       } else {
         // Standard Payload Password Login
         endpoint = '/api/quiz-users/login'
@@ -1502,7 +1496,7 @@ export default function LoginPage() {
         <div className="absolute top-1/2 -right-20 w-96 h-96 rounded-full bg-[#4B20D8]/40 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 left-10 w-96 h-96 rounded-full bg-[#17145C]/60 blur-2xl pointer-events-none" />
 
-        <div className="relative z-10">
+        {/* <div className="relative z-10">
           <div className="inline-block">
             <h1 className="text-4xl lg:text-6xl font-black tracking-tight leading-none text-white drop-shadow-md">
               TRIVIA
@@ -1511,7 +1505,7 @@ export default function LoginPage() {
               by Super Chennai
             </p>
           </div>
-        </div>
+        </div> */}
 
         <div className="relative z-10 hidden lg:flex flex-col items-center justify-center my-auto py-8">
           <div className="relative w-64 h-64 bg-gradient-to-tr from-purple-600/40 to-indigo-400/20 rounded-full p-6 border border-white/10 flex items-center justify-center backdrop-blur-md shadow-2xl">
@@ -1549,7 +1543,7 @@ export default function LoginPage() {
               <h2 className="text-2xl font-black text-[#11145A]">TRIVIA</h2>
               <p className="text-xs font-semibold text-[#5B2EE6]">by Super Chennai</p>
             </div>
-            <h2 className="text-3xl lg:text-4xl font-extrabold text-[#11145A] tracking-tight">
+            <h2 className="text-3xl lg:text-4xl font-extrabold tracking-tight ">
               {isForgotPassword ? 'Reset Password' : isRegister ? 'Create Account' : 'Welcome Back'}
             </h2>
             <p className="text-sm text-[#74799A] mt-1.5 font-medium">
@@ -2004,4 +1998,3 @@ export default function LoginPage() {
     </div>
   )
 }
-
