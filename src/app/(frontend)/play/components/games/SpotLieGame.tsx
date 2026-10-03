@@ -38,7 +38,7 @@ export function SpotLieGame({ data, onSelect }: { data: any; onSelect: (res: any
       <button
         onClick={handleSubmit}
         disabled={!selectedId}
-        className="w-full mt-4 py-4 bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-bold rounded-2xl transition shadow-md"
+        className="w-full mt-4 py-4 bg-gradient-to-r from-[#5122f2] to-[#6d3aff] text-white font-bold rounded-2xl transition shadow-md"
       >
         Spot the Lie
       </button>

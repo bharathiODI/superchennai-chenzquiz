@@ -920,7 +920,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
               isTimeLow ? 'bg-rose-100 text-rose-700 animate-pulse' : 'bg-slate-100 text-slate-700'
             }`}
           >
-            ⏱️ {timeLeft}s
+            ⏱️ 00 : {timeLeft}s
           </span>
           <span className="px-3 py-1 bg-slate-100 text-slate-600 font-semibold text-xs rounded-full uppercase">
             {gameType ? gameType.replace('_', ' ') : 'Loading...'}

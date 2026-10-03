@@ -342,6 +342,28 @@ body .paragraphfont {
   padding-bottom: 20px !important;
 }
 
+.quizeesspageee {
+
+
+  background-image: url("/images/quizzesbg.jpeg");
+    background-image: url("/images/gamingpagebgg.jpeg");
+  /* height: 700px; */
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+    display: flex;
+  align-items: center;
+}
+
+.gamingpagebgss {
+  background-image: url("/images/gamingpagebgg.jpeg");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+}
+
 @media (max-width:1200px) and (min-width:1000px) {
   .headingtexttriviaaa {
     font-size: 17px;
@@ -465,5 +487,9 @@ body .paragraphfont {
 
   .headingggtexxt h2 {
     line-height: 110%;
+  }
+
+  .howitworkssectionbg .padddinggmobile {
+    gap: 25px;
   }
 }

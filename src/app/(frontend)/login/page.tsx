@@ -208,10 +208,10 @@
 //         <div className="w-full max-w-[520px] py-4">
 //           <div className="text-center lg:text-left mb-8">
 //             <div className="lg:hidden mb-4">
-//               <h2 className="text-2xl font-black text-[#11145A]">TRIVIA</h2>
+//               <h2 className="text-2xl font-black text-[#000]">TRIVIA</h2>
 //               <p className="text-xs font-semibold text-[#5B2EE6]">by Super Chennai</p>
 //             </div>
-//             <h2 className="text-3xl lg:text-4xl font-extrabold text-[#11145A] tracking-tight">
+//             <h2 className="text-3xl lg:text-4xl font-extrabold text-[#000] tracking-tight">
 //               {isRegister ? 'Create Account' : 'Welcome Back'}
 //             </h2>
 //             <p className="text-sm text-[#74799A] mt-1.5 font-medium">
@@ -236,7 +236,7 @@
 //             {isRegister && (
 //               <>
 //                 <div>
-//                   <label className="block text-xs font-bold text-[#11145A] mb-1.5 uppercase tracking-wider">
+//                   <label className="block text-xs font-bold text-[#000] mb-1.5 uppercase tracking-wider">
 //                     Full Name
 //                   </label>
 //                   <div className="relative flex items-center">
@@ -253,7 +253,7 @@
 //                 </div>
 
 //                 <div>
-//                   <label className="block text-xs font-bold text-[#11145A] mb-1.5 uppercase tracking-wider">
+//                   <label className="block text-xs font-bold text-[#000] mb-1.5 uppercase tracking-wider">
 //                     Email Address <span className="text-slate-400 font-normal">(Optional)</span>
 //                   </label>
 //                   <div className="relative flex items-center">
@@ -271,7 +271,7 @@
 //             )}
 
 //             <div>
-//               <label className="block text-xs font-bold text-[#11145A] mb-1.5 uppercase tracking-wider">
+//               <label className="block text-xs font-bold text-[#000] mb-1.5 uppercase tracking-wider">
 //                 Message <span className="text-slate-400 font-normal">(Optional)</span>
 //               </label>
 //               <div className="relative flex items-start">
@@ -287,7 +287,7 @@
 //             </div>
 
 //             <div>
-//               <label className="block text-xs font-bold text-[#11145A] mb-1.5 uppercase tracking-wider">
+//               <label className="block text-xs font-bold text-[#000] mb-1.5 uppercase tracking-wider">
 //                 Mobile Number
 //               </label>
 //               <div className="flex gap-2">
@@ -323,7 +323,7 @@
 
 //             {!otpVerified && generatedOtp && (
 //               <div>
-//                 <label className="block text-xs font-bold text-[#11145A] mb-1.5 uppercase tracking-wider">
+//                 <label className="block text-xs font-bold text-[#000] mb-1.5 uppercase tracking-wider">
 //                   Enter 6-digit OTP
 //                 </label>
 //                 <div className="flex gap-2">
@@ -578,7 +578,7 @@ export default function LoginPage() {
         <div className="absolute -top-16 -left-16 w-80 h-80 rounded-full bg-[#5A2BE2]/30 blur-3xl pointer-events-none" />
         <div className="absolute top-1/2 -right-20 w-96 h-96 rounded-full bg-[#4B20D8]/40 blur-3xl pointer-events-none" />
         <div className="absolute -bottom-20 left-10 w-96 h-96 rounded-full bg-[#17145C]/60 blur-2xl pointer-events-none" />
-        <div className="relative z-10">
+        {/* <div className="relative z-10">
           <div className="inline-block">
             <h1 className="text-4xl lg:text-6xl font-black tracking-tight leading-none text-white drop-shadow-md">
               TRIVIA
@@ -587,7 +587,7 @@ export default function LoginPage() {
               by Super Chennai
             </p>
           </div>
-        </div>
+        </div> */}
         <div className="relative z-10 hidden lg:flex flex-col items-center justify-center my-auto py-8">
           <div className="relative w-64 h-64 bg-gradient-to-tr from-purple-600/40 to-indigo-400/20 rounded-full p-6 border border-white/10 flex items-center justify-center backdrop-blur-md shadow-2xl">
             <div className="absolute -top-4 right-12 bg-amber-400 p-3 rounded-full shadow-lg shadow-amber-400/50 animate-bounce">
@@ -618,10 +618,10 @@ export default function LoginPage() {
         <div className="w-full max-w-[520px] py-4">
           <div className="text-center lg:text-left mb-8">
             <div className="lg:hidden mb-4">
-              <h2 className="text-2xl font-black text-[#11145A]">TRIVIA</h2>
+              <h2 className="text-2xl font-black text-[#000]">TRIVIA</h2>
               <p className="text-xs font-semibold text-[#5B2EE6]">by Super Chennai</p>
             </div>
-            <h2 className="text-3xl lg:text-4xl font-extrabold text-[#11145A] tracking-tight">
+            <h2 className="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a]">
               {isRegister ? 'Create Account' : 'Welcome Back'}
             </h2>
             <p className="text-sm text-[#74799A] mt-1.5 font-medium">
@@ -646,7 +646,7 @@ export default function LoginPage() {
             {isRegister && (
               <>
                 <div>
-                  <label className="block text-xs font-bold text-[#11145A] mb-1.5 uppercase tracking-wider">
+                  <label className="block text-xs font-bold text-[#000] mb-1.5 uppercase tracking-wider">
                     Full Name
                   </label>
                   <div className="relative flex items-center">
@@ -663,7 +663,7 @@ export default function LoginPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#11145A] mb-1.5 uppercase tracking-wider">
+                  <label className="block text-xs font-bold text-[#000] mb-1.5 uppercase tracking-wider">
                     Email Address <span className="text-slate-400 font-normal">(Optional)</span>
                   </label>
                   <div className="relative flex items-center">
@@ -680,7 +680,7 @@ export default function LoginPage() {
 
                 {/* 👈 புது Textarea Message Input */}
                 <div>
-                  <label className="block text-xs font-bold text-[#11145A] mb-1.5 uppercase tracking-wider">
+                  <label className="block text-xs font-bold text-[#000] mb-1.5 uppercase tracking-wider">
                     Message <span className="text-slate-400 font-normal">(Optional)</span>
                   </label>
                   <div className="relative flex items-start">
@@ -698,7 +698,7 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label className="block text-xs font-bold text-[#11145A] mb-1.5 uppercase tracking-wider">
+              <label className="block text-xs font-bold text-[#000] mb-1.5 uppercase tracking-wider">
                 Mobile Number
               </label>
               <div className="flex gap-2">
@@ -734,7 +734,7 @@ export default function LoginPage() {
 
             {!otpVerified && generatedOtp && (
               <div>
-                <label className="block text-xs font-bold text-[#11145A] mb-1.5 uppercase tracking-wider">
+                <label className="block text-xs font-bold text-[#000] mb-1.5 uppercase tracking-wider">
                   Enter 6-digit OTP
                 </label>
                 <div className="flex gap-2">
