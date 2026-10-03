@@ -41,6 +41,9 @@ export default async function LeaderboardPage({
   const rank2 = topUsers[1]
   const rank3 = topUsers[2]
 
+
+  console.log("topUsersResult",topUsersResult)
+
   // Time Formatter Function
   function formatTime(seconds: number): string {
     if (!seconds || seconds <= 0) return '0s'

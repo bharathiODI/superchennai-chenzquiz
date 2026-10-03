@@ -30,12 +30,7 @@ export default async function QuizzesPage() {
   const todayQuiz = quizzes.docs?.[0]
 
   return (
-    /* BACKGROUND IMAGE STYLES ADDED HERE */
     <div className="relative min-h-screen text-slate-800 pt-16 pb-24 border-t border-slate-100 bg-cover bg-center bg-no-repeat bg-fixed bg-[url('/app-images/background-one.png')]">
-      {/* Light Overlay for readability (optional: change bg-slate-50/90 if needed) */}
-      {/* <div className="absolute inset-0 bg-slate-50/85 backdrop-blur-[2px] pointer-events-none" /> */}
-
-      {/* Main Content Container (relative z-10 added so content stays above overlay) */}
       <div className="relative z-10 container mx-auto px-4 max-w-7xl ">
         <QuizHeader />
 
@@ -43,6 +38,7 @@ export default async function QuizzesPage() {
           <QuizCountdown
             quizDate={todayQuiz.quizDate}
             slug={todayQuiz.slug}
+            quizEndDate={todayQuiz.quizEndDate}
             questionCount={todayQuiz.questions?.length || 0}
             quizTitle={todayQuiz.quizTitle}
           />

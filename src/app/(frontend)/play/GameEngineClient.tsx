@@ -11,7 +11,6 @@
 // import { MatchGame } from './components/games/MatchGame'
 // import { SpotLieGame } from './components/games/SpotLieGame'
 // import { DragDropGame } from './components/games/DragDropGame'
-
 // export default function GameEngineClient({ quiz }: { quiz: any }) {
 //   const router = useRouter()
 //   const questions = quiz?.questions || []
@@ -23,15 +22,14 @@
 //   const [isLoadingAuth, setIsLoadingAuth] = useState(true)
 //   const [alreadyPlayedToday, setAlreadyPlayedToday] = useState(false)
 //   const [lastAttemptScore, setLastAttemptScore] = useState<number | null>(null)
-
 //   const currentQ = questions[currentIndex]
 //   const questionTimeLimit = Number(currentQ?.timeLimit ?? 60)
+
+//   console.log("questions",questions)
 //   // Timer State
 //   const [timeLeft, setTimeLeft] = useState<number>(questionTimeLimit)
 //   const timerRef = useRef<NodeJS.Timeout | null>(null)
-
 //   const [startTime] = useState<number>(Date.now())
-
 //   // 1. Auth Protection Check & User Extraction
 //   useEffect(() => {
 //     const storedUser = localStorage.getItem('user')
@@ -84,14 +82,10 @@
 
 //     checkUserAndStatus()
 //   }, [router, quiz?.id])
-
 //   useEffect(() => {
 //     if (isCompleted || !currentQ) return
-
 //     setTimeLeft(questionTimeLimit)
-
 //     if (timerRef.current) clearInterval(timerRef.current)
-
 //     timerRef.current = setInterval(() => {
 //       setTimeLeft((prevTime) => {
 //         if (prevTime <= 1) {
@@ -106,21 +100,16 @@
 //         return prevTime - 1
 //       })
 //     }, 1000)
-
 //     return () => {
 //       if (timerRef.current) clearInterval(timerRef.current)
 //     }
 //   }, [currentIndex, isCompleted, questionTimeLimit])
-
-//   // 2. Active Countdown Timer Logic
+//   // 2.Active Countdown Timer Logic
 //   useEffect(() => {
 //     if (isCompleted || !currentQ) return
-
 //     // Reset timer when question index updates
 //     setTimeLeft(questionTimeLimit)
-
 //     if (timerRef.current) clearInterval(timerRef.current)
-
 //     timerRef.current = setInterval(() => {
 //       setTimeLeft((prevTime) => {
 //         if (prevTime <= 1) {
@@ -136,185 +125,20 @@
 //         return prevTime - 1
 //       })
 //     }, 1000)
-
 //     return () => {
 //       if (timerRef.current) clearInterval(timerRef.current)
 //     }
 //   }, [currentIndex, isCompleted, questionTimeLimit])
 
-//   // const handleGameCompletion = (result: {
-//   //   isCorrect: boolean
-//   //   pointsEarned?: number
-//   //   answerDetail?: any
-//   // }) => {
-//   //   // Clear timer when user submits an answer
-//   //   if (timerRef.current) clearInterval(timerRef.current)
-
-//   //   const defaultPoints = Number(currentQ?.points ?? 10)
-//   //   const negativePoints = Number(currentQ?.negativePoints ?? 0)
-
-//   //   let pointsToAdd = 0
-//   //   if (result.isCorrect) {
-//   //     pointsToAdd = result.pointsEarned ?? defaultPoints
-//   //     if (currentQ?.enableDoubleUp) {
-//   //       pointsToAdd *= 2
-//   //     }
-//   //   } else {
-//   //     pointsToAdd = -Math.abs(negativePoints)
-//   //   }
-
-//   //   const updatedScore = totalScore + pointsToAdd
-//   //   const currentLog = {
-//   //     questionId: currentQ?.id,
-//   //     title: currentQ?.questionTitle || currentQ?.title,
-//   //     gameType: currentQ?.gameType,
-//   //     isCorrect: result.isCorrect,
-//   //     pointsEarned: pointsToAdd,
-//   //     userAnswer: result.answerDetail || null,
-//   //   }
-
-//   //   const updatedLog = [...answersLog, currentLog]
-
-//   //   setTotalScore(updatedScore)
-//   //   setAnswersLog(updatedLog)
-
-//   //   if (currentIndex + 1 < questions.length) {
-//   //     setCurrentIndex((prev) => prev + 1)
-//   //   } else {
-//   //     setIsCompleted(true)
-//   //     submitFinalScore(updatedScore, updatedLog)
-//   //   }
-//   // }
-
-//   // const submitFinalScore = async (finalScore: number, logs: any[]) => {
-//   //   try {
-//   //     const activeUserId = currentUser?.id
-
-//   //     if (!activeUserId) {
-//   //       console.error('❌ User ID missing for submission')
-//   //       return
-//   //     }
-
-//   //     const res = await fetch('/api/quiz-submit', {
-//   //       method: 'POST',
-//   //       headers: { 'Content-Type': 'application/json' },
-//   //       body: JSON.stringify({
-//   //         quizId: quiz?.id,
-//   //         userId: activeUserId,
-//   //         scoreEarned: finalScore,
-//   //         answers: logs,
-//   //       }),
-//   //     })
-
-//   //     const data = await res.json()
-
-//   //     if (!res.ok) {
-//   //       console.error('❌ API Error submitting score:', data)
-//   //     } else {
-//   //       console.log('✅ Score submitted successfully!', data)
-//   //     }
-//   //   } catch (err) {
-//   //     console.error('❌ Error submitting score:', err)
-//   //   }
-//   // }
-
-//   //   const handleGameCompletion = (result: {
-//   //   isCorrect: boolean
-//   //   pointsEarned?: number
-//   //   answerDetail?: any
-//   // }) => {
-//   //   if (timerRef.current) clearInterval(timerRef.current)
-
-//   //   const defaultPoints = Number(currentQ?.points ?? 10)
-//   //   const negativePoints = Number(currentQ?.negativePoints ?? 0)
-
-//   //   let pointsToAdd = 0
-//   //   if (result.isCorrect) {
-//   //     pointsToAdd = result.pointsEarned ?? defaultPoints
-//   //     if (currentQ?.enableDoubleUp) {
-//   //       pointsToAdd *= 2
-//   //     }
-//   //   } else {
-//   //     pointsToAdd = -Math.abs(negativePoints)
-//   //   }
-
-//   //   const updatedScore = totalScore + pointsToAdd
-//   //   const currentLog = {
-//   //     questionId: currentQ?.id,
-//   //     title: currentQ?.questionTitle || currentQ?.title,
-//   //     gameType: currentQ?.gameType,
-//   //     isCorrect: result.isCorrect,
-//   //     pointsEarned: pointsToAdd,
-//   //     userAnswer: result.answerDetail || null,
-//   //   }
-
-//   //   const updatedLog = [...answersLog, currentLog]
-
-//   //   setTotalScore(updatedScore)
-//   //   setAnswersLog(updatedLog)
-
-//   //   if (currentIndex + 1 < questions.length) {
-//   //     setCurrentIndex((prev) => prev + 1)
-//   //   } else {
-//   //     setIsCompleted(true)
-
-//   //     // ⏱️ 2. கேம் முடிவடைந்ததும் மொத்த நேரத்தை Seconds-ஆகக் கணக்கிடுதல்:
-//   //     const totalTimeSpentInSeconds = Math.max(1, Math.round((Date.now() - startTime) / 1000))
-
-//   //     // API-க்கு Time Taken-உடன் அனுப்புதல்
-//   //     submitFinalScore(updatedScore, updatedLog, totalTimeSpentInSeconds)
-//   //   }
-//   // }
-
-//   // // ⏱️ 3. submitFinalScore ஃபங்க்ஷனில் timeTaken அளவு சேர்க்கப்பட்டுள்ளது
-//   // const submitFinalScore = async (finalScore: number, logs: any[], timeSpentSeconds: number) => {
-//   //   try {
-//   //     const activeUserId = currentUser?.id
-
-//   //     if (!activeUserId) {
-//   //       console.error('❌ User ID missing for submission')
-//   //       return
-//   //     }
-
-//   //     const res = await fetch('/api/quiz-submit', {
-//   //       method: 'POST',
-//   //       headers: { 'Content-Type': 'application/json' },
-//   //       body: JSON.stringify({
-//   //         quizId: quiz?.id,
-//   //         userId: activeUserId,
-//   //         scoreEarned: finalScore,
-//   //         answers: logs,
-//   //         timeTaken: timeSpentSeconds, // 👈 அனுப்பப்படும் மொத்த நேரம்!
-//   //       }),
-//   //     })
-
-//   //     const data = await res.json()
-
-//   //     if (!res.ok) {
-//   //       console.error('❌ API Error submitting score:', data)
-//   //     } else {
-//   //       console.log('✅ Score & Time submitted successfully!', data)
-//   //     }
-//   //   } catch (err) {
-//   //     console.error('❌ Error submitting score:', err)
-//   //   }
-//   // }
-
-//   // GameEngineClient.tsx
-
-//   // 1. Component துவங்கும் போது ஆரம்ப நேரத்தை பதிவு செய்யவும்
 //   const startTimeRef = useRef<number>(Date.now())
-
 //   const handleGameCompletion = (result: {
 //     isCorrect: boolean
 //     pointsEarned?: number
 //     answerDetail?: any
 //   }) => {
 //     if (timerRef.current) clearInterval(timerRef.current)
-
 //     const defaultPoints = Number(currentQ?.points ?? 10)
 //     const negativePoints = Number(currentQ?.negativePoints ?? 0)
-
 //     let pointsToAdd = 0
 //     if (result.isCorrect) {
 //       pointsToAdd = result.pointsEarned ?? defaultPoints
@@ -324,7 +148,6 @@
 //     } else {
 //       pointsToAdd = -Math.abs(negativePoints)
 //     }
-
 //     const updatedScore = totalScore + pointsToAdd
 //     const currentLog = {
 //       questionId: currentQ?.id,
@@ -334,41 +157,32 @@
 //       pointsEarned: pointsToAdd,
 //       userAnswer: result.answerDetail || null,
 //     }
-
 //     const updatedLog = [...answersLog, currentLog]
-
 //     setTotalScore(updatedScore)
 //     setAnswersLog(updatedLog)
-
 //     if (currentIndex + 1 < questions.length) {
 //       setCurrentIndex((prev) => prev + 1)
 //     } else {
 //       setIsCompleted(true)
-
 //       // ⏱️ மொத்தமாக விளையாடிய நேரம் (வினாடிகளில்)
 //       const timeSpentInSeconds = Math.max(1, Math.round((Date.now() - startTimeRef.current) / 1000))
-
 //       // 🚀 கணக்கிடப்பட்ட மதிப்புகளை நேரடியாக அனுப்புகிறோம்
 //       submitFinalScore(updatedScore, updatedLog, timeSpentInSeconds)
 //     }
 //   }
-
 //   const submitFinalScore = async (finalScore: number, logs: any[], timeSpentSeconds: number) => {
 //     try {
 //       const activeUserId = currentUser?.id
-
 //       if (!activeUserId) {
 //         console.error('❌ User ID missing for submission')
 //         return
 //       }
-
 //       console.log('Sending Payload:', {
 //         quizId: quiz?.id,
 //         userId: activeUserId,
 //         scoreEarned: finalScore,
 //         timeTaken: timeSpentSeconds,
 //       })
-
 //       const res = await fetch('/api/quiz-submit', {
 //         method: 'POST',
 //         headers: { 'Content-Type': 'application/json' },
@@ -380,9 +194,7 @@
 //           timeTaken: timeSpentSeconds,
 //         }),
 //       })
-
 //       const data = await res.json()
-
 //       if (!res.ok && data.alreadyPlayed) {
 //         setAlreadyPlayedToday(true)
 //       } else {
@@ -393,7 +205,6 @@
 //       console.error('❌ Error submitting score:', err)
 //     }
 //   }
-
 //   if (isLoadingAuth) {
 //     return (
 //       <div className="relative flex flex-col items-center justify-center p-12 bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl shadow-2xl overflow-hidden max-w-md mx-auto my-12">
@@ -458,30 +269,25 @@
 //       </div>
 //     )
 //   }
-
 //   if (alreadyPlayedToday) {
 //     return (
 //       <div className="relative overflow-hidden bg-white/95 backdrop-blur-xl border border-amber-200/80 rounded-3xl p-8 sm:p-10 text-center shadow-xl shadow-amber-500/5 max-w-lg mx-auto my-6">
 //         <div className="absolute -top-12 -left-12 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 //         <div className="absolute -bottom-12 -right-12 w-40 h-40 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-
 //         {/* Icon */}
 //         <div className="relative mx-auto w-20 h-20 mb-6 flex items-center justify-center bg-amber-100 rounded-full text-4xl shadow-inner border border-amber-200">
 //           ⏳
 //         </div>
-
 //         {/* Title */}
 //         <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-2 tracking-tight">
 //           Already Played Today!
 //         </h2>
-
 //         {/* Description */}
 //         <p className="text-slate-600 text-sm leading-relaxed mb-6">
 //           You have already completed this daily quiz today. To maintain a fair leaderboard, you can
 //           attempt this challenge again{' '}
 //           <span className="font-extrabold text-amber-700">Tomorrow!</span>
 //         </p>
-
 //         {/* Previous Score Display (Optional) */}
 //         {lastAttemptScore !== null && (
 //           <div className="bg-amber-50/80 border border-amber-200/60 rounded-2xl p-4 max-w-xs mx-auto mb-8">
@@ -491,7 +297,6 @@
 //             <span className="text-3xl font-black text-amber-900">+{lastAttemptScore} XP</span>
 //           </div>
 //         )}
-
 //         {/* Action Buttons */}
 //         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
 //           <Link
@@ -510,7 +315,6 @@
 //       </div>
 //     )
 //   }
-
 //   if (isCompleted) {
 //     return (
 //       <div className="bg-white border border-slate-200 p-10 rounded-3xl shadow-lg text-center max-w-lg mx-auto">
@@ -542,7 +346,6 @@
 //       <div className="relative overflow-hidden bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-8 md:p-12 text-center shadow-xl shadow-slate-100/50 max-w-lg mx-auto">
 //         <div className="absolute -top-12 -left-12 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 //         <div className="absolute -bottom-12 -right-12 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-
 //         <div className="relative mx-auto w-28 h-28 mb-6 flex items-center justify-center">
 //           <div className="absolute inset-0 bg-indigo-50/80 rounded-full animate-pulse" />
 //           <svg
@@ -702,6 +505,7 @@
 //     </div>
 //   )
 // }
+
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
@@ -730,13 +534,13 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
 
   const currentQ = questions[currentIndex]
   const questionTimeLimit = Number(currentQ?.timeLimit ?? 60)
+
+  // Timer State & Start Time
   const [timeLeft, setTimeLeft] = useState<number>(questionTimeLimit)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
-
-  // ⏱️ கேம் ஆரம்பிக்கும் நேரத்தை சேமிக்க Ref
   const startTimeRef = useRef<number>(Date.now())
 
-  // 1. Auth Protection Check & User Status Check
+  // 1. Auth Protection & Verify Daily Played Status
   useEffect(() => {
     const checkUserAndStatus = async () => {
       const storedUser = localStorage.getItem('user')
@@ -772,12 +576,11 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
     checkUserAndStatus()
   }, [router, quiz?.id])
 
-  // 2. Active Countdown Timer Logic (ஒரே ஒரு டைமர் மட்டும்)
+  // 2. Active Countdown Timer Logic
   useEffect(() => {
     if (isCompleted || !currentQ) return
 
     setTimeLeft(questionTimeLimit)
-
     if (timerRef.current) clearInterval(timerRef.current)
 
     timerRef.current = setInterval(() => {
@@ -800,7 +603,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
     }
   }, [currentIndex, isCompleted, questionTimeLimit])
 
-  // 🎯 Game Completion Logic
+  // 3. Score & Question Completion Handler
   const handleGameCompletion = (result: {
     isCorrect: boolean
     pointsEarned?: number
@@ -812,19 +615,22 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
     const negativePoints = Number(currentQ?.negativePoints ?? 0)
 
     let pointsToAdd = 0
-    if (result.isCorrect) {
-      //Sub-game அளித்த pointsEarned பயன்படுத்தப்படும்
-      pointsToAdd = result.pointsEarned ?? defaultPoints
-      if (currentQ?.enableDoubleUp) {
-        pointsToAdd *= 2
-      }
+
+    // 🎯 புள்ளிகள் நேரடியாக கேம் Component-ல் இருந்து அனுப்பப்பட்டால்
+    if (typeof result.pointsEarned === 'number') {
+      pointsToAdd = result.pointsEarned
+    } else if (result.isCorrect) {
+      pointsToAdd = defaultPoints
     } else {
-      pointsToAdd =
-        result.pointsEarned !== undefined ? result.pointsEarned : -Math.abs(negativePoints)
+      pointsToAdd = -Math.abs(negativePoints)
     }
 
-    // 🔴 முக்கியம்: State-ஐ நம்பாமல் நேரடி கணக்கீடு (Direct calculation)
-    const newScore = totalScore + pointsToAdd
+    // Double Up Booster
+    if (result.isCorrect && currentQ?.enableDoubleUp) {
+      pointsToAdd *= 2
+    }
+
+    const updatedScore = totalScore + pointsToAdd
     const currentLog = {
       questionId: currentQ?.id,
       title: currentQ?.questionTitle || currentQ?.title,
@@ -836,32 +642,31 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
 
     const updatedLog = [...answersLog, currentLog]
 
-    setTotalScore(newScore)
+    setTotalScore(updatedScore)
     setAnswersLog(updatedLog)
 
     if (currentIndex + 1 < questions.length) {
       setCurrentIndex((prev) => prev + 1)
     } else {
       setIsCompleted(true)
-
-      // ⏱️ மொத்தமாக எடுத்துக்கொண்ட நேரம்
+      // ⏱️ விளையாடிய மொத்த நேரத்தைக் கணக்கிடுதல் (Seconds)
       const timeSpentInSeconds = Math.max(1, Math.round((Date.now() - startTimeRef.current) / 1000))
 
-      // 🚀 புதிய newScore மற்றும் updatedLog உடனடியாக API-க்கு அனுப்பப்படும்!
-      submitFinalScore(newScore, updatedLog, timeSpentInSeconds)
+      // 🚀 API Call
+      submitFinalScore(updatedScore, updatedLog, timeSpentInSeconds)
     }
   }
 
+  // 4. Submit Final Score to Backend API
   const submitFinalScore = async (finalScore: number, logs: any[], timeSpentSeconds: number) => {
     try {
       const activeUserId = currentUser?.id
-
       if (!activeUserId) {
         console.error('❌ User ID missing for submission')
         return
       }
 
-      console.log('🚀 Submitting Final Data:', {
+      console.log('Sending Payload:', {
         quizId: quiz?.id,
         userId: activeUserId,
         scoreEarned: finalScore,
@@ -881,62 +686,131 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
       })
 
       const data = await res.json()
-
       if (!res.ok && data.alreadyPlayed) {
         setAlreadyPlayedToday(true)
       } else {
-        console.log('✅ Quiz Submitted Successfully:', data)
+        console.log('✅ Response:', data)
       }
     } catch (err) {
       console.error('❌ Error submitting score:', err)
     }
   }
 
-  // Loading View
+  // Loading Screen
   if (isLoadingAuth) {
     return (
       <div className="relative flex flex-col items-center justify-center p-12 bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl shadow-2xl overflow-hidden max-w-md mx-auto my-12">
-        <h3 className="text-lg font-bold text-white tracking-wide mb-1">Verifying Identity...</h3>
+        <div className="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative flex items-center justify-center mb-6">
+          <svg
+            className="w-16 h-16 animate-spin text-indigo-500"
+            viewBox="0 0 100 100"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient id="spinner-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#6366f1" />
+                <stop offset="100%" stopColor="#a855f7" />
+              </linearGradient>
+            </defs>
+            <circle
+              className="opacity-15"
+              cx="50"
+              cy="50"
+              r="40"
+              stroke="currentColor"
+              strokeWidth="8"
+            />
+            <path
+              d="M50 10 A 40 40 0 0 1 90 50"
+              stroke="url(#spinner-gradient)"
+              strokeWidth="8"
+              strokeLinecap="round"
+            />
+          </svg>
+
+          <div className="absolute text-indigo-400 animate-pulse">
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 002-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
+            </svg>
+          </div>
+        </div>
+
+        <h3 className="text-lg font-bold text-white tracking-wide mb-1">Verifying Identity</h3>
+        <p className="text-slate-400 text-sm font-medium flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+          </span>
+          Authenticating player profile...
+        </p>
       </div>
     )
   }
 
-  // Already Played View
+  // Already Played Screen
   if (alreadyPlayedToday) {
     return (
-      <div className="relative overflow-hidden bg-white/95 backdrop-blur-xl border border-amber-200/80 rounded-3xl p-8 sm:p-10 text-center shadow-xl max-w-lg mx-auto my-6">
-        <div className="text-4xl mb-4">⏳</div>
-        <h2 className="text-2xl font-black text-slate-900 mb-2">Already Played Today!</h2>
-        <p className="text-slate-600 text-sm mb-6">
-          You can attempt this challenge again tomorrow.
+      <div className="relative overflow-hidden bg-white/95 backdrop-blur-xl border border-amber-200/80 rounded-3xl p-8 sm:p-10 text-center shadow-xl shadow-amber-500/5 max-w-lg mx-auto my-6">
+        <div className="absolute -top-12 -left-12 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 -right-12 w-40 h-40 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative mx-auto w-20 h-20 mb-6 flex items-center justify-center bg-amber-100 rounded-full text-4xl shadow-inner border border-amber-200">
+          ⏳
+        </div>
+
+        <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-2 tracking-tight">
+          Already Played Today!
+        </h2>
+
+        <p className="text-slate-600 text-sm leading-relaxed mb-6">
+          You have already completed this daily quiz today. To maintain a fair leaderboard, you can
+          attempt this challenge again{' '}
+          <span className="font-extrabold text-amber-700">Tomorrow!</span>
         </p>
+
         {lastAttemptScore !== null && (
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 max-w-xs mx-auto mb-6">
-            <span className="text-xs font-bold text-amber-700 uppercase block">
-              Today&apos;s Score
+          <div className="bg-amber-50/80 border border-amber-200/60 rounded-2xl p-4 max-w-xs mx-auto mb-8">
+            <span className="text-xs font-bold text-amber-700 uppercase tracking-wider block mb-0.5">
+              Today&lsquo;s Score
             </span>
             <span className="text-3xl font-black text-amber-900">+{lastAttemptScore} XP</span>
           </div>
         )}
-        <div className="flex gap-3 justify-center">
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             href="/leaderboard"
-            className="px-6 py-3 bg-purple-600 text-white font-bold rounded-2xl"
+            className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-sm rounded-2xl shadow-lg shadow-purple-500/20 transition-all duration-200"
           >
-            Leaderboard
+            Check Leaderboard
           </Link>
           <Link
             href="/quizzes"
-            className="px-6 py-3 bg-slate-100 text-slate-700 font-bold rounded-2xl"
+            className="w-full sm:w-auto px-6 py-3.5 bg-slate-100 hover:bg-slate-200/80 text-slate-700 font-bold text-sm rounded-2xl transition-all duration-200"
           >
-            Quizzes
+            Explore Other Quizzes
           </Link>
         </div>
       </div>
     )
   }
 
-  // Completed View
+  // Quiz Completed Screen
   if (isCompleted) {
     return (
       <div className="bg-white border border-slate-200 p-10 rounded-3xl shadow-lg text-center max-w-lg mx-auto">
@@ -955,7 +829,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         </div>
         <Link
           href="/leaderboard"
-          className="inline-block px-8 py-4 bg-slate-900 text-white font-bold rounded-2xl"
+          className="inline-block px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl transition"
         >
           View Leaderboard
         </Link>
@@ -963,9 +837,60 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
     )
   }
 
-  if (!currentQ) return null
+  // No Questions Screen
+  if (!currentQ) {
+    return (
+      <div className="relative overflow-hidden bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-8 md:p-12 text-center shadow-xl shadow-slate-100/50 max-w-lg mx-auto">
+        <div className="absolute -top-12 -left-12 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-12 -right-12 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="relative mx-auto w-28 h-28 mb-6 flex items-center justify-center">
+          <div className="absolute inset-0 bg-indigo-50/80 rounded-full animate-pulse" />
+          <svg
+            className="relative w-16 h-16 text-indigo-500 drop-shadow-sm transition-transform duration-300 hover:scale-105"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="11" cy="11" r="8" className="stroke-indigo-600" />
+            <path d="m21 21-4.3-4.3" className="stroke-indigo-600" strokeWidth="2" />
+            <path
+              d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3"
+              className="stroke-amber-500"
+              strokeWidth="2"
+            />
+            <circle cx="12.5" cy="15" r="0.5" fill="currentColor" className="text-amber-500" />
+          </svg>
+        </div>
 
-  // Extract Question Level Properties
+        <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">
+          No Questions Available
+        </h3>
+        <p className="text-slate-500 text-sm md:text-base leading-relaxed mb-8 max-w-sm mx-auto">
+          We couldn’t find any questions for this quiz module or all challenges have been completed.
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button
+            onClick={() => router.push('/quizzes')}
+            className="w-full sm:w-auto px-6 py-3.5 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold text-sm rounded-2xl shadow-lg shadow-slate-900/10 transition-all duration-200"
+          >
+            Explore Other Quizzes
+          </button>
+          <button
+            onClick={() => router.refresh()}
+            className="w-full sm:w-auto px-6 py-3.5 bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-slate-700 font-bold text-sm rounded-2xl transition-all duration-200"
+          >
+            Reload Page
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Question Properties
   const gameType = currentQ?.gameType
   const points = currentQ?.points ?? 10
   const timeLimit = currentQ?.timeLimit ?? 60
@@ -974,8 +899,10 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
   const heroImage = currentQ?.heroImage
   const contentText = currentQ?.content
 
+  // Structure Game Data Payload
   const gameData = {
     ...currentQ,
+    points: points,
     mcqGroup: currentQ?.mcqGroup,
     dropdownGroup: currentQ?.dropdownGroup,
     wordleGroup: currentQ?.wordleGroup,
@@ -986,11 +913,13 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
     dragDropGroup: currentQ?.dragDropGroup,
   }
 
+  // Progress Bar %
   const timerPercentage = (timeLeft / questionTimeLimit) * 100
   const isTimeLow = timeLeft <= 10
 
   return (
     <div className="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-xs">
+      {/* Top Timer Progress Bar */}
       <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-6">
         <div
           className={`h-full transition-all duration-1000 ease-linear ${
@@ -1000,31 +929,50 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         />
       </div>
 
+      {/* Header Info Bar */}
       <div className="flex items-center justify-between border-b border-slate-100 pb-5 mb-6 flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <span className="px-3 py-1 bg-indigo-50 text-indigo-700 font-bold text-xs rounded-full uppercase">
+          <span className="px-3 py-1 bg-indigo-50 text-indigo-700 font-bold text-xs rounded-full uppercase tracking-wider">
             Game {currentIndex + 1} of {questions.length}
           </span>
           <span
-            className={`px-3 py-1 font-bold text-xs rounded-full ${isTimeLow ? 'bg-rose-100 text-rose-700 animate-pulse' : 'bg-slate-100 text-slate-700'}`}
+            className={`px-3 py-1 font-bold text-xs rounded-full transition-colors flex items-center gap-1 ${
+              isTimeLow ? 'bg-rose-100 text-rose-700 animate-pulse' : 'bg-slate-100 text-slate-700'
+            }`}
           >
             ⏱️ {timeLeft}s
           </span>
+          <span className="px-3 py-1 bg-slate-100 text-slate-600 font-semibold text-xs rounded-full uppercase">
+            {gameType ? gameType.replace('_', ' ') : 'Loading...'}
+          </span>
+          <span className="px-2.5 py-1 bg-slate-100 text-slate-500 font-medium text-xs rounded-full">
+            ⏱️ {timeLimit}s
+          </span>
+          <span className="px-2.5 py-1 bg-slate-100 text-slate-500 font-medium text-xs rounded-full">
+            🎯 {difficulty}
+          </span>
         </div>
         <span className="font-extrabold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full text-xs">
-          +{points} XP
+          +{points} XP {currentQ?.enableDoubleUp ? '(2x ⚡)' : ''}
         </span>
       </div>
 
+      {/* Hero Image */}
       {heroImage && (
         <div className="mb-6 overflow-hidden rounded-2xl border border-slate-100 max-h-72">
           <img src={heroImage} alt={questionTitle} className="w-full h-full object-cover" />
         </div>
       )}
 
+      {/* Question Title & Description */}
       <h2 className="text-2xl font-black text-slate-900 mb-2">{questionTitle}</h2>
-      {contentText && <p className="text-slate-600 text-sm leading-relaxed mb-6">{contentText}</p>}
+      {contentText && (
+        <p className="text-slate-600 text-sm leading-relaxed mb-6 whitespace-pre-line">
+          {contentText}
+        </p>
+      )}
 
+      {/* Active Sub Game Component Container */}
       <div className="min-h-[250px] mt-4">
         {gameType === 'mcq' && <MCQGame data={gameData} onComplete={handleGameCompletion} />}
         {gameType === 'wordle' && <WordleGame data={gameData} onComplete={handleGameCompletion} />}
@@ -1045,6 +993,14 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
           <DragDropGame data={gameData} onComplete={handleGameCompletion} />
         )}
       </div>
+
+      {/* Explanation / Hint Footer */}
+      {currentQ?.explanation && (
+        <div className="mt-8 pt-4 border-t border-slate-100 bg-indigo-50/50 p-4 rounded-2xl text-xs text-indigo-900">
+          <span className="font-bold block mb-1">💡 Hint / Explanation:</span>
+          {currentQ.explanation}
+        </div>
+      )}
     </div>
   )
 }

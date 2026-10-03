@@ -512,6 +512,10 @@ export interface Quiz {
    */
   slug: string;
   quizDate: string;
+  /**
+   * Set when this quiz should automatically conclude
+   */
+  quizEndDate: string;
   questions: (number | Question)[];
   status?: ('draft' | 'active' | 'completed') | null;
   updatedAt: string;
@@ -1405,6 +1409,7 @@ export interface QuizzesSelect<T extends boolean = true> {
   quizTitle?: T;
   slug?: T;
   quizDate?: T;
+  quizEndDate?: T;
   questions?: T;
   status?: T;
   updatedAt?: T;

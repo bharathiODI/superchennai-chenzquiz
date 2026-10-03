@@ -61,6 +61,19 @@ export const Quizzes: CollectionConfig = {
       },
     },
     {
+      name: 'quizEndDate',
+      type: 'date',
+      required: true,
+      label: 'Quiz End Date & Time',
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+          timeIntervals: 15,
+        },
+        description: 'Set when this quiz should automatically conclude',
+      },
+    },
+    {
       name: 'questions',
       type: 'relationship',
       relationTo: 'questions',

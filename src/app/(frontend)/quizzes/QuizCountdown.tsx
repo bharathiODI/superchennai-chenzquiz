@@ -1,3 +1,5 @@
+
+
 'use client'
 
 import Link from 'next/link'
@@ -5,6 +7,7 @@ import { useEffect, useState } from 'react'
 
 interface QuizCountdownProps {
   quizDate: string
+  quizEndDate: string 
   slug: string
   questionCount: number
   quizTitle: string
@@ -12,6 +15,7 @@ interface QuizCountdownProps {
 
 export default function QuizCountdown({
   quizDate,
+  quizEndDate,
   slug,
   questionCount,
   quizTitle,
@@ -27,34 +31,21 @@ export default function QuizCountdown({
 
   useEffect(() => {
     const updateTimer = () => {
-      const now = new Date()
-      const quizTime = new Date(quizDate)
+      const now = new Date().getTime()
+      const startTime = new Date(quizDate).getTime()
+      const endTime = new Date(quizEndDate).getTime() /* 👈 Dynamic End Time */
 
-      // 🛠️ STRICT DATE COMPARISON FIX FOR PAST QUIZZES
-      // Ignore time for date-only comparison if needed, or compare timestamps cleanly
-      const nowDateOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
-      const quizDateOnly = new Date(
-        quizTime.getFullYear(),
-        quizTime.getMonth(),
-        quizTime.getDate(),
-      ).getTime()
-
-      const startTime = quizTime.getTime()
-      // 24 Hours duration for active play window on the scheduled day
-      const endTime = startTime + 24 * 60 * 60 * 1000
-      const currentTime = now.getTime()
-
-      if (quizDateOnly < nowDateOnly || currentTime >= endTime) {
-        // If the quiz date is strictly in the past, or 24 hrs window has passed -> EXPIRED
+      if (now >= endTime) {
+        // தற்போதைய நேரம் Quiz End Date-ஐ தாண்டிவிட்டால் EXPIRED
         setStatus('EXPIRED')
         setTimeLeft(null)
-      } else if (currentTime >= startTime && currentTime < endTime) {
-        // Quiz is currently running today within the 24-hr window -> LIVE
+      } else if (now >= startTime && now < endTime) {
+        // Quiz Start Time மற்றும் End Time இடையிலான காலத்தில் இருந்தால் LIVE
         setStatus('LIVE')
         setTimeLeft(null)
       } else {
-        // Quiz is scheduled for a future date -> UPCOMING
-        const difference = startTime - currentTime
+        // Quiz Start Time-க்கு முன்னால் இருந்தால் UPCOMING
+        const difference = startTime - now
         setStatus('UPCOMING')
         setTimeLeft({
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
@@ -69,13 +60,13 @@ export default function QuizCountdown({
     const interval = setInterval(updateTimer, 1000)
 
     return () => clearInterval(interval)
-  }, [quizDate])
+  }, [quizDate, quizEndDate])
 
   // Hydration state placeholder
   if (timeLeft === null && status === 'UPCOMING') {
     return (
       <div className="animate-pulse flex space-x-4 py-8 mb-14">
-        <div className="h-48 bg-slate-200/60 rounded-3xl w-full"></div>
+        <div className="h-48 bg-slate-200/60 rounded-3xl w-full" />
       </div>
     )
   }
@@ -83,8 +74,7 @@ export default function QuizCountdown({
   /* ================= 1. EXPIRED / COMPLETED / PAST STATE ================= */
   if (status === 'EXPIRED') {
     return (
-      <div className="mb-14 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden border border-indigo-500/20 text-center md:text-left ">
-        {/* Background Decorative Lighting */}
+      <div className="mb-14 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden border border-indigo-500/20 text-center md:text-left">
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -103,16 +93,25 @@ export default function QuizCountdown({
               <span>🌟</span> Thank You for Your Amazing Participation!
             </p>
             <p className="text-slate-300 text-base leading-relaxed">
-              This daily challenge has officially ended. We truly appreciate your enthusiasm and
-              brainpower! Check the leaderboard to see the final ranks, or get ready for our next
-              upcoming daily quiz!
+              This daily challenge officially ended on{' '}
+              <strong className="text-white">
+                {new Date(quizEndDate).toLocaleDateString('en-IN', {
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </strong>
+              . We truly appreciate your enthusiasm and brainpower! Check the leaderboard to see the
+              final ranks.
             </p>
           </div>
 
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
             <Link
               href="/leaderboard"
-              className="inline-flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-[#5122f2] to-[#6d3aff] text-white font-semibold font-black text-sm rounded-xl shadow-lg transition transform hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-[#5122f2] to-[#6d3aff] text-white font-black text-sm rounded-xl shadow-lg transition transform hover:-translate-y-0.5"
             >
               <span>🏆 View Final Leaderboard</span>
             </Link>
@@ -128,8 +127,7 @@ export default function QuizCountdown({
 
   /* ================= 2. LIVE & UPCOMING STATES ================= */
   return (
-    <div className="mb-14 bg-gradient-to-br from-indigo-900 via-slate-900 to-purple-950 text-white rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden border border-indigo-500/20 ">
-      {/* Background Decorative Lighting */}
+    <div className="mb-14 bg-gradient-to-br from-indigo-900 via-slate-900 to-purple-950 text-white rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden border border-indigo-500/20">
       <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
 
@@ -158,7 +156,6 @@ export default function QuizCountdown({
         </p>
 
         {status === 'LIVE' ? (
-          /* Quiz is Active - Direct Play Button */
           <div className="space-y-4">
             <Link
               href={`/play/${slug}`}
@@ -167,9 +164,18 @@ export default function QuizCountdown({
               <span>Play Today Game Now</span>
               <span className="text-xl">➔</span>
             </Link>
+            <p className="text-xs text-indigo-300 font-medium">
+              Ends on:{' '}
+              {new Date(quizEndDate).toLocaleDateString('en-IN', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </p>
           </div>
         ) : (
-          /* Quiz is Scheduled - Professional Timer */
           <div className="space-y-6">
             <p className="text-xs font-bold uppercase tracking-widest text-indigo-300">
               Quiz Starts In:
