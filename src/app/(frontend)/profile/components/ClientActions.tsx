@@ -66,13 +66,13 @@ export function EditProfileModal({ user }: { user: any }) {
 
   return (
     <>
-      <button
+      {/* <button
         onClick={() => setIsOpen(true)}
         className="inline-flex items-center gap-2 px-4 py-2 border-2 border-[#5B2EFF]/30 hover:border-[#5B2EFF] text-[#5B2EFF] font-bold text-xs rounded-xl hover:bg-[#5B2EFF]/5 transition-all duration-200 active:scale-95 cursor-pointer"
       >
         <Edit3 className="w-3.5 h-3.5" />
         Edit Profile
-      </button>
+      </button> */}
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#11145A]/40 backdrop-blur-sm p-4">

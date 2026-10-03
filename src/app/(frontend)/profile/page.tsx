@@ -61,7 +61,7 @@ export default async function ProfilePage() {
       <main className="relative z-10 max-w-[1100px] mx-auto px-4 md:px-6 pt-4">
         <ProfileHeaderCard user={user} />
         <MyStatsSection stats={userStats} />
-        <RankAndStreakSection stats={userStats} currentRank={currentRank} />
+        {/* <RankAndStreakSection stats={userStats} currentRank={currentRank} /> */}
         <QuizHistorySection attempts={attempts} />
         <LogoutButton />
       </main>
