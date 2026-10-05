@@ -31,6 +31,7 @@ import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 
 import { revalidateQuiz, revalidateQuizDelete } from './hooks/revalidatePage' // (Or wherever your hook file is located)
+import { InstaReelsBlock } from './Blocks/InstaReelsSlider/config'
 
 export const Questions: CollectionConfig<'questions'> = {
   slug: 'questions',
@@ -109,6 +110,7 @@ export const Questions: CollectionConfig<'questions'> = {
                         EventRegistrationFormBlock,
                         EventDetailsBlock,
                         VideoGalleryBlock,
+                        InstaReelsBlock,
                       ],
                     }),
                     FixedToolbarFeature(),
