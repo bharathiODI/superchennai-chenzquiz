@@ -39,6 +39,7 @@ import { HowItWorksBlock } from '../Games/Blocks/HowItWorksSection/config'
 import { LetsTalkChennaiFAQBlock } from '../Games/Blocks/LetsTalkChennaiFAQ/config'
 import { TriviaAuthBlock } from '../Games/Blocks/ReadytoPlay/config'
 import { CreativeHeroBlock } from '../Games/Blocks/CreativeHero/config'
+import { InstaReelsBlock } from '../Games/Blocks/InstaReelsSlider/config'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -111,6 +112,7 @@ export const Pages: CollectionConfig<'pages'> = {
                         HowItWorksBlock,
                         LetsTalkChennaiFAQBlock,
                         CreativeHeroBlock,
+                        InstaReelsBlock,
                       ],
                     }),
                     FixedToolbarFeature(),
