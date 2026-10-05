@@ -1,17 +1,17 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from 'next/link'
-import { 
-  Calendar, 
-  HelpCircle, 
-  CheckCircle2, 
-  Star, 
-  Trophy, 
-  Crown, 
-  Target, 
-  Flame, 
+import {
+  Calendar,
+  HelpCircle,
+  CheckCircle2,
+  Star,
+  Trophy,
+  Crown,
+  Target,
+  Flame,
   ChevronRight,
   ArrowRight,
-  Play
+  Play,
 } from 'lucide-react'
 import { EditProfileModal } from './ClientActions'
 
@@ -20,7 +20,7 @@ export function ProfileHeaderCard({ user }: { user: any }) {
   const initial = user?.name ? user.name.trim().charAt(0).toUpperCase() : 'S'
 
   return (
-    <div className="bg-white/90 backdrop-blur-md border border-slate-100/80 rounded-3xl p-6 md:p-8 shadow-xl shadow-indigo-950/5 mb-8 transition-all hover:shadow-2xl hover:shadow-indigo-950/10">
+    <div className="bg-white/90 backdrop-blur-md border border-slate-100/80 rounded-3xl p-6 md:p-8 shadow-xl shadow-indigo-950/5 mb-8 transition-all hover:shadow-2xl hover:shadow-indigo-950/10 ">
       <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6 text-center sm:text-left">
         <div className="flex flex-col sm:flex-row items-center gap-5 md:gap-6">
           {/* Avatar with Purple Gradient */}
@@ -39,7 +39,7 @@ export function ProfileHeaderCard({ user }: { user: any }) {
           </div>
 
           <div>
-            <h1 className="text-2xl md:text-3xl font-black text-[#11145A] tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a]">
               {user?.name || 'Chennai Player'}
             </h1>
             <p className="text-[#5B2EFF] font-bold text-sm md:text-base mt-0.5">
@@ -101,7 +101,7 @@ export function MyStatsSection({ stats }: { stats: any }) {
 
   return (
     <div className="mb-8">
-      <h2 className="text-xl md:text-2xl font-extrabold text-[#11145A] mb-4">My Stats</h2>
+      <h2 className="text-xl md:text-2xl font-extrabold text-[#fff] mb-4">My Stats</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
         {statCards.map((card, idx) => {
           const IconComponent = card.icon
@@ -122,9 +122,7 @@ export function MyStatsSection({ stats }: { stats: any }) {
                 {card.value}
               </p>
               {card.secondary && (
-                <p className="text-xs font-extrabold text-emerald-600 mt-1">
-                  {card.secondary}
-                </p>
+                <p className="text-xs font-extrabold text-emerald-600 mt-1">{card.secondary}</p>
               )}
             </div>
           )
@@ -133,7 +131,6 @@ export function MyStatsSection({ stats }: { stats: any }) {
     </div>
   )
 }
-
 
 export function RankAndStreakSection({
   stats,
@@ -155,9 +152,7 @@ export function RankAndStreakSection({
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
               Current Rank
             </p>
-            <p className="text-2xl md:text-3xl font-black text-[#11145A]">
-              #{currentRank}
-            </p>
+            <p className="text-2xl md:text-3xl font-black text-[#11145A]">#{currentRank}</p>
           </div>
 
           <div className="w-[1px] h-12 bg-slate-100" />
@@ -169,9 +164,7 @@ export function RankAndStreakSection({
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
               Best Rank
             </p>
-            <p className="text-2xl md:text-3xl font-black text-[#11145A]">
-              #{currentRank}
-            </p>
+            <p className="text-2xl md:text-3xl font-black text-[#11145A]">#{currentRank}</p>
           </div>
 
           <div className="w-[1px] h-12 bg-slate-100" />
@@ -183,9 +176,7 @@ export function RankAndStreakSection({
             <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
               Avg Score
             </p>
-            <p className="text-xl md:text-2xl font-black text-[#11145A]">
-              {stats.averageScore}
-            </p>
+            <p className="text-xl md:text-2xl font-black text-[#11145A]">{stats.averageScore}</p>
           </div>
         </div>
       </div>
@@ -324,7 +315,9 @@ export function QuizHistorySection({ attempts }: { attempts: any[] }) {
                 <p className="font-bold text-sm text-[#11145A] mb-0.5">
                   {typeof item.quiz === 'object' ? item.quiz.title : 'Chennai Challenge'}
                 </p>
-                <p className="text-xs text-slate-400">{formattedDate} • {formattedTime}</p>
+                <p className="text-xs text-slate-400">
+                  {formattedDate} • {formattedTime}
+                </p>
               </div>
               <span className="px-3 py-1 bg-[#5B2EFF] text-white font-black rounded-xl text-xs">
                 {item.score} XP

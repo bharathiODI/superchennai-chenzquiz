@@ -9,14 +9,18 @@ export default async function Footer() {
     const { copyright, companyInfo, socialMedia } = footer || {}
 
     return (
-      <footer className="relative w-full overflow-hidden bg-gradient-to-b from-[#11145A] via-[#1a1c6e] to-[#0d0f42] text-white border-t border-purple-500/20 shadow-2xl">
+      // <footer className="relative w-full overflow-hidden bg-gradient-to-b from-[#11145A] via-[#1a1c6e] to-[#0d0f42] text-white border-t border-purple-500/20 shadow-2xl">
+      <footer
+        className="relative w-full overflow-hidden bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/images/footerbg.png')" }}
+      >
         {/* =====================================================
             1. GAMING NEON GLOW & LIGHTING EFFECTS
         ===================================================== */}
         <div className="pointer-events-none absolute inset-0 -z-0 overflow-hidden">
           {/* Top Border Vibrant Glow Line */}
           <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#5B2EFF] to-amber-400" />
-          
+
           {/* Subtle Ambient Radial Glows */}
           <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-[#5B2EFF]/25 blur-3xl animate-pulse" />
           <div className="absolute right-0 bottom-0 h-80 w-80 rounded-full bg-amber-500/15 blur-3xl" />
@@ -42,7 +46,6 @@ export default async function Footer() {
             3. MAIN FOOTER CONTENT AREA (GAMING STYLE)
         ===================================================== */}
         <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-8 px-6 py-10 md:flex-row md:items-center md:justify-between">
-          
           {/* Social Media Icons Container */}
           <div className="flex items-center gap-3.5 justify-center md:justify-start">
             {socialMedia?.map((item: any, index: number) => {

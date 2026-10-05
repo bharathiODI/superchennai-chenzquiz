@@ -52,13 +52,13 @@ export default async function ProfilePage() {
   const userStats = calculateUserStats(attempts)
 
   return (
-    <div className="relative min-h-screen text-slate-800 pt-16 pb-24 border-t border-slate-100 bg-cover bg-center bg-no-repeat bg-fixed bg-[url('/app-images/background-three.png')]">
+    <div className="relative min-h-screen text-slate-800 pt-16 pb-24 border-t border-slate-100 bg-cover bg-center bg-no-repeat bg-fixed bg-[url('/app-images/background-one.png')]">
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-40">
         <div className="absolute inset-0 bg-gradient-to-b from-indigo-100/40 via-purple-50/20 to-[#F8F8FC]" />
         <div className="absolute left-0 bottom-0 w-80 h-96 opacity-15 hidden lg:block bg-contain bg-no-repeat bg-left-bottom bg-[url('/images/chennai-landmarks-left.svg')]" />
         <div className="absolute right-0 bottom-0 w-96 h-96 opacity-15 hidden lg:block bg-contain bg-no-repeat bg-right-bottom bg-[url('/images/chennai-skyline-right.svg')]" />
       </div>
-      <main className="relative z-10 max-w-[1100px] mx-auto px-4 md:px-6 pt-4">
+      <main className="relative z-10 max-w-[1100px] mx-auto px-4 md:px-6 pt-4 padddingtopppp">
         <ProfileHeaderCard user={user} />
         <MyStatsSection stats={userStats} />
         {/* <RankAndStreakSection stats={userStats} currentRank={currentRank} /> */}
