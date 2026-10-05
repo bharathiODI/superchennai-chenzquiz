@@ -132,14 +132,14 @@ export default function HowItWorksComponent({
 
       <div className="text-center mb-10 relative z-10 flex flex-col items-center">
         {/* Top Badge/Subheading */}
-        <p className="text-[18px] font-extrabold  uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#FBFAFF] via-[#FBFAFF] to-[#EA0690] mb-0">
+        <p className="text-[18px] font-extrabold  uppercase text-transparent bg-clip-text bg-gradient-to-r from-[#fff] via-[#fff] to-[#fff] mb-0">
           {topSubtitle || 'READY TO PLAY'}
         </p>
 
         {/* Main Heading with Side Sparkles/Dashes */}
         <div className="relative inline-flex items-center justify-center my-2 headingggtexxt">
           {/* Gradient Title */}
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#FBFAFF] via-[#EA0690] to-[#EA0690] px-2 py-1">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#fff] via-[#fff] to-[#fff] px-2 py-1">
             {mainTitle || 'Trivia?'} {highlightText}
           </h2>
         </div>

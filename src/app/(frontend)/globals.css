@@ -120,8 +120,10 @@ html {
 }
 
 header {
-  z-index: 10000;
+  z-index: 10000 !important;
 }
+
+
 
 @media (max-width:700px) {
   .mobileimagessss {
