@@ -466,9 +466,8 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
             </h3>
 
             <p className="text-slate-600 text-sm leading-relaxed mb-6">
-              சில கேள்விகளை நீங்கள் <span className="font-bold text-amber-600">Skip</span>{' '}
-              செய்துள்ளீர்கள்! சரியான புள்ளிகளைப் பெற Previous பட்டனைப் பயன்படுத்தி அவற்றிற்குப்
-              பதிலளிக்க விரும்புகிறீர்களா?
+              Oops! You Skipped Some Questions 😅 You’ve got a few unanswered questions. Wanna go
+              back and finish them before submitting?
             </p>
 
             <div className="flex flex-col gap-2.5">
