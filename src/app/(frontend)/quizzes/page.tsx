@@ -136,7 +136,7 @@ export default async function QuizzesPage() {
 
   return (
     <div className="relative min-h-screen text-slate-800 pt-16 pb-24 border-t border-slate-100 bg-cover bg-center bg-no-repeat bg-fixed bg-[url('/app-images/background-one.png')] padddingtopppp">
-      <div className="relative z-10 container mx-auto px-4 max-w-7xl ">
+      <div className="relative z-10 container mx-auto px-4 max-w-7xl  quizeesectionconatinerrr ">
         <QuizHeader />
 
         {todayQuiz ? (

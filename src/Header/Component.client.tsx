@@ -432,7 +432,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
                     alt={secondaryLogoAlt}
                     width={150}
                     height={60}
-                    className="h-auto w-[100px] object-contain"
+                    className="h-auto w-[100px] object-contain chenaquizzzzimage"
                   />
                 )}
               </a>
