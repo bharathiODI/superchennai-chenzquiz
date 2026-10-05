@@ -794,7 +794,7 @@ export default function LoginPage() {
                   : 'Logging in...'
                 : isRegister
                   ? 'Sign Up'
-                  : 'Login with OTP'}
+                  : 'Login'}
             </button>
           </form>
 

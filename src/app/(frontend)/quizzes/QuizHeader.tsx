@@ -70,7 +70,8 @@ export default function QuizHeader() {
               title="Logout"
             >
               <LogOut className="w-4 h-4" />
-              <span className="hidden sm:inline">Logout</span>
+              {/* <span className="hidden sm:inline">Logout</span> */}
+              <span className="">Logout</span>
             </button>
           </>
         ) : (

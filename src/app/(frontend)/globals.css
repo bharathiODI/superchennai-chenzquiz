@@ -177,6 +177,34 @@ header {
   .quizeesectionconatinerrr {
     margin-top: 4%;
   }
+
+
+  /* header img {
+    transition: height 0.3s ease;
+  }
+
+  header.scrolleddddheaderrr img {
+    height: 50px !important;
+    width: auto;
+  } */
+
+
+  header img {
+    height: 70px;
+    width: auto;
+    transition: height 0.4s ease-in-out;
+  }
+
+  header.scrolleddddheaderrr img {
+    height: 50px !important;
+  }
+
+}
+
+@media (max-width:1024px) and (min-width:768px) {
+  .howitworkssectionbg {
+    height: auto;
+  }
 }
 
 
