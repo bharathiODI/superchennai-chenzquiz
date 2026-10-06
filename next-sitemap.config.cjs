@@ -9,7 +9,7 @@ module.exports = {
 
   generateRobotsTxt: true,
 
-  exclude: [ '/pages-sitemap.xml', '/events-sitemap.xml', '/posts/*'],
+  exclude: [ '/pages-sitemap.xml', '/quizzes-sitemap.xml', '/posts/*'],
 
   robotsTxtOptions: {
     policies: [
@@ -21,7 +21,7 @@ module.exports = {
 
     additionalSitemaps: [
       `${SITE_URL}/pages-sitemap.xml`,
-      `${SITE_URL}/events-sitemap.xml`,
+      `${SITE_URL}/quizzes-sitemap.xml`,
     ],
   },
 }
