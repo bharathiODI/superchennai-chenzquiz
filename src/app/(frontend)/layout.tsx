@@ -29,8 +29,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link href="/favicon.ico" rel="icon" type="image/svg+xml" />
       </head>
       <body>
-        <GoogleTagManager gtmId="GTM-P9G3PTT7" />
-        <GoogleAnalytics gaId="G-XQNZ1N285N" />
+        <GoogleTagManager gtmId="GTM-53P93R9G" />
+        <GoogleAnalytics gaId="G-ZEMVJH3G2E" />
         <Providers>
           <AdminBar
             adminBarProps={{
