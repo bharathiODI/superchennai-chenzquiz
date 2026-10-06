@@ -210,9 +210,9 @@ export default function AboutTriviaComponent({
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{
-                duration: 0.8, // AOS style smooth duration
-                ease: [0.16, 1, 0.3, 1], // AOS signature ease-out-expo curve
-                delay: idx * 0.12, // Staggered entry
+                duration: 0.8,
+                ease: [0.16, 1, 0.3, 1],
+                delay: idx * 0.12,
               }}
               className="bg-white/90 backdrop-blur-md rounded-2xl p-6 border border-white shadow-xl shadow-purple-500/5 flex items-start gap-4 transition-transform duration-300 hover:-translate-y-1 triviaaboutbga"
             >
@@ -231,7 +231,6 @@ export default function AboutTriviaComponent({
           ))}
         </div>
 
-        {/* Center Image */}
         <div className="rounded-3xl overflow-hidden shadow-2xl shadow-purple-900/10 border-4 border-white aspect-square sm:aspect-[4/3] lg:aspect-square relative">
           <img
             src={imageUrl || '/images/chennai-central.jpg'}
@@ -301,9 +300,9 @@ export default function AboutTriviaComponent({
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{
-                duration: 0.8, // Slightly longer duration for a buttery feel
-                ease: [0.16, 1, 0.3, 1], // AOS signature ease-out-expo curve
-                delay: idx * 0.12, // Smooth sequential entrance
+                duration: 0.8,
+                ease: [0.16, 1, 0.3, 1],
+                delay: idx * 0.12,
               }}
               className="bg-white/90 backdrop-blur-md rounded-2xl p-6 border border-white shadow-xl shadow-purple-500/5 flex items-start gap-4 transition-transform duration-300 hover:-translate-y-1 triviaaboutbga1"
             >
