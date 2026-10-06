@@ -171,7 +171,7 @@ export default async function LeaderboardPage({
                         1
                       </div>
                     </div>
-                    <p className="font-black text-slate-900 text-sm sm:text-base truncate max-w-[120px] sm:max-w-[160px]">
+                    <p className="font-black text-slate-900 text-sm sm:text-base truncate max-w-[auto] sm:max-w-[auto]">
                       {rank1.name || 'Champion'}
                     </p>
                     <div className="flex flex-wrap justify-center items-center gap-1 mt-1">
