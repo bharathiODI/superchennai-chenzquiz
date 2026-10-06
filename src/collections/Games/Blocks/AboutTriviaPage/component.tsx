@@ -108,12 +108,6 @@ export default function AboutTriviaComponent({
   return (
     <section className="relative w-full py-16 px-4 bg-[#fff] overflow-hidden triviabgsection-hide padddinggmobile">
       {/* Title Area */}
-      {/* <div className="text-center mb-12 relative z-10">
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-black font-bold text-[#0f172a]">
-          {mainTitle} <span className="text-[#5122f2]">{highlightText}</span>
-        </h2>
-        <p className="text-gray-600 mt-2 font-medium text-base sm:text-lg">{subDescription}</p>
-      </div> */}
 
       <div className="text-center mb-5 relative z-10 flex flex-col items-center">
         {/* Top Badge/Subheading */}
@@ -151,63 +145,22 @@ export default function AboutTriviaComponent({
 
       {/* Main Grid Section */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 items-center relative z-10">
-        {/* Left 2 Cards */}
-        {/* <div className="flex flex-col gap-6">
-          {leftCards?.map((card, idx) => (
-            <div
-              key={card.id || idx}
-              className="bg-white/90 backdrop-blur-md rounded-2xl p-6 border border-white shadow-xl shadow-purple-500/5 flex items-start gap-4 transition-transform duration-300 hover:-translate-y-1 triviaaboutbga"
-            >
-              <div className="w-12 h-12 rounded-xl bg-[#eeeaff] flex items-center justify-center shrink-0 triviaaaimage">
-                {renderIcon(card.iconType)}
-              </div>
-              <div>
-                <h3 className="text-lg font-bold headingtexttriviaaa text-[#111827] mb-1">
-                  {card.title}
-                </h3>
-                <p className="text-gray-500 text-sm leading-relaxed paragraphfont">
-                  {card.description}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div> */}
-
-        {/* <div className="flex flex-col gap-6">
-          {leftCards?.map((card, idx) => (
-            <motion.div
-              key={card.id || idx}
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '-50px' }}
-              transition={{
-                duration: 0.5,
-                delay: idx * 0.15, // dynamic delay for staggered effect
-                ease: 'easeOut',
-              }}
-              className="bg-white/90 backdrop-blur-md rounded-2xl p-6 border border-white shadow-xl shadow-purple-500/5 flex items-start gap-4 transition-transform duration-300 hover:-translate-y-1 triviaaboutbga"
-            >
-              <div className="w-12 h-12 rounded-xl bg-[#eeeaff] flex items-center justify-center shrink-0 triviaaaimage">
-                {renderIcon(card.iconType)}
-              </div>
-              <div>
-                <h3 className="text-lg font-bold headingtexttriviaaa text-[#111827] mb-1">
-                  {card.title}
-                </h3>
-                <p className="text-gray-500 text-sm leading-relaxed paragraphfont">
-                  {card.description}
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </div> */}
-
         <div className="flex flex-col gap-6">
           {leftCards?.map((card, idx) => (
             <motion.div
+              // key={card.id || idx}
+              // initial={{ opacity: 0, x: -60 }}
+              // whileInView={{ opacity: 1, x: 0 }}
+              // viewport={{ once: true, amount: 0.2 }}
+              // transition={{
+              //   duration: 0.8,
+              //   ease: [0.16, 1, 0.3, 1],
+              //   delay: idx * 0.12,
+              // }}
+
               key={card.id || idx}
-              initial={{ opacity: 0, x: -60 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 60 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{
                 duration: 0.8,
@@ -239,65 +192,22 @@ export default function AboutTriviaComponent({
           />
         </div>
 
-        {/* Right 2 Cards */}
-        {/* <div className="flex flex-col gap-6">
-          {rightCards?.map((card, idx) => (
-            <div
-              key={card.id || idx}
-              className="bg-white/90 backdrop-blur-md rounded-2xl p-6 border border-white shadow-xl shadow-purple-500/5 flex items-start gap-4 transition-transform duration-300 hover:-translate-y-1 triviaaboutbga1"
-            >
-              <div className="w-12 h-12 rounded-xl bg-[#eeeaff] flex items-center justify-center shrink-0 triviaaaimage">
-                {renderIcon(card.iconType)}
-              </div>
-              <div>
-                <h3 className="text-lg font-bold headingtexttriviaaa text-[#111827] mb-1">
-                  {card.title}
-                </h3>
-                <p className="text-gray-500 text-sm leading-relaxed paragraphfont">
-                  {card.description}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div> */}
-        {/* 
         <div className="flex flex-col gap-6">
           {rightCards?.map((card, idx) => (
             <motion.div
-              key={card.id || idx}
-              initial={{ opacity: 0, x: 80 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
-              transition={{
-                type: 'spring',
-                stiffness: 40, // Low stiffness = soft and smooth movement
-                damping: 15, // Prevents harsh stopping or sticking
-                mass: 0.8, // Light feel
-                delay: idx * 0.1, // Smooth stagger delay
-              }}
-              className="bg-white/90 backdrop-blur-md rounded-2xl p-6 border border-white shadow-xl shadow-purple-500/5 flex items-start gap-4 transition-transform duration-300 hover:-translate-y-1 triviaaboutbga1"
-            >
-              <div className="w-12 h-12 rounded-xl bg-[#eeeaff] flex items-center justify-center shrink-0 triviaaaimage">
-                {renderIcon(card.iconType)}
-              </div>
-              <div>
-                <h3 className="text-lg font-bold headingtexttriviaaa text-[#111827] mb-1">
-                  {card.title}
-                </h3>
-                <p className="text-gray-500 text-sm leading-relaxed paragraphfont">
-                  {card.description}
-                </p>
-              </div>
-            </motion.div>
-          ))}
-        </div> */}
+              // key={card.id || idx}
+              // initial={{ opacity: 0, x: 60 }}
+              // whileInView={{ opacity: 1, x: 0 }}
+              // viewport={{ once: true, amount: 0.2 }}
+              // transition={{
+              //   duration: 0.8,
+              //   ease: [0.16, 1, 0.3, 1],
+              //   delay: idx * 0.12,
+              // }}
 
-        <div className="flex flex-col gap-6">
-          {rightCards?.map((card, idx) => (
-            <motion.div
               key={card.id || idx}
-              initial={{ opacity: 0, x: 60 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ opacity: 0, y: 60 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{
                 duration: 0.8,

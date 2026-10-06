@@ -141,7 +141,7 @@ export default async function LeaderboardPage({
                         2
                       </div>
                     </div>
-                    <p className="font-bold text-slate-900 text-xs sm:text-sm truncate max-w-[100px] sm:max-w-[140px]">
+                    <p className="font-bold text-slate-900 text-xs sm:text-sm truncate max-w-[auto] sm:max-w-[auto]">
                       {rank2.name || 'Player 2'}
                     </p>
                     <div className="flex flex-wrap justify-center items-center gap-1 mt-1">
@@ -198,7 +198,7 @@ export default async function LeaderboardPage({
                         3
                       </div>
                     </div>
-                    <p className="font-bold text-slate-900 text-xs sm:text-sm truncate max-w-[100px] sm:max-w-[140px]">
+                    <p className="font-bold text-slate-900 text-xs sm:text-sm truncate max-w-[auto] sm:max-w-[auto]">
                       {rank3.name || 'Player 3'}
                     </p>
                     <div className="flex flex-wrap justify-center items-center gap-1 mt-1">
