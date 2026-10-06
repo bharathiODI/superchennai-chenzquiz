@@ -278,6 +278,14 @@ export default function AboutTriviaComponent({
           </>
         )}
       </div>
+
+      {/* <div className="giftgifimage">
+        <img src="/images/giftgifff.gif" alt="" />
+      </div>
+
+      <div className="arrowgif">
+        <img src="/images/arrowgif.gif" alt="" />
+      </div> */}
     </section>
   )
 }
