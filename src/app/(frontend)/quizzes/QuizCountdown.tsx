@@ -393,7 +393,7 @@ export default function QuizCountdown({
               href={`/play/${slug}`}
               className="inline-flex items-center gap-3 px-8 py-4 bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-lg rounded-2xl shadow-xl hover:shadow-amber-400/20 transition transform hover:-translate-y-1 cursor-pointer"
             >
-              <span>Play Today Game Now</span>
+              <span>Play Now</span>
               <span className="text-xl">➔</span>
             </Link>
             <p className="text-xs text-indigo-300 font-medium">

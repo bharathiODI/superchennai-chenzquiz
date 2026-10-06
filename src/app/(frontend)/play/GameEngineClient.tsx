@@ -531,7 +531,11 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
       {/* Hero Image */}
       {heroImage && (
         <div className="mb-6 overflow-hidden rounded-2xl border border-slate-100 max-h-72">
-          <img src={heroImage} alt={questionTitle} className="w-full h-full object-cover" />
+          <img
+            src={heroImage}
+            alt={questionTitle}
+            className="w-full h-full object-cover quizzzimagesectionnn "
+          />
         </div>
       )}
 

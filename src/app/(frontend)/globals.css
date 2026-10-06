@@ -123,6 +123,10 @@ header {
   z-index: 10000 !important;
 }
 
+.quizzzimagesectionnn {
+  height: 150px;
+}
+
 
 
 @media (max-width:700px) {
