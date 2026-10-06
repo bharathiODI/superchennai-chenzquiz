@@ -125,6 +125,7 @@ header {
 
 .quizzzimagesectionnn {
   height: 150px;
+  object-fit: contain;
 }
 
 

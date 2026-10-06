@@ -237,7 +237,63 @@ export default function TriviaAuthComponent({
           </div>
         ) : isLoggedIn ? (
           /* PROFESSIONAL LOGGED-IN STATE BANNER */
-          <div className="w-full max-w-xl bg-white/95 backdrop-blur-xl rounded-[32px] p-8 sm:p-10 border border-purple-100 shadow-2xl shadow-purple-500/10 text-center transform transition-all animate-fade-in">
+          // <div className="loginnncardsss w-full max-w-xl bg-white/95 backdrop-blur-xl rounded-[32px] p-8 sm:p-10 border border-purple-100 shadow-2xl shadow-purple-500/10 text-center transform transition-all animate-fade-in">
+          //   <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-[#5122f2] to-[#7c54ff] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/30 text-white playbuttonsec">
+          //     <svg className="w-10 h-10 fill-white animate-pulse" viewBox="0 0 24 24">
+          //       <path d="M8 5v14l11-7z" />
+          //     </svg>
+          //   </div>
+          //   <h3 className="text-2xl sm:text-3xl font-black text-[#0f172a] mb-3">
+          //     You&lsquo;re All Set to Play!
+          //   </h3>
+          //   <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-8 max-w-md mx-auto">
+          //     Your session is active. Jump straight into the action, beat your high scores, and
+          //     climb the Chennai leaderboard.
+          //   </p>
+          //   <Link
+          //     href="/quizzes"
+          //     className="w-full py-4 px-8 rounded-2xl bg-gradient-to-r from-[#5122f2] to-[#6d3aff] text-white font-bold text-lg shadow-xl shadow-purple-500/30 hover:scale-[1.02] transition-all flex items-center justify-center gap-3 group buttonpaaddinggg"
+          //   >
+          //     <span>Play Now</span>
+          //     <svg
+          //       className="w-5 h-5 transition-transform duration-200 group-hover:translate-x-1"
+          //       fill="none"
+          //       stroke="currentColor"
+          //       strokeWidth="2.5"
+          //       viewBox="0 0 24 24"
+          //     >
+          //       <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
+          //       <path strokeLinecap="round" strokeLinejoin="round" d="m12 5 7 7-7 7" />
+          //     </svg>
+          //   </Link>
+          // </div>
+
+          <motion.div
+            // animate={{
+            //   y: [0, -22, 0],
+            // }}
+            // transition={{
+            //   duration: 3,
+            //   ease: 'easeInOut',
+            //   repeat: Infinity,
+            //   repeatType: 'loop',
+            // }}
+            animate={{
+              y: [0, -22, 0], // Smoothly moves up 22px and back down
+              boxShadow: [
+                '0px 25px 50px -12px rgba(81, 34, 242, 0.1)', // Base shadow
+                '0px 40px 70px -15px rgba(81, 34, 242, 0.25)', // Deep, wide shadow at peak
+                '0px 25px 50px -12px rgba(81, 34, 242, 0.1)', // Back to base shadow
+              ],
+            }}
+            transition={{
+              duration: 10, // Speed of one full loop cycle
+              ease: 'easeInOut', // Soft deceleration at top and bottom
+              repeat: Infinity, // Loops forever
+              repeatType: 'loop',
+            }}
+            className="loginnncardsss w-full max-w-xl bg-white/95 backdrop-blur-xl rounded-[32px] p-8 sm:p-10 border border-purple-100 shadow-2xl shadow-purple-500/10 text-center transition-shadow"
+          >
             <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-[#5122f2] to-[#7c54ff] flex items-center justify-center mx-auto mb-6 shadow-lg shadow-purple-500/30 text-white playbuttonsec">
               <svg className="w-10 h-10 fill-white animate-pulse" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
@@ -266,7 +322,7 @@ export default function TriviaAuthComponent({
                 <path strokeLinecap="round" strokeLinejoin="round" d="m12 5 7 7-7 7" />
               </svg>
             </Link>
-          </div>
+          </motion.div>
         ) : (
           /* GUEST STATE CARDS */
           // <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
