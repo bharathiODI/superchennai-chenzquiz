@@ -121,6 +121,7 @@ html {
 
 header {
   z-index: 10000 !important;
+  z-index: 10 !important;
 }
 
 .quizzzimagesectionnn {
@@ -387,6 +388,10 @@ body .paragraphfont {
 
 .scrolleddddheaderrr .iconssuperrr {
   filter: none !important;
+}
+
+.scrolleddddheaderrr {
+  z-index: 100000000 !important;
 }
 
 
