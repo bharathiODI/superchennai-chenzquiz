@@ -269,27 +269,13 @@ export default function TriviaAuthComponent({
           // </div>
 
           <motion.div
-            // animate={{
-            //   y: [0, -22, 0],
-            // }}
-            // transition={{
-            //   duration: 3,
-            //   ease: 'easeInOut',
-            //   repeat: Infinity,
-            //   repeatType: 'loop',
-            // }}
             animate={{
-              y: [0, -22, 0], // Smoothly moves up 22px and back down
-              boxShadow: [
-                '0px 25px 50px -12px rgba(81, 34, 242, 0.1)', // Base shadow
-                '0px 40px 70px -15px rgba(81, 34, 242, 0.25)', // Deep, wide shadow at peak
-                '0px 25px 50px -12px rgba(81, 34, 242, 0.1)', // Back to base shadow
-              ],
+              y: [0, -22, 0],
             }}
             transition={{
-              duration: 10, // Speed of one full loop cycle
-              ease: 'easeInOut', // Soft deceleration at top and bottom
-              repeat: Infinity, // Loops forever
+              duration: 3,
+              ease: 'easeInOut',
+              repeat: Infinity,
               repeatType: 'loop',
             }}
             className="loginnncardsss w-full max-w-xl bg-white/95 backdrop-blur-xl rounded-[32px] p-8 sm:p-10 border border-purple-100 shadow-2xl shadow-purple-500/10 text-center transition-shadow"

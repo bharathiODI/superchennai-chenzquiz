@@ -53,9 +53,9 @@ export function FAQItemCard({ item, index, isOpen, onToggle }: FAQItemCardProps)
           </div>
 
           {/* Question Text */}
-          <span className="text-base md:text-lg lg:text-xl font-bold text-slate-900 transition-colors duration-200 group-hover:text-indigo-600">
+          <h2 className="text-base md:text-lg lg:text-xl font-bold text-slate-900 transition-colors duration-200 group-hover:text-indigo-600">
             {item.question}
-          </span>
+          </h2>
         </div>
 
         {/* Plus / Rotating Action Button */}
@@ -81,7 +81,7 @@ export function FAQItemCard({ item, index, isOpen, onToggle }: FAQItemCardProps)
       >
         <div className="overflow-hidden px-5 md:px-6 lg:px-7 pl-[4.25rem] md:pl-[5.25rem]">
           <div className="pt-1 text-sm md:text-base leading-relaxed text-slate-600 border-t border-slate-100">
-            <p className="mt-3">{item.answer}</p>
+            <h3 className="mt-3">{item.answer}</h3>
           </div>
         </div>
       </div>
