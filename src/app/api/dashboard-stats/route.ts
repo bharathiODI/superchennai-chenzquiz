@@ -9,7 +9,7 @@ export async function GET() {
     const headersList = await headers()
     const { user } = await payload.auth({ headers: headersList })
 
-    if (!user || !('role' in user) || user.role !== 'admin') {
+    if (!user || !('role' in user) || user.role !== 'client') {
       return NextResponse.json({ error: 'Forbidden: Super Admin access required' }, { status: 403 })
     }
 

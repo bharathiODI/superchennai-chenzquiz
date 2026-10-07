@@ -215,7 +215,6 @@ export function RankAndStreakSection({
     </div>
   )
 }
-
 // 4. Quiz History List Table
 export function QuizHistorySection({ attempts }: { attempts: any[] }) {
   if (!attempts || attempts.length === 0) {
@@ -274,15 +273,19 @@ export function QuizHistorySection({ attempts }: { attempts: any[] }) {
               const secs = item.timeTaken % 60
               const formattedTime = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
 
+              // FIX HERE: Extract title properly checking quizTitle, title, or Fallback
+              const quizTitle =
+                typeof item.quiz === 'object' && item.quiz !== null
+                  ? item.quiz.quizTitle || item.quiz.title || 'Chennai Special Challenge'
+                  : 'Chennai Special Challenge'
+
               return (
                 <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
                   <td className="py-4 text-slate-500 font-medium">{formattedDate}</td>
-                  <td className="py-4 font-bold text-[#11145A]">
-                    {typeof item.quiz === 'object' ? item.quiz.title : 'Chennai Challenge'}
-                  </td>
+                  <td className="py-4 font-bold text-[#11145A]">{quizTitle}</td>
                   <td className="py-4 text-center">
                     <span className="px-3 py-1 bg-indigo-50 text-[#5B2EFF] font-black rounded-full text-xs">
-                      {item.score} / {item.totalQuestions * 10}
+                      {item.score} XP
                     </span>
                   </td>
                   <td className="py-4 text-right font-mono text-slate-500 text-xs">
@@ -306,15 +309,19 @@ export function QuizHistorySection({ attempts }: { attempts: any[] }) {
           const secs = item.timeTaken % 60
           const formattedTime = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
 
+          // FIX HERE: Extract title properly for Mobile view as well
+          const quizTitle =
+            typeof item.quiz === 'object' && item.quiz !== null
+              ? item.quiz.quizTitle || item.quiz.title || 'Chennai Special Challenge'
+              : 'Chennai Special Challenge'
+
           return (
             <div
               key={item.id}
               className="p-4 bg-slate-50/70 rounded-2xl flex items-center justify-between"
             >
               <div>
-                <p className="font-bold text-sm text-[#11145A] mb-0.5">
-                  {typeof item.quiz === 'object' ? item.quiz.title : 'Chennai Challenge'}
-                </p>
+                <p className="font-bold text-sm text-[#11145A] mb-0.5">{quizTitle}</p>
                 <p className="text-xs text-slate-400">
                   {formattedDate} • {formattedTime}
                 </p>
@@ -329,3 +336,117 @@ export function QuizHistorySection({ attempts }: { attempts: any[] }) {
     </div>
   )
 }
+
+// 4. Quiz History List Table
+// export function QuizHistorySection({ attempts }: { attempts: any[] }) {
+//   if (!attempts || attempts.length === 0) {
+//     return (
+//       <div className="bg-white border border-slate-100 rounded-3xl p-8 text-center shadow-md shadow-slate-100/80">
+//         <div className="w-16 h-16 bg-indigo-50 text-[#5B2EFF] rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+//           🎪
+//         </div>
+//         <h3 className="text-lg font-black text-[#11145A] mb-1">No quizzes played yet</h3>
+//         <p className="text-slate-400 text-sm mb-6">
+//           Start your first Chennai quiz challenge today!
+//         </p>
+//         <Link
+//           href="/quizzes"
+//           className="inline-flex items-center gap-2 px-6 py-3 bg-[#5B2EFF] hover:bg-[#4c22e0] text-white font-bold text-sm rounded-2xl shadow-lg shadow-[#5B2EFF]/20 transition active:scale-95"
+//         >
+//           Play Quiz <ArrowRight className="w-4 h-4" />
+//         </Link>
+//       </div>
+//     )
+//   }
+
+//   return (
+//     <div className="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 shadow-md shadow-slate-100/80">
+//       <div className="flex items-center justify-between mb-6">
+//         <h2 className="text-xl md:text-2xl font-extrabold text-[#11145A]">
+//           Quiz History <span className="text-sm font-normal text-slate-400">(Recent 5)</span>
+//         </h2>
+//         <Link
+//           href="/history"
+//           className="text-[#5B2EFF] hover:text-[#4c22e0] font-bold text-xs md:text-sm flex items-center gap-1 transition"
+//         >
+//           View All <ChevronRight className="w-4 h-4" />
+//         </Link>
+//       </div>
+
+//       {/* Desktop Table View */}
+//       <div className="hidden sm:block overflow-x-auto">
+//         <table className="w-full text-left border-collapse">
+//           <thead>
+//             <tr className="border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-wider">
+//               <th className="pb-4 font-bold">Date</th>
+//               <th className="pb-4 font-bold">Quiz</th>
+//               <th className="pb-4 font-bold text-center">Score</th>
+//               <th className="pb-4 font-bold text-right">Time Taken</th>
+//             </tr>
+//           </thead>
+//           <tbody className="divide-y divide-slate-50 text-sm font-semibold text-[#11145A]">
+//             {attempts.slice(0, 5).map((item) => {
+//               const formattedDate = new Date(item.completedAt).toLocaleDateString('en-US', {
+//                 month: 'short',
+//                 day: 'numeric',
+//                 year: 'numeric',
+//               })
+//               const mins = Math.floor(item.timeTaken / 60)
+//               const secs = item.timeTaken % 60
+//               const formattedTime = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+
+//               return (
+//                 <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
+//                   <td className="py-4 text-slate-500 font-medium">{formattedDate}</td>
+//                   <td className="py-4 font-bold text-[#11145A]">
+//                     {typeof item.quiz === 'object' ? item.quiz.title : 'Chennai Challenge'}
+//                   </td>
+//                   <td className="py-4 text-center">
+//                     <span className="px-3 py-1 bg-indigo-50 text-[#5B2EFF] font-black rounded-full text-xs">
+//                       {item.score} / {item.totalQuestions * 10}
+//                     </span>
+//                   </td>
+//                   <td className="py-4 text-right font-mono text-slate-500 text-xs">
+//                     {formattedTime}
+//                   </td>
+//                 </tr>
+//               )
+//             })}
+//           </tbody>
+//         </table>
+//       </div>
+
+//       {/* Mobile Card List View */}
+//       <div className="sm:hidden space-y-3">
+//         {attempts.slice(0, 5).map((item) => {
+//           const formattedDate = new Date(item.completedAt).toLocaleDateString('en-US', {
+//             month: 'short',
+//             day: 'numeric',
+//           })
+//           const mins = Math.floor(item.timeTaken / 60)
+//           const secs = item.timeTaken % 60
+//           const formattedTime = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+
+//           return (
+//             <div
+//               key={item.id}
+//               className="p-4 bg-slate-50/70 rounded-2xl flex items-center justify-between"
+//             >
+//               <div>
+//                 <p className="font-bold text-sm text-[#11145A] mb-0.5">
+//                   {typeof item.quiz === 'object' ? item.quiz.title : 'Chennai Challenge'}
+//                 </p>
+//                 <p className="text-xs text-slate-400">
+//                   {formattedDate} • {formattedTime}
+//                 </p>
+//               </div>
+//               <span className="px-3 py-1 bg-[#5B2EFF] text-white font-black rounded-xl text-xs">
+//                 {item.score} XP
+//               </span>
+//             </div>
+//           )
+//         })}
+//       </div>
+//     </div>
+//   )
+// }
