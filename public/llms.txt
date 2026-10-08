@@ -1,0 +1,14 @@
+# Chenz Quiz: Chennai Quiz on Landmarks, People & History
+
+> Chenz Quiz by Super Chennai is an online trivia game about Chennai’s places, people, culture, and history; play to test city knowledge, score on leaderboards, and win prizes.
+
+This file maps the site pages and where to find gameplay, account actions, and the homepage content (overview, How It Works, and FAQ). Use the homepage to learn scoring, game types, and general rules before linking users to signup or login flows.
+
+## Site
+
+- [Chenz Quiz: Chennai Quiz on Landmarks, People & History](https://chenzquiz.superchennai.com/): homepage with banners, "How It Works", gameplay types (MCQ, Wordle, Match the Following, etc.), and the FAQ; use to explain rules, scoring, and available game modes.
+
+## Play
+
+- [Sign Up / Quiz Listing](https://chenzquiz.superchennai.com/quizzes): registration and quiz selection page; use when creating an account and starting a quiz.
+- [Login](https://chenzquiz.superchennai.com/login): authentication page to resume play and access scores and leaderboards; use when returning players need to view or improve their score.

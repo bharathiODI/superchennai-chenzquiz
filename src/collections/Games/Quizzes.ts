@@ -1,5 +1,8 @@
 import type { CollectionConfig } from 'payload'
 import { revalidateQuiz, revalidateQuizDelete } from './hooks/revalidatePage'
+import { isAdmin, isAdminAdminAccess } from '@/access/isAdmin'
+import { authenticatedOrPublished } from '@/access/authenticatedOrPublished'
+import { isNotAdmin } from '@/access/checkRole'
 
 const formatSlug = (val: string): string =>
   val
@@ -12,9 +15,15 @@ export const Quizzes: CollectionConfig = {
   admin: {
     useAsTitle: 'quizTitle',
     defaultColumns: ['quizTitle', 'slug', 'quizDate', 'status'],
+     hidden: isNotAdmin,
   },
   access: {
-    read: () => true,
+    // read: () => true,
+    admin: isAdminAdminAccess,
+    create: isAdmin,
+    delete: isAdmin,
+    read: authenticatedOrPublished,
+    update: isAdmin,
   },
   fields: [
     {

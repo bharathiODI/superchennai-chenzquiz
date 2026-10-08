@@ -33,7 +33,7 @@ export default async function ProfilePage() {
       },
     },
     sort: '-completedAt',
-    limit: 10,
+    limit: 1000,
   })
 
   const userXP = Number((user as any)?.totalXP || 0)

@@ -40,14 +40,16 @@ import { LetsTalkChennaiFAQBlock } from '../Games/Blocks/LetsTalkChennaiFAQ/conf
 import { TriviaAuthBlock } from '../Games/Blocks/ReadytoPlay/config'
 import { CreativeHeroBlock } from '../Games/Blocks/CreativeHero/config'
 import { InstaReelsBlock } from '../Games/Blocks/InstaReelsSlider/config'
+import { isAdmin, isAdminAdminAccess } from '@/access/isAdmin'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    admin: isAdminAdminAccess,
+    create: isAdmin,
+    delete: isAdmin,
     read: authenticatedOrPublished,
-    update: authenticated,
+    update: isAdmin,
   },
   defaultPopulate: {
     title: true,

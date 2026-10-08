@@ -1,3 +1,4 @@
+import { isNotAdmin } from '@/access/checkRole'
 import type { CollectionConfig } from 'payload'
 
 export const QuizAttempts: CollectionConfig = {
@@ -5,6 +6,7 @@ export const QuizAttempts: CollectionConfig = {
   admin: {
     useAsTitle: 'id',
     defaultColumns: ['user', 'quiz', 'score', 'completedAt'],
+     hidden: isNotAdmin,
   },
   access: {
     read: ({ req: { user } }) => {
