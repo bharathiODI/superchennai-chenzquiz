@@ -3,6 +3,14 @@ import { revalidateQuiz, revalidateQuizDelete } from './hooks/revalidatePage'
 import { isAdmin, isAdminAdminAccess } from '@/access/isAdmin'
 import { authenticatedOrPublished } from '@/access/authenticatedOrPublished'
 import { isNotAdmin } from '@/access/checkRole'
+import { SEOFieldSchema } from '@/fields/seo'
+import {
+  MetaDescriptionField,
+  MetaImageField,
+  MetaTitleField,
+  OverviewField,
+  PreviewField,
+} from '@payloadcms/plugin-seo/fields'
 
 const formatSlug = (val: string): string =>
   val
@@ -15,7 +23,7 @@ export const Quizzes: CollectionConfig = {
   admin: {
     useAsTitle: 'quizTitle',
     defaultColumns: ['quizTitle', 'slug', 'quizDate', 'status'],
-     hidden: isNotAdmin,
+    hidden: isNotAdmin,
   },
   access: {
     // read: () => true,
@@ -56,7 +64,6 @@ export const Quizzes: CollectionConfig = {
         ],
       },
     },
-
     {
       name: 'quizDate',
       type: 'date',
@@ -100,7 +107,45 @@ export const Quizzes: CollectionConfig = {
       ],
       defaultValue: 'draft',
     },
+    {
+      name: 'meta',
+      type: 'group',
+      label: 'SEO',
+      fields: [
+        OverviewField({
+          titlePath: 'meta.title',
+          descriptionPath: 'meta.description',
+          imagePath: 'meta.image',
+        }),
+
+        MetaTitleField({
+          hasGenerateFn: true,
+        }),
+
+        MetaImageField({
+          relationTo: 'media',
+        }),
+
+        MetaDescriptionField({}),
+
+        PreviewField({
+          hasGenerateFn: true,
+          titlePath: 'meta.title',
+          descriptionPath: 'meta.description',
+        }),
+
+        {
+          name: 'schema',
+          type: 'json',
+          label: 'Structured Data (JSON-LD)',
+          admin: {
+            description: 'Paste valid JSON-LD schema for this quiz',
+          },
+        }, 
+      ],
+    },
   ],
+
   hooks: {
     afterChange: [revalidateQuiz],
     afterDelete: [revalidateQuizDelete],

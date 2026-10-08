@@ -518,6 +518,26 @@ export interface Quiz {
   quizEndDate: string;
   questions: (number | Question)[];
   status?: ('draft' | 'active' | 'completed') | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+    /**
+     * Paste valid JSON-LD schema for this quiz
+     */
+    schema?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1412,6 +1432,14 @@ export interface QuizzesSelect<T extends boolean = true> {
   quizEndDate?: T;
   questions?: T;
   status?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+        schema?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

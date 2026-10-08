@@ -3,37 +3,62 @@ import { getPayload } from 'payload'
 import configPromise from 'src/payload.config'
 import QuizCountdown from './QuizCountdown'
 import QuizHeader from './QuizHeader'
+import { generateMeta } from '@/utilities/generateMeta'
+import { cache } from 'react'
 
 export const revalidate = 600
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: 'Chenz Quiz | Daily Chennai Quiz, Trivia Games & Leaderboard',
-    description: `Play today's Chenz Quiz by Super Chennai. Solve MCQ, Wordle and Spot the Lie games on the city, climb the local leaderboard and earn your Chennai Master badge.`,
-  }
-}
-
-export default async function QuizzesPage() {
+const queryTodayQuiz = cache(async () => {
   const payload = await getPayload({ config: configPromise })
-
   const quizzes = await payload.find({
     collection: 'quizzes',
     where: {
       status: { equals: 'active' },
     },
     sort: 'quizDate',
-    limit: 10,
+    limit: 1,
     depth: 2,
     overrideAccess: true,
   })
+  return quizzes.docs?.[0] || null
+})
 
-  const todayQuiz = quizzes.docs?.[0]
+export async function generateMetadata(): Promise<Metadata> {
+  const todayQuiz = await queryTodayQuiz()
+
+  let baseMeta: Metadata = {
+    title: '',
+    description: '',
+  }
+
+  if (todayQuiz) {
+    baseMeta = await generateMeta({ doc: todayQuiz as any })
+  }
+
+  const rawSchema = (todayQuiz as any)?.meta?.schema
+  const schemaString =
+    typeof rawSchema === 'string' ? rawSchema : rawSchema ? JSON.stringify(rawSchema) : null
+
+  return {
+    ...baseMeta,
+    other: {
+      ...((baseMeta as any)?.other || {}),
+      ...(schemaString
+        ? {
+            'script:ld+json': schemaString,
+          }
+        : {}),
+    },
+  } as any
+}
+
+export default async function QuizzesPage() {
+  const todayQuiz = await queryTodayQuiz()
 
   return (
     <div className="relative min-h-screen text-slate-800 pt-16 pb-24 border-t border-slate-100 bg-cover bg-center bg-no-repeat bg-fixed bg-[url('/app-images/background-one.png')] padddingtopppp">
-      <div className="relative z-10 container mx-auto px-4 max-w-7xl  quizeesectionconatinerrr ">
+      <div className="relative z-10 container mx-auto px-4 max-w-7xl quizeesectionconatinerrr">
         <QuizHeader />
-
         {todayQuiz ? (
           <QuizCountdown
             quizDate={todayQuiz.quizDate}
@@ -43,7 +68,7 @@ export default async function QuizzesPage() {
             quizTitle={todayQuiz.quizTitle}
           />
         ) : (
-          <div className="relative overflow-hidden bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border border-slate-800/80 rounded-3xl p-10 md:p-14 text-center shadow-2xl mb-12 ">
+          <div className="relative overflow-hidden bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border border-slate-800/80 rounded-3xl p-10 md:p-14 text-center shadow-2xl mb-12">
             <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -bottom-24 left-1/2 -translate-x-1/2 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="relative z-10 max-w-md mx-auto flex flex-col items-center">
@@ -82,16 +107,13 @@ export default async function QuizzesPage() {
                   </span>
                 </div>
               </div>
-
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/60 text-indigo-400 text-xs font-bold uppercase tracking-wider mb-4">
                 <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
                 Daily Quiz Schedule
               </div>
-
               <h3 className="text-2xl md:text-3xl font-black text-white mb-3 tracking-tight">
                 No Active Quiz Scheduled
               </h3>
-
               <p className="text-slate-400 text-base leading-relaxed mb-8">
                 We are preparing fresh challenges! Check back in a bit or explore previous quizzes.
               </p>
