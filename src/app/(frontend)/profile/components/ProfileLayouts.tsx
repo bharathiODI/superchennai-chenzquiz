@@ -102,7 +102,7 @@ export function MyStatsSection({ stats }: { stats: any }) {
   return (
     <div className="mb-8">
       {/* Fixed: Text color changed from #fff to dark indigo for proper visibility */}
-      <h2 className="text-xl md:text-2xl font-extrabold text-[#11145A] mb-4">My Stats</h2>
+      <h2 className="text-xl md:text-2xl font-extrabold text-[#fff] mb-4">My Stats</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
         {statCards.map((card, idx) => {
           const IconComponent = card.icon
@@ -146,7 +146,7 @@ export function RankAndStreakSection({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
       {/* My Rank Card */}
       <div>
-        <h2 className="text-xl font-extrabold text-[#11145A] mb-4">My Rank</h2>
+        <h2 className="text-xl font-extrabold text-[#fff] mb-4">My Rank</h2>
         <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-md shadow-slate-100/80 flex items-center justify-between">
         
 
@@ -168,7 +168,7 @@ export function RankAndStreakSection({
 
       {/* My Streak Card */}
       <div>
-        <h2 className="text-xl font-extrabold text-[#11145A] mb-4">My Streak</h2>
+        <h2 className="text-xl font-extrabold text-[#fff] mb-4">My Streak</h2>
         <div className="bg-gradient-to-r from-amber-50/60 to-orange-50/40 border border-amber-200/50 rounded-3xl p-6 shadow-md shadow-slate-100/80 flex items-center justify-around">
           <div className="w-[1px] h-12 bg-amber-200/60" />
 
