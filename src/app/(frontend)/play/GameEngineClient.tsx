@@ -13,6 +13,7 @@ import { SpotLieGame } from './components/games/SpotLieGame'
 import { DragDropGame } from './components/games/DragDropGame'
 
 import confetti from 'canvas-confetti'
+import QuizResultCard, { type SubmitTitle } from './components/QuizResultCard'
 
 export default function GameEngineClient({ quiz }: { quiz: any }) {
   const router = useRouter()
@@ -25,6 +26,8 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true)
   const [alreadyPlayedToday, setAlreadyPlayedToday] = useState(false)
   const [lastAttemptScore, setLastAttemptScore] = useState<number | null>(null)
+  const [resultTitle, setResultTitle] = useState<SubmitTitle | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Warning Modal State for Skipped Questions
   const [showSkipWarningModal, setShowSkipWarningModal] = useState(false)
@@ -279,6 +282,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         return
       }
 
+      setIsSubmitting(true)
       const res = await fetch('/api/quiz-submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -296,10 +300,13 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
       if (!res.ok && data.alreadyPlayed) {
         setAlreadyPlayedToday(true)
       } else {
+        if (data?.title) setResultTitle(data.title)
         console.log('✅ Quiz Submitted Successfully:', data)
       }
     } catch (err) {
       console.error('❌ Error submitting score:', err)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -418,54 +425,12 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
   // Completed View
   if (isCompleted) {
     return (
-      // <div className="bg-white border border-slate-200 p-10 rounded-3xl shadow-lg text-center max-w-lg mx-auto">
-      //   <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">
-      //     🏆
-      //   </div>
-      //   <h2 className="text-3xl font-black text-slate-900 mb-2">Quiz Completed!</h2>
-      //   <p className="text-slate-500 mb-6">
-      //     Great effort {currentUser?.name}! Here is your total score:
-      //   </p>
-      //   <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 max-w-xs mx-auto mb-8">
-      //     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
-      //       Total Score
-      //     </p>
-      //     <p className="text-5xl font-black text-indigo-600">{totalScore} XP</p>
-      //   </div>
-      //   <Link
-      //     href="/leaderboard"
-      //     className="inline-block px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl transition"
-      //   >
-      //     View Leaderboard
-      //   </Link>
-      // </div>
-
-      <div className="bg-white border border-slate-200 p-10 rounded-3xl shadow-lg text-center max-w-lg mx-auto">
-        <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-6">
-          🏆
-        </div>
-
-        <h2 className="text-3xl font-black text-slate-900 mb-2">Quiz Completed!</h2>
-
-        <p className="text-slate-500 mb-6">
-          Great effort {currentUser?.name}! Here is your total score:
-        </p>
-
-        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 max-w-xs mx-auto mb-8">
-          <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
-            Total Score
-          </p>
-
-          <p className="text-5xl font-black text-indigo-600">{totalScore} XP</p>
-        </div>
-
-        <Link
-          href="/leaderboard"
-          className="inline-block px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl transition"
-        >
-          View Leaderboard
-        </Link>
-      </div>
+      <QuizResultCard
+        playerName={currentUser?.name}
+        scoreEarned={totalScore}
+        title={resultTitle}
+        isSubmitting={isSubmitting}
+      />
     )
   }
 

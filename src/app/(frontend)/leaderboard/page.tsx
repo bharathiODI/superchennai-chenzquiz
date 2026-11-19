@@ -1,15 +1,84 @@
+/* eslint-disable @next/next/no-img-element */
 import type { Metadata } from 'next/types'
 import { getPayload } from 'payload'
 import Link from 'next/link'
 import configPromise from 'src/payload.config'
+import { CalendarDays, CalendarRange, Crown, Flame, Sun } from 'lucide-react'
 import AuthGuard from './AuthGuard'
+import { Laurel, TitleBadge } from '@/components/quiz/TitleBadge'
+import { getQuizTitles } from '@/utilities/getQuizTitles'
+import { getTitleForXP, type QuizTitle } from '@/utilities/quizTitles'
+import { computeStreaks } from '@/utilities/quizStreak'
 
+export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: 'Top Quiz Champions | Super Chennai Leaderboard',
   }
+}
+
+type Tab = 'daily' | 'weekly' | 'monthly' | 'all'
+
+const TABS: { id: Tab; label: string; icon: typeof Sun; xpLabel: string }[] = [
+  { id: 'daily', label: 'Daily', icon: Sun, xpLabel: 'XP (Today)' },
+  { id: 'weekly', label: 'Weekly', icon: CalendarDays, xpLabel: 'XP (This Week)' },
+  { id: 'monthly', label: 'Monthly', icon: CalendarRange, xpLabel: 'XP (This Month)' },
+  { id: 'all', label: 'All Time', icon: Crown, xpLabel: 'XP (All Time)' },
+]
+
+type Ranked = {
+  id: string
+  xp: number
+  timeTaken: number
+  name: string
+}
+
+type Player = Ranked & {
+  rank: number
+  avatarUrl: string | null
+  overallXP: number
+  streak: number
+  title: ReturnType<typeof getTitleForXP>
+}
+
+const PAGE_SIZE = 10
+
+function relId(value: unknown): string | null {
+  if (value === null || value === undefined) return null
+  if (typeof value === 'object') {
+    const id = (value as { id?: unknown }).id
+    return id === null || id === undefined ? null : String(id)
+  }
+  return String(value)
+}
+
+function avatarOf(user: any): string | null {
+  const a = user?.avatar
+  if (a && typeof a === 'object' && a.url) return String(a.url)
+  return null
+}
+
+// Start of the requested period in India time, returned as a UTC instant.
+function getIndiaPeriodStart(tab: Tab, now: Date): Date {
+  const indiaDate = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }))
+  indiaDate.setHours(0, 0, 0, 0)
+
+  if (tab === 'weekly') {
+    const daysSinceMonday = (indiaDate.getDay() + 6) % 7
+    indiaDate.setDate(indiaDate.getDate() - daysSinceMonday)
+  } else if (tab === 'monthly') {
+    indiaDate.setDate(1)
+  }
+
+  // Server clock may not be in IST: shift by the difference between local and IST offsets.
+  const localOffsetMin = -indiaDate.getTimezoneOffset()
+  return new Date(indiaDate.getTime() + (localOffsetMin - 330) * 60 * 1000)
+}
+
+function byRank(a: Ranked, b: Ranked) {
+  return b.xp - a.xp || a.timeTaken - b.timeTaken || a.name.localeCompare(b.name)
 }
 
 export default async function LeaderboardPage({
@@ -20,68 +89,162 @@ export default async function LeaderboardPage({
   const resolvedSearchParams = await searchParams
   const payload = await getPayload({ config: configPromise })
 
-  const pageParam = Number(resolvedSearchParams?.page) || 1
-  const limit = 10
-  const tab = (resolvedSearchParams?.tab as string) || 'all'
+  const requestedTab = resolvedSearchParams?.tab
+  const tab: Tab =
+    typeof requestedTab === 'string' && TABS.some((t) => t.id === requestedTab)
+      ? (requestedTab as Tab)
+      : 'all'
 
-  const whereClause: Record<string, any> = {}
+  const requestedPage = Number(resolvedSearchParams?.page)
+  const pageParam = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
+  const now = new Date()
 
-  if (tab !== 'all') {
-    const now = new Date()
-    let startDate = new Date()
+  // ---------------------------------------------------------------
+  // 1. Ranking for the selected period
+  // ---------------------------------------------------------------
+  let pageRows: Ranked[] = []
+  let podiumRows: Ranked[] = []
+  let totalPages = 1
+  const usersById = new Map<string, any>()
 
-    if (tab === 'daily') {
-      startDate.setHours(0, 0, 0, 0)
-    } else if (tab === 'weekly') {
-      const day = startDate.getDay()
-      const diff = startDate.getDate() - day + (day === 0 ? -6 : 1) // இந்த வாரத்தின் திங்கள் கிழமை
-      startDate = new Date(startDate.setDate(diff))
-      startDate.setHours(0, 0, 0, 0)
-    } else if (tab === 'monthly') {
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1) // இந்த மாதத்தின் 1-ஆம் தேதி
-      startDate.setHours(0, 0, 0, 0)
+  if (tab === 'all') {
+    const findPage = (page: number, limit: number) =>
+      payload.find({
+        collection: 'quiz-users',
+        sort: ['-totalXP', 'totalTimeTaken', 'createdAt'],
+        limit,
+        page,
+        depth: 1,
+        overrideAccess: true,
+      })
+
+    const result = await findPage(pageParam, PAGE_SIZE)
+    const podium = pageParam === 1 ? result : await findPage(1, 3)
+
+    const toRanked = (u: any): Ranked => {
+      usersById.set(String(u.id), u)
+      return {
+        id: String(u.id),
+        name: u.name || u.email || 'Anonymous',
+        xp: Math.max(0, Number(u.totalXP) || 0),
+        timeTaken: Math.max(0, Number(u.totalTimeTaken) || 0),
+      }
     }
 
-    // `updatedAt` அல்லது `createdAt` அடிப்படையில் வடிகட்டுதல்
-    whereClause.updatedAt = {
-      greater_than_equal: startDate.toISOString(),
+    pageRows = result.docs.map(toRanked)
+    podiumRows = podium.docs.slice(0, 3).map(toRanked)
+    totalPages = Math.max(1, result.totalPages || 1)
+  } else {
+    const startDate = getIndiaPeriodStart(tab, now)
+    const stats = new Map<string, Ranked>()
+    let page = 1
+    let hasNextPage = true
+
+    while (hasNextPage) {
+      const res = await payload.find({
+        collection: 'quiz-attempts',
+        where: {
+          and: [
+            { completedAt: { greater_than_equal: startDate.toISOString() } },
+            { completedAt: { less_than_equal: now.toISOString() } },
+          ],
+        },
+        sort: 'completedAt',
+        limit: 1000,
+        page,
+        depth: 0,
+        overrideAccess: true,
+      })
+
+      for (const attempt of res.docs as any[]) {
+        const userId = relId(attempt.user)
+        if (!userId) continue
+        const row = stats.get(userId) ?? { id: userId, name: '', xp: 0, timeTaken: 0 }
+        row.xp += Math.max(0, Number(attempt.score) || 0)
+        row.timeTaken += Math.max(0, Number(attempt.timeTaken) || 0)
+        stats.set(userId, row)
+      }
+
+      hasNextPage = Boolean(res.hasNextPage)
+      page += 1
     }
+
+    // Names, avatars and overall XP for everyone ranked in this period
+    const ids = Array.from(stats.keys())
+    if (ids.length) {
+      const users = await payload.find({
+        collection: 'quiz-users',
+        where: { id: { in: ids } },
+        limit: ids.length,
+        depth: 1,
+        overrideAccess: true,
+      })
+      for (const u of users.docs as any[]) {
+        usersById.set(String(u.id), u)
+        const row = stats.get(String(u.id))
+        if (row) row.name = u.name || u.email || 'Anonymous'
+      }
+    }
+
+    const ranked = Array.from(stats.values())
+      .map((r) => ({ ...r, name: r.name || 'Anonymous' }))
+      .sort(byRank)
+
+    totalPages = Math.max(1, Math.ceil(ranked.length / PAGE_SIZE))
+    pageRows = ranked.slice((pageParam - 1) * PAGE_SIZE, pageParam * PAGE_SIZE)
+    podiumRows = ranked.slice(0, 3)
   }
 
-  // 🔍 2. Payload DB Query-இல் `where` Condition சேர்த்தல்
-  const topUsersResult = await payload
-    .find({
-      collection: 'quiz-users',
-      where: whereClause, // 💥 Added Date Filter Here
-      sort: ['-totalXP', 'totalTimeTaken', 'createdAt'],
-      limit: 20,
+  // ---------------------------------------------------------------
+  // 2. Streaks + titles for the players on screen
+  // ---------------------------------------------------------------
+  const visibleIds = Array.from(new Set([...pageRows, ...podiumRows].map((r) => r.id)))
+  const playDates = new Map<string, string[]>()
+
+  if (visibleIds.length) {
+    const attempts = await payload.find({
+      collection: 'quiz-attempts',
+      where: { user: { in: visibleIds } },
+      limit: 10000,
+      depth: 0,
       overrideAccess: true,
     })
-    .catch(() => ({ docs: [], totalDocs: 0 }))
-
-  const topUsers = topUsersResult.docs || []
-
-  // Rank 1, 2, 3 extraction for podium
-  const rank1 = topUsers[0]
-  const rank2 = topUsers[1]
-  const rank3 = topUsers[2]
-
-  // Time Formatter Function
-  function formatTime(seconds: number): string {
-    if (!seconds || seconds <= 0) return '0s'
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    if (mins === 0) return `${secs}s`
-    return `${mins}m ${secs}s`
+    for (const a of attempts.docs as any[]) {
+      const userId = relId(a.user)
+      if (!userId || !a.completedAt) continue
+      const list = playDates.get(userId) ?? []
+      list.push(a.completedAt)
+      playDates.set(userId, list)
+    }
   }
+
+  const titles: QuizTitle[] = await getQuizTitles(payload)
+
+  const enrich = (row: Ranked, rank: number): Player => {
+    const user = usersById.get(row.id)
+    const overallXP = Math.max(0, Number(user?.totalXP) || 0)
+    return {
+      ...row,
+      rank,
+      avatarUrl: avatarOf(user),
+      overallXP,
+      streak: computeStreaks(playDates.get(row.id) ?? [], now).current,
+      title: getTitleForXP(overallXP, titles),
+    }
+  }
+
+  const players = pageRows.map((r, i) => enrich(r, (pageParam - 1) * PAGE_SIZE + i + 1))
+  const podium = podiumRows.map((r, i) => enrich(r, i + 1))
+  const [rank1, rank2, rank3] = podium
+  const activeTab = TABS.find((t) => t.id === tab)!
+
+  const pageHref = (page: number) => `/leaderboard?tab=${tab}&page=${page}`
 
   return (
     <AuthGuard>
       <div className="min-h-screen text-slate-800 relative overflow-hidden py-12 px-4 sm:px-6 bg-[url('/images/gamingpagebgg.jpeg')] bg-no-repeat bg-cover bg-center padddingtopppp leaderrrboardddcontainerr">
-        {/* <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-purple-400/10 blur-[120px] pointer-events-none rounded-full" /> */}
-
         <div className="container mx-auto max-w-4xl relative z-10 space-y-6">
-          <div className="bg-white/95 backdrop-blur-xl border border-white rounded-[28px] p-6 sm:p-10 shadow-xl shadow-purple-500/5">
+          <div className="bg-white/95 backdrop-blur-xl border border-white rounded-[28px] p-5 sm:p-10 shadow-xl shadow-purple-500/5">
             <Link
               href="/quizzes"
               className="px-4 py-2 bg-white/80 hover:bg-white text-slate-800 border border-slate-200 font-bold text-xs rounded-2xl shadow-xs transition inline-block mb-4"
@@ -99,189 +262,136 @@ export default async function LeaderboardPage({
             </div>
 
             {/* FILTER TABS */}
-            <div className="flex items-center justify-center gap-2 mb-10 overflow-x-auto pb-2 formflexstatt">
-              {[
-                { id: 'daily', label: 'Daily' },
-                { id: 'weekly', label: 'Weekly' },
-                { id: 'monthly', label: 'Monthly' },
-                { id: 'all', label: 'All Time' },
-              ].map((t) => {
-                const isActive = tab === t.id
-                return (
-                  <Link
-                    key={t.id}
-                    href={`/leaderboard?tab=${t.id}`}
-                    className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-200 whitespace-nowrap border ${
-                      isActive
-                        ? 'bg-gradient-to-r from-[#6D20FF] to-[#8a4fff] text-white border-transparent shadow-md shadow-purple-500/25 scale-105'
-                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
-                    }`}
-                  >
-                    {t.label}
-                  </Link>
-                )
-              })}
+            <div className="flex justify-center mb-10">
+              <div className="inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-purple-100 bg-white p-1.5 shadow-md shadow-purple-500/10">
+                {TABS.map((t) => {
+                  const isActive = tab === t.id
+                  const Icon = t.icon
+                  return (
+                    <Link
+                      key={t.id}
+                      href={`/leaderboard?tab=${t.id}`}
+                      className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition sm:px-6 sm:text-sm ${
+                        isActive
+                          ? 'bg-gradient-to-r from-[#6D20FF] to-[#8a4fff] text-white shadow-md shadow-purple-500/30'
+                          : 'text-slate-600 hover:bg-purple-50'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {t.label}
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
 
-            {topUsers.length === 0 ? (
+            {players.length === 0 && podium.length === 0 ? (
               <div className="text-center py-16 text-slate-400 font-medium">
                 No champions ranked for this period yet. Play a game to claim your spot!
               </div>
             ) : (
               <>
-                {/* TOP 3 PODIUM SECTION */}
-                <div className="grid grid-cols-3 gap-3 sm:gap-6 items-end mb-12 pt-6 pb-4 leaderrboradflexx">
-                  {/* RANK 2 (Left) */}
-                  {rank2 ? (
-                    <div className="flex flex-col items-center text-center transform translate-y-4 flexxxxxxs">
-                      <div className="relative mb-3">
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-slate-200 border-4 border-[#9AA3B8] flex items-center justify-center text-slate-700 font-black text-xl sm:text-2xl shadow-md">
-                          {rank2.name?.[0]?.toUpperCase() || 'P'}
-                        </div>
-                        <div className="absolute -bottom-2 -right-1 w-6 h-6 sm:w-7 sm:h-7 bg-[#9AA3B8] text-white font-black text-xs rounded-full flex items-center justify-center border-2 border-white shadow">
-                          2
-                        </div>
-                      </div>
-                      <p className="font-bold text-slate-900 text-xs sm:text-sm truncate max-w-[auto] sm:max-w-[auto]">
-                        {rank2.name || 'Player 2'}
-                      </p>
-                      <div className="flex flex-wrap justify-center items-center gap-1 mt-1">
-                        <span className="text-xs font-black text-[#9AA3B8]">
-                          {rank2.totalXP || 0} XP
-                        </span>
-                        {/* <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full border border-slate-200">
-                          ⏱️ {formatTime((rank2 as any).totalTimeTaken || 0)}
-                        </span> */}
-                      </div>
-                    </div>
-                  ) : (
-                    <div />
-                  )}
-
-                  {/* RANK 1 (Center - Champion) */}
-                  {rank1 ? (
-                    <div className="flex flex-col items-center text-center z-10 -translate-y-4 flexxxxxxs">
-                      <div className="relative mb-3">
-                        <div className="absolute -top-7 left-1/2 -translate-x-1/2 text-amber-500 text-xl sm:text-2xl animate-bounce">
-                          👑
-                        </div>
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 border-4 border-[#F5A623] flex items-center justify-center text-white font-black text-2xl sm:text-3xl shadow-xl shadow-purple-500/20">
-                          {rank1.name?.[0]?.toUpperCase() || 'C'}
-                        </div>
-                        <div className="absolute -bottom-2 -right-1 w-7 h-7 sm:w-8 sm:h-8 bg-[#F5A623] text-white font-black text-xs rounded-full flex items-center justify-center border-2 border-white shadow">
-                          1
-                        </div>
-                      </div>
-                      <p className="font-black text-slate-900 text-sm sm:text-base truncate max-w-[auto] sm:max-w-[auto]">
-                        {rank1.name || 'Champion'}
-                      </p>
-                      <div className="flex flex-wrap justify-center items-center gap-1 mt-1">
-                        <span className="text-xs sm:text-sm font-black text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
-                          {rank1.totalXP || 0} XP
-                        </span>
-                        {/* <span className="text-[10px] sm:text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-                          ⏱️ {formatTime((rank1 as any).totalTimeTaken || 0)}
-                        </span> */}
-                      </div>
-                    </div>
-                  ) : (
-                    <div />
-                  )}
-
-                  {/* RANK 3 (Right) */}
-                  {rank3 ? (
-                    <div className="flex flex-col items-center text-center transform translate-y-6 flexxxxxxs">
-                      <div className="relative mb-3">
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-amber-100 border-4 border-[#C96A3A] flex items-center justify-center text-[#C96A3A] font-black text-xl sm:text-2xl shadow-md">
-                          {rank3.name?.[0]?.toUpperCase() || 'P'}
-                        </div>
-                        <div className="absolute -bottom-2 -right-1 w-6 h-6 sm:w-7 sm:h-7 bg-[#C96A3A] text-white font-black text-xs rounded-full flex items-center justify-center border-2 border-white shadow">
-                          3
-                        </div>
-                      </div>
-                      <p className="font-bold text-slate-900 text-xs sm:text-sm truncate max-w-[auto] sm:max-w-[auto]">
-                        {rank3.name || 'Player 3'}
-                      </p>
-                      <div className="flex flex-wrap justify-center items-center gap-1 mt-1">
-                        <span className="text-xs font-black text-[#C96A3A]">
-                          {rank3.totalXP || 0} XP
-                        </span>
-                        {/* <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full border border-slate-200">
-                          ⏱️ {formatTime((rank3 as any).totalTimeTaken || 0)}
-                        </span> */}
-                      </div>
-                    </div>
-                  ) : (
-                    <div />
-                  )}
+                {/* TOP 3 PODIUM */}
+                <div className="mb-10 grid grid-cols-3 items-end gap-2 sm:gap-6">
+                  <PodiumSpot player={rank2} place={2} />
+                  <PodiumSpot player={rank1} place={1} />
+                  <PodiumSpot player={rank3} place={3} />
                 </div>
 
                 {/* LEADERBOARD TABLE */}
-                <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
-                  {/* Table Header */}
-                  <div className="grid grid-cols-12 bg-[#f8f9fc] px-4 sm:px-6 py-3.5 text-xs font-extrabold text-[#10145C] border-b border-slate-200 tracking-wider">
+                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                  <div className="grid grid-cols-12 gap-2 border-b border-slate-200 bg-[#f8f6ff] px-3 py-3.5 text-[11px] font-extrabold uppercase tracking-wider text-[#10145C] sm:px-6 sm:text-xs">
                     <div className="col-span-2 sm:col-span-1">Rank</div>
-                    <div className="col-span-5 sm:col-span-6">Player</div>
-                    {/* <div className="col-span-2 sm:col-span-2 text-center">Time ⏱️</div> */}
-                    <div className="col-span-3 sm:col-span-3 text-right">Score</div>
+                    <div className="col-span-6 sm:col-span-4">Player</div>
+                    <div className="hidden sm:block sm:col-span-2">Streak</div>
+                    <div className="hidden sm:block sm:col-span-3">Title</div>
+                    <div className="col-span-4 sm:col-span-2 text-right">{activeTab.xpLabel}</div>
                   </div>
 
-                  {/* Table Body */}
                   <div className="divide-y divide-slate-100">
-                    {topUsers.map((user: any, index: number) => {
-                      const rank = index + 1
-                      return (
-                        <div
-                          key={user.id || index}
-                          className={`grid grid-cols-12 px-4 sm:px-6 py-4 items-center text-sm transition hover:bg-slate-50/80 tableeeviewwws ${
-                            rank <= 3 ? 'bg-purple-50/20 font-semibold' : ''
-                          }`}
-                        >
-                          {/* Rank */}
-                          <div className="col-span-2 sm:col-span-1 font-black text-slate-700">
-                            #{rank}
-                          </div>
+                    {players.map((p) => (
+                      <div
+                        key={p.id}
+                        className={`grid grid-cols-12 items-center gap-2 px-3 py-3.5 text-sm transition hover:bg-slate-50/80 sm:px-6 ${ROW_HIGHLIGHT[p.rank] ?? ''}`}
+                      >
+                        <div className="col-span-2 flex items-center gap-1 font-black text-slate-700 sm:col-span-1">
+                          {p.rank <= 3 && <Crown className={`h-4 w-4 ${CROWN_TONE[p.rank]}`} />}#{p.rank}
+                        </div>
 
-                          {/* User Profile */}
-                          <div className="col-span-5 sm:col-span-6 flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs shrink-0 border border-indigo-200">
-                              {user.name?.[0]?.toUpperCase() || 'U'}
+                        <div className="col-span-6 flex min-w-0 items-center gap-3 sm:col-span-4">
+                          <Avatar player={p} size="sm" />
+                          <div className="min-w-0">
+                            <p className="truncate font-bold text-slate-900">{p.name}</p>
+                            {/* mobile: streak + title under the name */}
+                            <div className="mt-1 flex flex-wrap items-center gap-1.5 sm:hidden">
+                              <TitleBadge
+                                name={p.title.title.name}
+                                tierIndex={p.title.tierIndex}
+                                tierCount={p.title.tierCount}
+                                className="!text-[10px] !px-2"
+                              />
+                              {p.streak > 0 && (
+                                <span className="inline-flex items-center gap-0.5 text-[11px] font-bold text-orange-600">
+                                  <Flame className="h-3 w-3 fill-orange-400" />
+                                  {p.streak}d
+                                </span>
+                              )}
                             </div>
-                            <span className="font-bold text-slate-900 truncate">
-                              {user.name || user.email || 'Anonymous'}
-                            </span>
-                          </div>
-
-                          {/* Time Taken Column */}
-                          {/* <div className="col-span-2 sm:col-span-2 text-center font-bold text-slate-500 text-xs sm:text-sm">
-                            {formatTime(user.totalTimeTaken || 0)}
-                          </div> */}
-
-                          {/* XP Score Column */}
-                          <div className="col-span-3 sm:col-span-3 text-right font-black text-purple-600">
-                            {user.totalXP || 0}{' '}
-                            <span className="text-xs font-normal text-slate-400">XP</span>
                           </div>
                         </div>
-                      )
-                    })}
+
+                        <div className="hidden items-center gap-1 font-bold text-slate-600 sm:col-span-2 sm:flex">
+                          {p.streak > 0 ? (
+                            <>
+                              <Flame className="h-4 w-4 fill-orange-400 text-orange-500" />
+                              {p.streak} {p.streak === 1 ? 'day' : 'days'}
+                            </>
+                          ) : (
+                            <span className="text-slate-300">-</span>
+                          )}
+                        </div>
+
+                        <div className="hidden sm:col-span-3 sm:block">
+                          <TitleBadge
+                            name={p.title.title.name}
+                            tierIndex={p.title.tierIndex}
+                            tierCount={p.title.tierCount}
+                          />
+                        </div>
+
+                        <div className="col-span-4 text-right font-black text-purple-600 sm:col-span-2">
+                          {p.xp} <span className="text-xs font-semibold text-slate-400">XP</span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
                 {/* PAGINATION CONTROLS */}
                 <div className="flex items-center justify-center gap-2 mt-8">
-                  <button
-                    disabled={pageParam <= 1}
-                    className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+                  <Link
+                    href={pageHref(Math.max(1, pageParam - 1))}
+                    aria-disabled={pageParam <= 1}
+                    className={`w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition ${
+                      pageParam <= 1 ? 'pointer-events-none opacity-40' : ''
+                    }`}
                   >
                     ←
-                  </button>
+                  </Link>
+
                   <div className="px-4 py-2 rounded-full bg-purple-600 text-white font-bold text-xs shadow-sm">
-                    {pageParam}
+                    {pageParam} / {totalPages}
                   </div>
-                  <button className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition">
+
+                  <Link
+                    href={pageHref(Math.min(totalPages, pageParam + 1))}
+                    aria-disabled={pageParam >= totalPages}
+                    className={`w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition ${
+                      pageParam >= totalPages ? 'pointer-events-none opacity-40' : ''
+                    }`}
+                  >
                     →
-                  </button>
+                  </Link>
                 </div>
               </>
             )}
@@ -289,5 +399,111 @@ export default async function LeaderboardPage({
         </div>
       </div>
     </AuthGuard>
+  )
+}
+
+const ROW_HIGHLIGHT: Record<number, string> = {
+  1: 'bg-amber-50/80',
+  2: 'bg-slate-50',
+  3: 'bg-orange-50/60',
+}
+
+const CROWN_TONE: Record<number, string> = {
+  1: 'fill-amber-400 text-amber-500',
+  2: 'fill-slate-300 text-slate-400',
+  3: 'fill-orange-300 text-orange-500',
+}
+
+const PLACE_STYLE: Record<1 | 2 | 3, { ring: string; badge: string; block: string }> = {
+  1: {
+    ring: 'ring-4 ring-amber-400',
+    badge: 'bg-amber-400',
+    block: 'h-24 sm:h-28 bg-gradient-to-b from-amber-200 to-amber-100',
+  },
+  2: {
+    ring: 'ring-4 ring-slate-300',
+    badge: 'bg-slate-400',
+    block: 'h-16 sm:h-20 bg-gradient-to-b from-purple-200 to-purple-100',
+  },
+  3: {
+    ring: 'ring-4 ring-orange-400',
+    badge: 'bg-orange-500',
+    block: 'h-12 sm:h-14 bg-gradient-to-b from-purple-200 to-purple-100',
+  },
+}
+
+function Avatar({ player, size }: { player: Player; size: 'sm' | 'lg' | 'xl' }) {
+  const dims = {
+    sm: 'h-9 w-9 text-xs',
+    lg: 'h-16 w-16 sm:h-20 sm:w-20 text-xl sm:text-2xl',
+    xl: 'h-20 w-20 sm:h-24 sm:w-24 text-2xl sm:text-3xl',
+  }[size]
+
+  if (player.avatarUrl) {
+    return (
+      <img
+        src={player.avatarUrl}
+        alt={player.name}
+        className={`${dims} shrink-0 rounded-full object-cover`}
+      />
+    )
+  }
+
+  return (
+    <div
+      className={`${dims} flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-100 to-purple-200 font-black text-indigo-700`}
+    >
+      {player.name?.[0]?.toUpperCase() || 'P'}
+    </div>
+  )
+}
+
+function PodiumSpot({ player, place }: { player?: Player; place: 1 | 2 | 3 }) {
+  const style = PLACE_STYLE[place]
+
+  return (
+    <div className="flex flex-col items-center text-center">
+      {player ? (
+        <>
+          <div className="relative mb-3 flex items-end">
+            {place === 1 && <Laurel className="hidden h-20 w-9 sm:block" />}
+            <div className="relative">
+              {place === 1 && (
+                <Crown className="absolute -top-7 left-1/2 h-7 w-7 -translate-x-1/2 fill-amber-400 text-amber-500" />
+              )}
+              <div className={`rounded-full ${style.ring} ring-offset-2`}>
+                <Avatar player={player} size={place === 1 ? 'xl' : 'lg'} />
+              </div>
+              <span
+                className={`absolute -bottom-2 left-1/2 flex h-7 w-7 -translate-x-1/2 items-center justify-center rounded-full border-2 border-white text-xs font-black text-white shadow ${style.badge}`}
+              >
+                {place}
+              </span>
+            </div>
+            {place === 1 && <Laurel flip className="hidden h-20 w-9 sm:block" />}
+          </div>
+          <p className="mt-1 max-w-full truncate px-1 text-xs font-black text-slate-900 sm:text-base">
+            {player.name}
+          </p>
+          <span className="mt-1 rounded-lg bg-[#2E1065] px-2.5 py-0.5 text-xs font-black text-white sm:text-sm">
+            {player.xp} XP
+          </span>
+          <span className="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-slate-600 sm:text-xs">
+            <Flame className="h-3.5 w-3.5 fill-orange-400 text-orange-500" />
+            {player.streak > 0 ? `${player.streak}-day streak` : 'No streak yet'}
+          </span>
+          <div className="mt-1 hidden sm:block">
+            <TitleBadge
+              name={player.title.title.name}
+              tierIndex={player.title.tierIndex}
+              tierCount={player.title.tierCount}
+            />
+          </div>
+        </>
+      ) : (
+        <div className="h-24" />
+      )}
+      <div className={`mt-3 w-full rounded-t-2xl ${style.block}`} />
+    </div>
   )
 }

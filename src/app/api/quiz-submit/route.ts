@@ -78,6 +78,8 @@
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from 'src/payload.config'
+import { getQuizTitles } from '@/utilities/getQuizTitles'
+import { getTitleForXP } from '@/utilities/quizTitles'
 
 export async function POST(req: Request) {
   try {
@@ -153,19 +155,38 @@ export async function POST(req: Request) {
       })
       .catch(() => null)
 
+    let totalXP = scoreEarned
+
     if (existingUser) {
+      totalXP = (Number(existingUser.totalXP) || 0) + scoreEarned
       await payload.update({
         collection: 'quiz-users',
         id: userId,
         data: {
-          totalXP: (Number(existingUser.totalXP) || 0) + scoreEarned,
+          totalXP,
           totalTimeTaken: (Number((existingUser as any).totalTimeTaken) || 0) + timeTaken,
         },
         overrideAccess: true,
       })
     }
 
-    return NextResponse.json({ success: true, attempt })
+    // 4. Player title (tier) based on the updated total XP
+    const titles = await getQuizTitles(payload)
+    const titleInfo = getTitleForXP(totalXP, titles)
+
+    return NextResponse.json({
+      success: true,
+      attempt,
+      scoreEarned,
+      totalXP,
+      title: {
+        name: titleInfo.title.name,
+        tierIndex: titleInfo.tierIndex,
+        tierCount: titleInfo.tierCount,
+        nextName: titleInfo.next?.name ?? null,
+        xpToNext: titleInfo.xpToNext,
+      },
+    })
   } catch (error: any) {
     console.error('❌ [API SUBMIT ERROR]:', error?.message || error)
     return NextResponse.json(

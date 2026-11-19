@@ -18,6 +18,7 @@ import { QuizUsers } from './collections/Games/QuizUsers'
 import { Quizzes } from './collections/Games/Quizzes'
 import { UserSubmissions } from './collections/Games/UserSubmissions'
 import { QuizAttempts } from './collections/Games/QuizAttempts'
+import { QuizSettings } from './globals/QuizSettings'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -97,7 +98,7 @@ export default buildConfig({
     getServerSideURL(),
   ].filter(Boolean),
 
-  globals: [Header, Footer],
+  globals: [Header, Footer, QuizSettings],
   blocks: [],
   plugins: [...plugins],
   secret: process.env.PAYLOAD_SECRET,

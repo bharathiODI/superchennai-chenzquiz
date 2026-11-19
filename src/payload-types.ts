@@ -112,10 +112,12 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
+    'quiz-settings': QuizSetting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    'quiz-settings': QuizSettingsSelect<false> | QuizSettingsSelect<true>;
   };
   locale: null;
   user:
@@ -1902,6 +1904,27 @@ export interface Footer {
   createdAt?: string | null;
 }
 /**
+ * Player titles shown on the quiz result screen, leaderboard and profile, based on total XP.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-settings".
+ */
+export interface QuizSetting {
+  id: number;
+  /**
+   * A player gets the highest title whose "Min XP" is at or below their total XP. The first row should start at 0.
+   */
+  titles?:
+    | {
+        name: string;
+        minXP: number;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
@@ -1943,6 +1966,22 @@ export interface FooterSelect<T extends boolean = true> {
         platform?: T;
         url?: T;
         icon?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-settings_select".
+ */
+export interface QuizSettingsSelect<T extends boolean = true> {
+  titles?:
+    | T
+    | {
+        name?: T;
+        minXP?: T;
         id?: T;
       };
   updatedAt?: T;

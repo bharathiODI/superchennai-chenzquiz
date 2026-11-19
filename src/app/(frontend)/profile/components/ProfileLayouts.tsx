@@ -12,10 +12,40 @@ import {
   ChevronRight,
   ArrowRight,
   Play,
+  Award,
+  Lock,
+  Medal,
+  Rocket,
+  Sparkles,
+  Zap,
 } from 'lucide-react'
 import { EditProfileModal } from './ClientActions'
+import { TitleBadge } from '@/components/quiz/TitleBadge'
 
-export function ProfileHeaderCard({ user }: { user: any }) {
+export type ProfileTitleInfo = {
+  name: string
+  tierIndex: number
+  tierCount: number
+  nextName: string | null
+  xpToNext: number
+  progress: number
+}
+
+export type Achievement = {
+  key: string
+  label: string
+  description: string
+  earned: boolean
+  icon: 'rocket' | 'compass' | 'target' | 'flame' | 'zap' | 'title'
+}
+
+export function ProfileHeaderCard({
+  user,
+  titleInfo,
+}: {
+  user: any
+  titleInfo?: ProfileTitleInfo
+}) {
   const memberYear = user?.createdAt ? new Date(user.createdAt).getFullYear() : 2026
   const initial = user?.name ? user.name.trim().charAt(0).toUpperCase() : 'S'
 
@@ -42,9 +72,36 @@ export function ProfileHeaderCard({ user }: { user: any }) {
             <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a]">
               {user?.name || 'Chennai Player'}
             </h1>
-            <p className="text-[#5B2EFF] font-bold text-sm md:text-base mt-0.5">
-              Trivia Enthusiast
-            </p>
+            {titleInfo ? (
+              <div className="mt-2 flex flex-col items-center sm:items-start">
+                <TitleBadge
+                  name={titleInfo.name}
+                  tierIndex={titleInfo.tierIndex}
+                  tierCount={titleInfo.tierCount}
+                  className="!text-xs !px-3 !py-1.5"
+                />
+                {titleInfo.nextName ? (
+                  <div className="mt-2 w-56">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-purple-100">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-[#5B2EFF] to-[#a855f7]"
+                        style={{ width: `${titleInfo.progress}%` }}
+                      />
+                    </div>
+                    <p className="mt-1 text-[11px] font-semibold text-slate-500">
+                      {titleInfo.xpToNext} XP to{' '}
+                      <span className="font-extrabold text-[#5B2EFF]">{titleInfo.nextName}</span>
+                    </p>
+                  </div>
+                ) : (
+                  <p className="mt-1 text-[11px] font-semibold text-amber-600">Top title unlocked!</p>
+                )}
+              </div>
+            ) : (
+              <p className="text-[#5B2EFF] font-bold text-sm md:text-base mt-0.5">
+                Trivia Enthusiast
+              </p>
+            )}
             <div className="flex items-center justify-center sm:justify-start gap-1.5 text-slate-400 font-medium text-xs md:text-sm mt-2">
               <Calendar className="w-4 h-4 text-slate-400" />
               <span>Member since {memberYear}</span>
@@ -450,3 +507,89 @@ export function QuizHistorySection({ attempts }: { attempts: any[] }) {
 //     </div>
 //   )
 // }
+
+export function ClimbLeaderboardBanner({ currentRank }: { currentRank?: number }) {
+  return (
+    <div className="mb-8 flex flex-col items-center gap-5 rounded-3xl border border-purple-100 bg-gradient-to-r from-[#F3EEFF] via-white to-[#FFF4E5] p-6 text-center shadow-md shadow-purple-500/5 sm:flex-row sm:text-left md:p-7">
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-300 to-orange-400 shadow-lg shadow-orange-500/20">
+        <Trophy className="h-9 w-9 text-white" />
+      </div>
+      <div className="flex-1">
+        <h3 className="text-xl font-black text-[#2E1065] md:text-2xl">Climb the Leaderboard</h3>
+        <p className="mt-1 text-sm font-medium text-slate-500">
+          Keep playing daily quizzes and earn more XP to move up the rankings!
+          {currentRank ? (
+            <>
+              {' '}
+              You are currently <span className="font-extrabold text-[#5B2EFF]">#{currentRank}</span>.
+            </>
+          ) : null}
+        </p>
+      </div>
+      <Link
+        href="/leaderboard"
+        className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-gradient-to-r from-[#5B2EFF] to-[#7c3aed] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#5B2EFF]/25 transition hover:scale-[1.02]"
+      >
+        View Leaderboard <ArrowRight className="h-4 w-4" />
+      </Link>
+    </div>
+  )
+}
+
+const ACHIEVEMENT_ICONS = {
+  rocket: Rocket,
+  compass: Sparkles,
+  target: Target,
+  flame: Flame,
+  zap: Zap,
+  title: Crown,
+} as const
+
+export function AchievementsSection({ achievements }: { achievements: Achievement[] }) {
+  const earnedCount = achievements.filter((a) => a.earned).length
+
+  return (
+    <div className="mb-8">
+      <h2 className="mb-4 flex items-center gap-2 text-xl font-extrabold text-[#fff] md:text-2xl">
+        <Award className="h-6 w-6" /> My Achievements
+        <span className="text-sm font-bold opacity-80">
+          ({earnedCount}/{achievements.length})
+        </span>
+      </h2>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 md:gap-4">
+        {achievements.map((a) => {
+          const Icon = ACHIEVEMENT_ICONS[a.icon] ?? Medal
+          return (
+            <div
+              key={a.key}
+              className={`rounded-2xl border p-4 transition ${
+                a.earned
+                  ? 'border-purple-100 bg-white shadow-md shadow-purple-500/5'
+                  : 'border-white/60 bg-white/90'
+              }`}
+            >
+              <div className="mb-2 flex items-center justify-between">
+                <div
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                    a.earned
+                      ? 'bg-gradient-to-br from-[#5B2EFF] to-[#a855f7] text-white'
+                      : 'bg-slate-100 text-slate-400'
+                  }`}
+                >
+                  <Icon className="h-5 w-5" />
+                </div>
+                {!a.earned && <Lock className="h-4 w-4 text-slate-300" />}
+              </div>
+              <p className={`text-sm font-extrabold ${a.earned ? 'text-[#11145A]' : 'text-slate-500'}`}>
+                {a.label}
+              </p>
+              <p className={`mt-0.5 text-xs ${a.earned ? 'text-slate-500' : 'text-slate-400'}`}>
+                {a.description}
+              </p>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}

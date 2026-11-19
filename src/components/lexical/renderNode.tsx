@@ -15,6 +15,7 @@ import React from 'react'
 import LetsTalkChennaiFAQBlockComponent from '@/collections/Games/Blocks/LetsTalkChennaiFAQ/LetsTalkChennaiFAQBlockComponent'
 import { CreativeHeroBlock } from '@/collections/Games/Blocks/CreativeHero/Component'
 import InstaReelsSliderComponent from '@/collections/Games/Blocks/InstaReelsSlider/Component'
+import QuizRewardsComponent from '@/collections/Games/Blocks/QuizRewards/Component'
 // import LetsTalkChennaiFAQBlockComponent from '@/collections/Games/Blocks/FAQ/FAQBlockComponent'
 
 export function renderNode(node: any, idx: number, eventData?: any): React.ReactNode {
@@ -162,6 +163,10 @@ export function renderNode(node: any, idx: number, eventData?: any): React.React
 
       if (blockType === 'InstaReelsBlock') {
         return <InstaReelsSliderComponent key={idx} {...node.fields} />
+      }
+
+      if (blockType === 'QuizRewardsBlock') {
+        return <QuizRewardsComponent key={idx} {...node.fields} />
       }
 
       if (blockType === 'creativeHero') {

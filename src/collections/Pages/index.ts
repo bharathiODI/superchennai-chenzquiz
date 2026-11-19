@@ -40,6 +40,7 @@ import { LetsTalkChennaiFAQBlock } from '../Games/Blocks/LetsTalkChennaiFAQ/conf
 import { TriviaAuthBlock } from '../Games/Blocks/ReadytoPlay/config'
 import { CreativeHeroBlock } from '../Games/Blocks/CreativeHero/config'
 import { InstaReelsBlock } from '../Games/Blocks/InstaReelsSlider/config'
+import { QuizRewardsBlock } from '../Games/Blocks/QuizRewards/config'
 import { isAdmin, isAdminAdminAccess } from '@/access/isAdmin'
 
 export const Pages: CollectionConfig<'pages'> = {
@@ -115,6 +116,7 @@ export const Pages: CollectionConfig<'pages'> = {
                         LetsTalkChennaiFAQBlock,
                         CreativeHeroBlock,
                         InstaReelsBlock,
+                        QuizRewardsBlock,
                       ],
                     }),
                     FixedToolbarFeature(),

@@ -89,6 +89,8 @@
 //   }
 // }
 
+import { computeStreaks } from '@/utilities/quizStreak'
+
 export interface QuizAttempt {
   id: string
   quiz: { title: string } | string
@@ -140,37 +142,10 @@ export function calculateUserStats(attempts: QuizAttempt[]) {
   const avgScoreNum = Math.round(totalScore / totalPlayed)
   const averageScore = `${avgScoreNum} / 30`
 
-  // Streak Calculation with safe string assertions
-  const uniqueDates = Array.from(
-    new Set(
-      attempts
-        .map((a) => (a.completedAt ? new Date(a.completedAt).toISOString().split('T')[0] : null))
-        .filter((date): date is string => date !== null)
-    )
-  ).sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
-
-  let currentStreak = 0
-  let tempStreak = 0
-
-  const todayStr = new Date().toISOString().split('T')[0]!
-  const yesterday = new Date()
-  yesterday.setDate(yesterday.getDate() - 1)
-  const yesterdayStr = yesterday.toISOString().split('T')[0]!
-
-  if (uniqueDates.length > 0 && (uniqueDates.includes(todayStr) || uniqueDates.includes(yesterdayStr))) {
-    let checkDate = new Date(uniqueDates[0]!)
-    for (const dStr of uniqueDates) {
-      const d = new Date(dStr)
-      const diffDays = Math.round((checkDate.getTime() - d.getTime()) / (1000 * 3600 * 24))
-      if (diffDays <= 1) {
-        tempStreak++
-        checkDate = d
-      } else {
-        break
-      }
-    }
-    currentStreak = tempStreak
-  }
+  // Streaks: consecutive play days in India time
+  const { current: currentStreak, best: bestStreak } = computeStreaks(
+    attempts.map((a) => a.completedAt),
+  )
 
   return {
     quizzesPlayed: totalPlayed,
@@ -180,6 +155,6 @@ export function calculateUserStats(attempts: QuizAttempt[]) {
     bestScore,
     averageScore,
     currentStreak,
-    bestStreak: Math.max(currentStreak, 12),
+    bestStreak,
   }
 }
