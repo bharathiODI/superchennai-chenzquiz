@@ -1,3 +1,180 @@
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.hk-animated-btn {
+  position: relative;
+  background: #000;
+  border-radius: 1rem;
+  /* rounded-xl */
+  cursor: pointer;
+  overflow: hidden;
+  border: none;
+  isolation: isolate;
+}
+
+/* Conic gradient tuned specifically for your dark/purple banner theme */
+.hk-animated-btn::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  aspect-ratio: 1/1;
+  width: 250%;
+  height: auto;
+  background: conic-gradient(from 0deg at 50% 50%,
+      #ed008c 0%,
+      /* Neon Pink */
+      #9333ea 25%,
+      /* Purple */
+      #00f2fe 50%,
+      /* Electric Cyan/Blue (matches your CHENZ logo) */
+      #9333ea 75%,
+      /* Purple */
+      #ed008c 100%
+      /* Neon Pink */
+    );
+  animation: spin linear 3s infinite;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+}
+
+/* Inner Background Mask - Keeps the button content area clean and readable */
+.hk-animated-btn::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  /* 2px border width */
+  /* background: #ffffff;  */
+  background: #fffffff5;
+  border-radius: calc(1rem - 2px);
+  z-index: 1;
+}
+
+.hk-btn-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+
+
+.newbuttonchangeee {
+  position: absolute;
+  top: 80%;
+}
+
+
+.leaderboradsectionsss {
+  position: fixed;
+  bottom: 15%;
+  right: 1%;
+  width: 115px;
+  height: 115px;
+  z-index: 1000;
+
+}
+
+.leaderboradsectionsss img {
+  width: 100%;
+  height: 100%;
+  /* border: 4px solid #ab00c8; */
+  border-radius: 50%;
+}
+
+.chenaquizzzzimage {
+  width: 75px;
+  height: 75px;
+}
+
+.stickeyfooterr {
+    position: fixed;
+    bottom: 0;
+    z-index: 1000;
+    background: #fffffff0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    padding: 10px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+
+
+@keyframes spin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.leaderboard-animated {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.leaderboard-animated::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 250%;
+  aspect-ratio: 1 / 1;
+  background: conic-gradient(from 0deg,
+      #ed008c 0%,
+      #9333ea 25%,
+      #00f2fe 50%,
+      #9333ea 75%,
+      #ed008c 100%);
+  animation: spin linear 3s infinite;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+}
+
+.leaderboard-animated img {
+  position: absolute;
+  inset: 2px;
+  width: calc(100% - 5px);
+  height: calc(100% - 5px);
+  object-fit: cover;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-9px);
+  }
+}
+
+.leaderboard-animated {
+  animation: float 2s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+
+
 @media (min-width: 1300px) {
   .widthbaoutsection {
     max-width: 92rem;
@@ -58,8 +235,22 @@
   .aboutttsectionnnnew p {
     font-size: 16px;
   }
+
   .aboutttsectionnnnew .uppercase {
     font-size: 30px;
+  }
+}
+
+@media (min-width:769px) {
+  .stickeyfooterr {
+    display: none;
+  }
+}
+
+
+@media (max-width:768px) {
+  .leaderboradsectionsss {
+    display: none;
   }
 }
 
@@ -83,6 +274,7 @@
   .aboutttsectionnnnew p {
     font-size: 16px;
   }
+
   .headerrrheeight {
     padding-top: 100px;
   }
@@ -121,6 +313,7 @@
   .aboutttsectionnnnew .mt-8 {
     margin-top: 20px;
   }
+
   .headerrrheeight {
     padding-top: 100px;
   }
