@@ -11,18 +11,6 @@
 //   const isVideo = typeof resource === 'object' && resource?.mimeType?.includes('video')
 //   const Tag = htmlElement || Fragment
 
-//   return (
-//     <Tag
-//       {...(htmlElement !== null
-//         ? {
-//             className,
-//           }
-//         : {})}
-//     >
-//       {isVideo ? <VideoMedia {...props} /> : <ImageMedia {...props} />}
-//     </Tag>
-//   )
-// }
 import React, { Fragment } from 'react'
 
 import type { Props } from './types'

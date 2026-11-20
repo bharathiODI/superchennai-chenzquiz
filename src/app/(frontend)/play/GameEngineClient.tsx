@@ -154,21 +154,11 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
 
   useEffect(() => {
     if (isCompleted) {
-      // confetti({
-      //   particleCount: 150,
-      //   spread: 100,
-      //   origin: { y: 0.6 },
-      // })
 
       celebrate()
     }
 
     if (alreadyPlayedToday) {
-      // confetti({
-      //   particleCount: 150,
-      //   spread: 100,
-      //   origin: { y: 0.6 },
-      // })
 
       celebrate()
     }
@@ -301,7 +291,6 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         setAlreadyPlayedToday(true)
       } else {
         if (data?.title) setResultTitle(data.title)
-        console.log('✅ Quiz Submitted Successfully:', data)
       }
     } catch (err) {
       console.error('❌ Error submitting score:', err)

@@ -47,29 +47,6 @@
 //     // 3. Password Verification via Payload authenticate helper
 //     console.log(`🔐 [PASSWORD LOGIN] Authenticating user ID: ${user.id}...`)
 
-// let loginResult
-// try {
-//   loginResult = await payload.login({
-//     collection: 'quiz-users',
-//     data: {
-//       // Payload expects email or username field by default based on strategy
-//       email: (user as any).email || user.phone,
-//       username: (user as any).username || user.phone,
-//       password: password,
-//     },
-//     overrideAccess: true,
-//   })
-// } catch (authError: any) {
-//   console.error('❌ Authentication failed detail:', authError)
-//   return NextResponse.json(
-//     { message: 'Invalid mobile number or password' },
-//     { status: 401 }
-//   )
-// }
-//     if (!loginResult?.token) {
-//       return NextResponse.json({ message: 'Invalid mobile number or password' }, { status: 401 })
-//     }
-
 //     console.log('🎉 [PASSWORD LOGIN] Login successful!')
 //     console.log('--------------------------------------------------')
 
@@ -77,23 +54,11 @@
 //     delete (user as any).salt
 //     delete (user as any).hash
 
-//     return NextResponse.json({
-//       message: 'Login successful',
-//       token: loginResult.token,
-//       user: loginResult.user || user,
-//     })
-//   } catch (error: any) {
-//     console.error('🔥 [PASSWORD LOGIN ERROR]:', error?.message || error)
-//     return NextResponse.json({ message: 'Invalid mobile number or password' }, { status: 401 })
-//   }
-// }
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
-  console.log('--------------------------------------------------')
-  console.log('🚀 [PASSWORD LOGIN] Incoming login request initiated')
 
   try {
     const body = await req.json()
@@ -116,7 +81,6 @@ export async function POST(req: Request) {
     })
 
     // 2. Find user using phone number
-    console.log(`🔍 [PASSWORD LOGIN] Searching user in DB for phone: "${phone}"`)
 
     const userResult = await payload.find({
       collection: 'quiz-users',
@@ -137,7 +101,6 @@ export async function POST(req: Request) {
 
     const user = userResult.docs[0] as any
 
-    console.log(`👤 [PASSWORD LOGIN] User found. ID: ${user.id}`)
 
     // 3. Payload authentication
     //
@@ -162,8 +125,6 @@ export async function POST(req: Request) {
       )
     }
 
-    console.log(`🔐 [PASSWORD LOGIN] Authenticating user ID: ${user.id}...`)
-
     let loginResult
 
     try {
@@ -187,9 +148,6 @@ export async function POST(req: Request) {
 
       return NextResponse.json({ message: 'Invalid mobile number or password' }, { status: 401 })
     }
-
-    console.log('🎉 [PASSWORD LOGIN] Login successful!')
-    console.log('--------------------------------------------------')
 
     // 5. Remove sensitive fields
     delete user.salt

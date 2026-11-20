@@ -76,13 +76,6 @@ export function WordFinderGame({
     //   if (!foundWords.includes(wordStr)) {
     //     setFoundWords((prev) => [...prev, wordStr])
 
-    //     // Save coordinate pattern for line highlight drawing
-    //     const start = selectedCells[0]
-    //     const end = selectedCells[selectedCells.length - 1]
-    //     setFoundWordCoordinates((prev) => [...prev, { start, end, color: '#E83E9F' }])
-    //   }
-    // }
-    
     if (matchedTarget) {
       const wordStr = matchedTarget.word.toUpperCase()
       if (!foundWords.includes(wordStr)) {

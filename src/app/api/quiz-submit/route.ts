@@ -16,13 +16,6 @@
 
 //     console.log('📝 [API SUBMIT] Processing submission for User ID:', userId)
 
-//     if (!quizId || !userId) {
-//       return NextResponse.json(
-//         { success: false, error: 'Both quizId and userId are required.' },
-//         { status: 400 },
-//       )
-//     }
-
 //     const payload = await getPayload({ config: configPromise })
 
 //     const totalQuestions = rawLogs.length
@@ -51,29 +44,6 @@
 //         overrideAccess: true,
 //       })
 //       .catch(() => null)
-
-//     if (existingUser) {
-//       await payload.update({
-//         collection: 'quiz-users',
-//         id: userId,
-//         data: {
-//           totalXP: (Number(existingUser.totalXP) || 0) + scoreEarned,
-//           totalTimeTaken: (Number((existingUser as any).totalTimeTaken) || 0) + timeTaken,
-//         },
-//         overrideAccess: true,
-//       })
-//     }
-
-//     return NextResponse.json({ success: true, attempt })
-//   } catch (error: any) {
-//     console.error('❌ [API SUBMIT ERROR]:', error?.message || error)
-//     return NextResponse.json(
-//       { success: false, error: error?.message || 'Internal Server Error' },
-//       { status: 500 },
-//     )
-//   }
-// }
-
 
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'

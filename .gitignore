@@ -11,3 +11,7 @@ public/media/
 
 public/robots.txt
 public/sitemap*.xml
+
+# Local database dumps and scratch files
+/db/
+/_local/

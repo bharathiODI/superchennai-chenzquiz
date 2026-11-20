@@ -33,12 +33,9 @@ export const sendOtp = async ({ mobile, otp }: SendOtpProps) => {
 
     return response.data
   } catch (error: any) {
-    console.log('❌ SMS ERROR')
 
     if (error.response) {
-      console.log(error.response.data)
     } else {
-      console.log(error.message)
     }
 
     throw error

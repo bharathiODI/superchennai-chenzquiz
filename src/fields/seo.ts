@@ -40,18 +40,6 @@
       
 //     },
 
-//     // 🔥 JSON-LD structured data (important part)
-//     {
-//       name: 'structuredData',
-//       type: 'json',
-//       label: 'Schema (JSON-LD)',
-//       admin: {
-//         description: 'Paste JSON-LD structured data here',
-//       },
-//     },
-//   ],
-// }
-
 import type { Field } from 'payload'
 
 export const SEOFieldSchema: Field = {

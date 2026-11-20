@@ -31,29 +31,6 @@ const Canvas = dynamic(() => import('@react-three/fiber').then((m) => m.Canvas),
 // Camera Types
 type CameraMode = 'CHASE' | 'FIRST_PERSON'
 
-// // ==========================================
-// // 1. SOUND SYNTHESIZER
-// // ==========================================
-// class SoundFX {
-//   private ctx: AudioContext | null = null
-//   private engineOsc: OscillatorNode | null = null
-//   private engineGain: GainNode | null = null
-//   public isMuted: boolean = false
-
-//   private init() {
-//     if (!this.ctx) {
-//       const AudioCtx =
-//         window.AudioContext ||
-//         (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
-//       if (AudioCtx) {
-//         this.ctx = new AudioCtx()
-//       }
-//     }
-//     if (this.ctx && this.ctx.state === 'suspended') {
-//       this.ctx.resume()
-//     }
-//   }
-
 //   public startEngine() {
 //     if (this.isMuted) return
 //     this.init()
@@ -66,33 +43,6 @@ type CameraMode = 'CHASE' | 'FIRST_PERSON'
 //       this.engineOsc.type = 'sawtooth'
 //       this.engineOsc.frequency.setValueAtTime(50, this.ctx.currentTime)
 //       this.engineGain.gain.setValueAtTime(0.04, this.ctx.currentTime)
-
-//       this.engineOsc.connect(this.engineGain)
-//       this.engineGain.connect(this.ctx.destination)
-//       this.engineOsc.start()
-//     } catch (e) {
-//       console.error(e)
-//     }
-//   }
-
-//   public updateEnginePitch(speed: number) {
-//     if (this.engineOsc && this.ctx) {
-//       const pitch = 50 + (speed / 240) * 180
-//       this.engineOsc.frequency.setValueAtTime(pitch, this.ctx.currentTime)
-//     }
-//   }
-
-//   public stopEngine() {
-//     if (this.engineOsc) {
-//       try {
-//         this.engineOsc.stop()
-//         this.engineOsc.disconnect()
-//       } catch (e) {
-//         // Silently catch audio stop errors
-//       }
-//       this.engineOsc = null
-//     }
-//   }
 
 //   public playCrash() {
 //     if (this.isMuted) return
@@ -113,13 +63,6 @@ type CameraMode = 'CHASE' | 'FIRST_PERSON'
 //       osc.connect(gain)
 //       gain.connect(this.ctx.destination)
 
-//       osc.start()
-//       osc.stop(this.ctx.currentTime + 0.5)
-//     } catch (e) {
-//       // Silently catch audio play errors
-//     }
-//   }
-
 //   public playClick() {
 //     if (this.isMuted) return
 //     this.init()
@@ -138,22 +81,6 @@ type CameraMode = 'CHASE' | 'FIRST_PERSON'
 
 //       osc.connect(gain)
 //       gain.connect(this.ctx.destination)
-
-//       osc.start()
-//       osc.stop(this.ctx.currentTime + 0.08)
-//     } catch (e) {
-//       // Silently catch audio play errors
-//     }
-//   }
-
-//   public destroy() {
-//     this.stopEngine()
-//     if (this.ctx) {
-//       this.ctx.close()
-//       this.ctx = null
-//     }
-//   }
-// }
 
 // ==========================================
 // 1. SOUND SYNTHESIZER (WITH REAL AUDIO FILE SUPPORT)
@@ -175,7 +102,6 @@ class SoundFX {
     if (this.isMuted || !this.audioEl) return
     this.audioEl.currentTime = 0
     this.audioEl.play().catch((e) => {
-      console.log('Audio play blocked/failed:', e)
     })
   }
 

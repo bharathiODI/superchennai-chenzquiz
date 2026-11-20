@@ -29,7 +29,6 @@ export async function POST(req: NextRequest) {
       message: 'OTP Sent Successfully',
     })
   } catch (error) {
-    console.log(error)
 
     return NextResponse.json(
       {

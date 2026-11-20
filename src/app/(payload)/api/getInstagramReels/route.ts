@@ -1,10 +1,14 @@
-
 import { NextResponse } from 'next/server'
 
-const PAGE_ID = '672199299308709' // your Facebook Page ID (e.g., "Fdgdfg")
-const ACCESS_TOKEN = 'EAAJMuCEDm8wBOzmvz16I4hDFBr9CpEs1TFkVNAPLt0re1al4HZCCZBsdxVkPF0RfkRpUczZBwZCRNCxAZCEQc5bln3ck3mPbMFCpGAPbOHt4wRGZA7oEu9SJ9TFCSMMsQeVpSB0aT9ZBx5VJNtFtbdUZA3sbVYLHA7ZCA0S7gwWCKE42qFmJZAAtWDZAm3IKZA16Tq8e'
+// Facebook Page linked to the Instagram Business Account (set both in .env)
+const PAGE_ID = process.env.INSTAGRAM_PAGE_ID || '672199299308709'
+const ACCESS_TOKEN = process.env.INSTAGRAM_ACCESS_TOKEN
 
 export async function GET() {
+  if (!ACCESS_TOKEN) {
+    return NextResponse.json({ error: 'INSTAGRAM_ACCESS_TOKEN is not set' }, { status: 500 })
+  }
+
   try {
     // STEP 1: Get Instagram Business Account ID linked to the Page
     const igAccountRes = await fetch(
