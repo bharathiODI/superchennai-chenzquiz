@@ -77,6 +77,7 @@ export interface Config {
     questions: Question;
     'user-submissions': UserSubmission;
     'quiz-attempts': QuizAttempt;
+    'quiz-rounds': QuizRound;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -97,6 +98,7 @@ export interface Config {
     questions: QuestionsSelect<false> | QuestionsSelect<true>;
     'user-submissions': UserSubmissionsSelect<false> | UserSubmissionsSelect<true>;
     'quiz-attempts': QuizAttemptsSelect<false> | QuizAttemptsSelect<true>;
+    'quiz-rounds': QuizRoundsSelect<false> | QuizRoundsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -112,11 +114,13 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
+    'quiz-settings': QuizSetting;
     'quiz-site-settings': QuizSiteSetting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    'quiz-settings': QuizSettingsSelect<false> | QuizSettingsSelect<true>;
     'quiz-site-settings': QuizSiteSettingsSelect<false> | QuizSiteSettingsSelect<true>;
   };
   locale: null;
@@ -518,7 +522,27 @@ export interface Quiz {
    * Set when this quiz should automatically conclude
    */
   quizEndDate: string;
+  /**
+   * All questions for this challenge. Every round, each player gets random questions from this pool that they have not answered before, in a different order.
+   */
   questions: (number | Question)[];
+  roundsPerDay?: number | null;
+  questionsPerRound?: number | null;
+  /**
+   * Which question in each round is sponsored (3 = third). 0 = no sponsored slot.
+   */
+  sponsoredPosition?: number | null;
+  /**
+   * Sponsored question per day (same for every player). Leave "Round" empty to use it in all rounds that day. Days without one get a regular question in that slot. Sponsored questions are never served as regular questions.
+   */
+  sponsoredQuestions?:
+    | {
+        date: string;
+        round?: number | null;
+        question: number | Question;
+        id?: string | null;
+      }[]
+    | null;
   status?: ('draft' | 'active' | 'completed') | null;
   meta?: {
     title?: string | null;
@@ -741,6 +765,37 @@ export interface QuizAttempt {
   timeTaken: number;
   completedAt: string;
   rankAtCompletion?: number | null;
+  /**
+   * Round of the day (1, 2, 3...)
+   */
+  round?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Questions given to each player per day and round (created automatically).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-rounds".
+ */
+export interface QuizRound {
+  id: number;
+  user: number | QuizUser;
+  quiz: number | Quiz;
+  /**
+   * India date (YYYY-MM-DD)
+   */
+  day: string;
+  round: number;
+  status: 'assigned' | 'completed';
+  questions?: (number | Question)[] | null;
+  sponsoredQuestion?: (number | null) | Question;
+  score?: number | null;
+  completedAt?: string | null;
+  /**
+   * Questions reused because the pool ran out
+   */
+  recycled?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1127,6 +1182,10 @@ export interface PayloadLockedDocument {
         value: number | QuizAttempt;
       } | null)
     | ({
+        relationTo: 'quiz-rounds';
+        value: number | QuizRound;
+      } | null)
+    | ({
         relationTo: 'redirects';
         value: number | Redirect;
       } | null)
@@ -1433,6 +1492,17 @@ export interface QuizzesSelect<T extends boolean = true> {
   quizDate?: T;
   quizEndDate?: T;
   questions?: T;
+  roundsPerDay?: T;
+  questionsPerRound?: T;
+  sponsoredPosition?: T;
+  sponsoredQuestions?:
+    | T
+    | {
+        date?: T;
+        round?: T;
+        question?: T;
+        id?: T;
+      };
   status?: T;
   meta?:
     | T
@@ -1616,6 +1686,25 @@ export interface QuizAttemptsSelect<T extends boolean = true> {
   timeTaken?: T;
   completedAt?: T;
   rankAtCompletion?: T;
+  round?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-rounds_select".
+ */
+export interface QuizRoundsSelect<T extends boolean = true> {
+  user?: T;
+  quiz?: T;
+  day?: T;
+  round?: T;
+  status?: T;
+  questions?: T;
+  sponsoredQuestion?: T;
+  score?: T;
+  completedAt?: T;
+  recycled?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1932,6 +2021,54 @@ export interface Footer {
   createdAt?: string | null;
 }
 /**
+ * Player titles, per-game timers and the shareable scorecard.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-settings".
+ */
+export interface QuizSetting {
+  id: number;
+  /**
+   * A player gets the highest title whose "Min XP" is at or below their total XP. The first row should start at 0.
+   */
+  titles?:
+    | {
+        name: string;
+        minXP: number;
+        id?: string | null;
+      }[]
+    | null;
+  gameTimers?: {
+    mcq?: number | null;
+    dropdown?: number | null;
+    wordle?: number | null;
+    wordFinder?: number | null;
+    matchFollowing?: number | null;
+    spotLie?: number | null;
+    reorder?: number | null;
+    dragDrop?: number | null;
+  };
+  scorecard?: {
+    /**
+     * Use a colour version that shows on white. Empty: "SUPER CHENNAI" text.
+     */
+    logo?: (number | null) | Media;
+    /**
+     * Empty: the right-side logo from Header settings.
+     */
+    badgeLogo?: (number | null) | Media;
+    headline?: string | null;
+    highlight?: string | null;
+    /**
+     * Chennai landmarks or similar, wide (about 1800 x 600). Empty: the default skyline.
+     */
+    image?: (number | null) | Media;
+    footerText?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * Text and options for the login, quizzes and leaderboard pages.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2019,6 +2156,44 @@ export interface FooterSelect<T extends boolean = true> {
         url?: T;
         icon?: T;
         id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-settings_select".
+ */
+export interface QuizSettingsSelect<T extends boolean = true> {
+  titles?:
+    | T
+    | {
+        name?: T;
+        minXP?: T;
+        id?: T;
+      };
+  gameTimers?:
+    | T
+    | {
+        mcq?: T;
+        dropdown?: T;
+        wordle?: T;
+        wordFinder?: T;
+        matchFollowing?: T;
+        spotLie?: T;
+        reorder?: T;
+        dragDrop?: T;
+      };
+  scorecard?:
+    | T
+    | {
+        logo?: T;
+        badgeLogo?: T;
+        headline?: T;
+        highlight?: T;
+        image?: T;
+        footerText?: T;
       };
   updatedAt?: T;
   createdAt?: T;

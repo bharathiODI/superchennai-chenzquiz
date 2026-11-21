@@ -43,12 +43,6 @@ export const Media: CollectionConfig = {
       }),
     },
   ],
-  //  hooks: {
-  //   afterChange: [
-  //     async ({ doc, operation }) => {
-  //       if (operation !== 'create') return doc
-  //       if (!doc.mimeType?.startsWith('video/')) return doc
-  //       const result = await compressVideo({ doc })
 
   //       return result
   //     },

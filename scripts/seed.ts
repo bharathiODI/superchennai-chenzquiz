@@ -6,11 +6,13 @@
  *
  * - Quiz Site Settings: default text and options, only if they were never saved
  * - Test players: Test Player 1-5 (see src/utilities/testPlayers.ts)
+ * - Home page: adds the "Ready to Play Chenz Quiz?" rewards section if it is missing
  *
  * Run `npm run db:migrate` first if the database is new (deploys do this automatically).
  */
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
+import { seedHomeRewards } from './seeds/homeRewards'
 import { seedSiteSettings } from './seeds/siteSettings'
 import { seedTestPlayers } from './seeds/testPlayers'
 
@@ -22,6 +24,7 @@ async function main() {
 
   await seedSiteSettings(payload)
   await seedTestPlayers(payload)
+  await seedHomeRewards(payload)
 
   console.log('\nSeed finished.\n')
   process.exit(0)

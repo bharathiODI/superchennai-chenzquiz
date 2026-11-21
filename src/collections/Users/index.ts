@@ -91,4 +91,3 @@ export const Users: CollectionConfig = {
   timestamps: true,
 }
 
-

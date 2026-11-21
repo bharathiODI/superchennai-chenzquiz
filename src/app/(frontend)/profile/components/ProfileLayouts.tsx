@@ -1,7 +1,8 @@
-/* eslint-disable @next/next/no-img-element */
 'use client'
 
+/* eslint-disable @next/next/no-img-element */
 import Link from 'next/link'
+import { useState } from 'react'
 import {
   Calendar,
   HelpCircle,
@@ -14,19 +15,49 @@ import {
   ChevronRight,
   ArrowRight,
   Play,
+  Award,
+  Lock,
+  Medal,
+  Rocket,
+  Sparkles,
+  Zap,
   X,
 } from 'lucide-react'
 import { EditProfileModal } from './ClientActions'
-import { useState } from 'react'
+import { TitleBadge } from '@/components/quiz/TitleBadge'
 
-export function ProfileHeaderCard({ user }: { user: any }) {
+export type ProfileTitleInfo = {
+  name: string
+  tierIndex: number
+  tierCount: number
+  nextName: string | null
+  xpToNext: number
+  progress: number
+}
+
+export type Achievement = {
+  key: string
+  label: string
+  description: string
+  earned: boolean
+  icon: 'rocket' | 'compass' | 'target' | 'flame' | 'zap' | 'title'
+}
+
+export function ProfileHeaderCard({
+  user,
+  titleInfo,
+}: {
+  user: any
+  titleInfo?: ProfileTitleInfo
+}) {
   const memberYear = user?.createdAt ? new Date(user.createdAt).getFullYear() : 2026
   const initial = user?.name ? user.name.trim().charAt(0).toUpperCase() : 'S'
 
   return (
-    <div className="bg-white/90 backdrop-blur-md border border-slate-100/80 rounded-3xl p-6 md:p-8 shadow-xl shadow-indigo-950/5 mb-8 transition-all hover:shadow-2xl hover:shadow-indigo-950/10">
+    <div className="bg-white/90 backdrop-blur-md border border-slate-100/80 rounded-3xl p-6 md:p-8 shadow-xl shadow-indigo-950/5 mb-8 transition-all hover:shadow-2xl hover:shadow-indigo-950/10 ">
       <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6 text-center sm:text-left">
         <div className="flex flex-col sm:flex-row items-center gap-5 md:gap-6">
+          {/* Avatar with Purple Gradient */}
           <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-[#5B2EFF] to-[#a855f7] p-1 shadow-lg shadow-[#5B2EFF]/20 flex-shrink-0">
             {user?.avatar ? (
               <img
@@ -42,18 +73,48 @@ export function ProfileHeaderCard({ user }: { user: any }) {
           </div>
 
           <div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a]">
+            <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a]">
               {user?.name || 'Chennai Player'}
             </h1>
-            <p className="text-[#5B2EFF] font-bold text-sm md:text-base mt-0.5">
-              Trivia Enthusiast
-            </p>
+            {titleInfo ? (
+              <div className="mt-2 flex flex-col items-center sm:items-start">
+                <TitleBadge
+                  name={titleInfo.name}
+                  tierIndex={titleInfo.tierIndex}
+                  tierCount={titleInfo.tierCount}
+                  variant="hero"
+                  className="origin-center scale-90 sm:origin-left"
+                />
+                {titleInfo.nextName ? (
+                  <div className="mt-2 w-56">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-purple-100">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-[#5B2EFF] to-[#a855f7]"
+                        style={{ width: `${titleInfo.progress}%` }}
+                      />
+                    </div>
+                    <p className="mt-1 text-[11px] font-semibold text-slate-500">
+                      {titleInfo.xpToNext} XP to{' '}
+                      <span className="font-extrabold text-[#5B2EFF]">{titleInfo.nextName}</span>
+                    </p>
+                  </div>
+                ) : (
+                  <p className="mt-1 text-[11px] font-semibold text-amber-600">Top title unlocked!</p>
+                )}
+              </div>
+            ) : (
+              <p className="text-[#5B2EFF] font-bold text-sm md:text-base mt-0.5">
+                Trivia Enthusiast
+              </p>
+            )}
             <div className="flex items-center justify-center sm:justify-start gap-1.5 text-slate-400 font-medium text-xs md:text-sm mt-2">
               <Calendar className="w-4 h-4 text-slate-400" />
               <span>Member since {memberYear}</span>
             </div>
           </div>
         </div>
+
+        {/* Action Buttons: Play Quiz + Edit Profile */}
         <div className="flex flex-col sm:flex-row items-center gap-3 self-center sm:self-start w-full sm:w-auto">
           <Link
             href="/quizzes"
@@ -70,38 +131,46 @@ export function ProfileHeaderCard({ user }: { user: any }) {
   )
 }
 
+// 2. My Stats Grid Card
 export function MyStatsSection({ stats }: { stats: any }) {
+  // Same order as the profile design: score, quizzes played, winning streak (+ accuracy)
   const statCards = [
     {
-      label: 'Quizzes Played',
-      value: stats.quizzesPlayed ?? 0,
-      icon: HelpCircle,
-      iconBg: 'bg-indigo-50 text-[#5B2EFF]',
-    },
-    {
-      label: 'Correct Answers',
-      value: stats.correctAnswers ?? 0,
-      secondary: `${stats.accuracy ?? 0}% Accuracy`,
-      icon: CheckCircle2,
-      iconBg: 'bg-emerald-50 text-emerald-600',
-    },
-    {
       label: 'Total Score',
-      value: `${stats.totalScore ?? 0} XP`,
+      value: `${stats.totalScore} XP`,
       icon: Star,
       iconBg: 'bg-amber-50 text-[#F5A623]',
     },
     {
-      label: 'Best Score',
-      value: stats.bestScore || '0 XP',
-      icon: Trophy,
-      iconBg: 'bg-orange-50 text-[#F97316]',
+      label: 'Quizzes Played',
+      value: stats.quizzesPlayed,
+      icon: HelpCircle,
+      iconBg: 'bg-indigo-50 text-[#5B2EFF]',
     },
+    {
+      label: 'Winning Streak',
+      value: `${stats.currentStreak || 0} ${stats.currentStreak === 1 ? 'day' : 'days'}`,
+      secondary: stats.bestStreak ? `Best: ${stats.bestStreak} ${stats.bestStreak === 1 ? 'day' : 'days'}` : undefined,
+      icon: Flame,
+      iconBg: 'bg-orange-50 text-orange-500',
+    },
+    {
+      label: 'Correct Answers',
+      value: stats.correctAnswers,
+      secondary: `${stats.accuracy}% Accuracy`,
+      icon: CheckCircle2,
+      iconBg: 'bg-emerald-50 text-emerald-600',
+    },
+    // {
+    //   label: 'Best Score',
+    //   value: stats.bestScore,
+    //   icon: Trophy,
+    //   iconBg: 'bg-orange-50 text-[#F97316]',
+    // },
   ]
 
   return (
     <div className="mb-8">
-      {/* Fixed: Text color changed from #fff to dark indigo for proper visibility */}
       <h2 className="text-xl md:text-2xl font-extrabold text-[#fff] mb-4">My Stats</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
         {statCards.map((card, idx) => {
@@ -140,18 +209,52 @@ export function RankAndStreakSection({
   stats: any
   currentRank?: number
 }) {
-  const bestRank = stats?.bestRank || currentRank
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
       {/* My Rank Card */}
       <div>
-        <h2 className="text-xl font-extrabold text-[#fff] mb-4">My Rank</h2>
+        <h2 className="text-xl font-extrabold text-[#11145A] mb-4">My Rank</h2>
         <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-md shadow-slate-100/80 flex items-center justify-between">
-        
+          <div className="text-center flex-1">
+            <div className="inline-flex p-2 bg-indigo-50 text-[#5B2EFF] rounded-xl mb-2">
+              <Trophy className="w-4 h-4" />
+            </div>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+              Current Rank
+            </p>
+            <p className="text-2xl md:text-3xl font-black text-[#11145A]">#{currentRank}</p>
+          </div>
 
           <div className="w-[1px] h-12 bg-slate-100" />
 
+          <div className="text-center flex-1">
+            <div className="inline-flex p-2 bg-amber-50 text-[#F5A623] rounded-xl mb-2">
+              <Crown className="w-4 h-4" />
+            </div>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+              Best Rank
+            </p>
+            <p className="text-2xl md:text-3xl font-black text-[#11145A]">#{currentRank}</p>
+          </div>
+
+          <div className="w-[1px] h-12 bg-slate-100" />
+
+          <div className="text-center flex-1">
+            <div className="inline-flex p-2 bg-slate-100 text-slate-600 rounded-xl mb-2">
+              <Target className="w-4 h-4" />
+            </div>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
+              Avg Score
+            </p>
+            <p className="text-xl md:text-2xl font-black text-[#11145A]">{stats.averageScore}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* My Streak Card */}
+      <div>
+        <h2 className="text-xl font-extrabold text-[#11145A] mb-4">My Streak</h2>
+        <div className="bg-gradient-to-r from-amber-50/60 to-orange-50/40 border border-amber-200/50 rounded-3xl p-6 shadow-md shadow-slate-100/80 flex items-center justify-around">
           <div className="text-center flex-1">
             <div className="inline-flex p-2.5 bg-orange-500 text-white rounded-2xl mb-2 shadow-md shadow-orange-500/20">
               <Flame className="w-5 h-5 animate-pulse" />
@@ -160,16 +263,10 @@ export function RankAndStreakSection({
               Current Streak
             </p>
             <p className="text-2xl md:text-3xl font-black text-[#11145A]">
-              {stats.currentStreak ?? 0} Days
+              {stats.currentStreak} Days
             </p>
           </div>
-        </div>
-      </div>
 
-      {/* My Streak Card */}
-      <div>
-        <h2 className="text-xl font-extrabold text-[#fff] mb-4">My Streak</h2>
-        <div className="bg-gradient-to-r from-amber-50/60 to-orange-50/40 border border-amber-200/50 rounded-3xl p-6 shadow-md shadow-slate-100/80 flex items-center justify-around">
           <div className="w-[1px] h-12 bg-amber-200/60" />
 
           <div className="text-center flex-1">
@@ -180,7 +277,7 @@ export function RankAndStreakSection({
               Best Streak
             </p>
             <p className="text-2xl md:text-3xl font-black text-[#11145A]">
-              {stats.bestStreak ?? 0} Days
+              {stats.bestStreak} Days
             </p>
           </div>
         </div>
@@ -188,7 +285,7 @@ export function RankAndStreakSection({
     </div>
   )
 }
-
+// 4. Quiz History List Table
 export function QuizHistorySection({ attempts }: { attempts: any[] }) {
   const [showAllModal, setShowAllModal] = useState(false)
 
@@ -339,5 +436,91 @@ export function QuizHistorySection({ attempts }: { attempts: any[] }) {
         </div>
       )}
     </>
+  )
+}
+
+export function ClimbLeaderboardBanner({ currentRank }: { currentRank?: number }) {
+  return (
+    <div className="mb-8 flex flex-col items-center gap-5 rounded-3xl border border-purple-100 bg-gradient-to-r from-[#F3EEFF] via-white to-[#FFF4E5] p-6 text-center shadow-md shadow-purple-500/5 sm:flex-row sm:text-left md:p-7">
+      <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-300 to-orange-400 shadow-lg shadow-orange-500/20">
+        <Trophy className="h-9 w-9 text-white" />
+      </div>
+      <div className="flex-1">
+        <h3 className="text-xl font-black text-[#2E1065] md:text-2xl">Climb the Leaderboard</h3>
+        <p className="mt-1 text-sm font-medium text-slate-500">
+          Keep playing daily quizzes and earn more XP to move up the rankings!
+          {currentRank ? (
+            <>
+              {' '}
+              You are currently <span className="font-extrabold text-[#5B2EFF]">#{currentRank}</span>.
+            </>
+          ) : null}
+        </p>
+      </div>
+      <Link
+        href="/leaderboard"
+        className="inline-flex shrink-0 items-center gap-2 rounded-2xl bg-gradient-to-r from-[#5B2EFF] to-[#7c3aed] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#5B2EFF]/25 transition hover:scale-[1.02]"
+      >
+        View Leaderboard <ArrowRight className="h-4 w-4" />
+      </Link>
+    </div>
+  )
+}
+
+const ACHIEVEMENT_ICONS = {
+  rocket: Rocket,
+  compass: Sparkles,
+  target: Target,
+  flame: Flame,
+  zap: Zap,
+  title: Crown,
+} as const
+
+export function AchievementsSection({ achievements }: { achievements: Achievement[] }) {
+  const earnedCount = achievements.filter((a) => a.earned).length
+
+  return (
+    <div className="mb-8">
+      <h2 className="mb-4 flex items-center gap-2 text-xl font-extrabold text-[#fff] md:text-2xl">
+        <Award className="h-6 w-6" /> My Achievements
+        <span className="text-sm font-bold opacity-80">
+          ({earnedCount}/{achievements.length})
+        </span>
+      </h2>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 md:gap-4">
+        {achievements.map((a) => {
+          const Icon = ACHIEVEMENT_ICONS[a.icon] ?? Medal
+          return (
+            <div
+              key={a.key}
+              className={`rounded-2xl border p-4 transition ${
+                a.earned
+                  ? 'border-purple-100 bg-white shadow-md shadow-purple-500/5'
+                  : 'border-white/60 bg-white/90'
+              }`}
+            >
+              <div className="mb-2 flex items-center justify-between">
+                <div
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                    a.earned
+                      ? 'bg-gradient-to-br from-[#5B2EFF] to-[#a855f7] text-white'
+                      : 'bg-slate-100 text-slate-400'
+                  }`}
+                >
+                  <Icon className="h-5 w-5" />
+                </div>
+                {!a.earned && <Lock className="h-4 w-4 text-slate-300" />}
+              </div>
+              <p className={`text-sm font-extrabold ${a.earned ? 'text-[#11145A]' : 'text-slate-500'}`}>
+                {a.label}
+              </p>
+              <p className={`mt-0.5 text-xs ${a.earned ? 'text-slate-500' : 'text-slate-400'}`}>
+                {a.description}
+              </p>
+            </div>
+          )
+        })}
+      </div>
+    </div>
   )
 }

@@ -15,13 +15,13 @@ import React from 'react'
 import LetsTalkChennaiFAQBlockComponent from '@/collections/Games/Blocks/LetsTalkChennaiFAQ/LetsTalkChennaiFAQBlockComponent'
 import { CreativeHeroBlock } from '@/collections/Games/Blocks/CreativeHero/Component'
 import InstaReelsSliderComponent from '@/collections/Games/Blocks/InstaReelsSlider/Component'
+import QuizRewardsComponent from '@/collections/Games/Blocks/QuizRewards/Component'
 // import LetsTalkChennaiFAQBlockComponent from '@/collections/Games/Blocks/FAQ/FAQBlockComponent'
 
 export function renderNode(node: any, idx: number, eventData?: any): React.ReactNode {
   /* ------------------------------------------------
      DEBUG LOGS
   ------------------------------------------------ */
-  console.log('LEXICAL NODE =>', node)
 
   switch (node.type) {
     /* ------------------------------------------------
@@ -39,16 +39,6 @@ export function renderNode(node: any, idx: number, eventData?: any): React.React
     // ------------------------------------------------ */
     // case 'heading': {
     //   const Tag = (node.tag || 'h2') as React.ElementType
-
-    //   return (
-    //     <Tag
-    //       key={idx}
-    //       className={`paragaphhlexical text-center blog-${node.tag || 'h2'} text-[#005b70] text-3xl font-bold tracking-wide mt-0 mb-0`}
-    //     >
-    //       {renderText(node.children)}
-    //     </Tag>
-    //   )
-    // }
 
     /* ------------------------------------------------
      HEADING
@@ -96,8 +86,6 @@ export function renderNode(node: any, idx: number, eventData?: any): React.React
     case 'block': {
       const blockType = node.fields?.blockType || node.fields?.blockName || node.blockType
 
-      console.log('DETECTED BLOCK TYPE =>', blockType)
-      console.log('BLOCK NODE FIELDS =>', node.fields)
 
       /* ---------------- CODE BLOCK ---------------- */
       if (blockType === 'code' || blockType === 'codeBlock') {
@@ -122,10 +110,6 @@ export function renderNode(node: any, idx: number, eventData?: any): React.React
         blockType === 'eventRegistrationBlock' ||
         blockType === 'eventRegistrationForm'
       ) {
-        console.log('RENDERING EventRegistrationBlockComponent WITH:', {
-          fields: node.fields,
-          eventData,
-        })
 
         return (
           <EventRegistrationBlockComponent key={idx} block={node.fields} eventData={eventData} />
@@ -162,6 +146,10 @@ export function renderNode(node: any, idx: number, eventData?: any): React.React
 
       if (blockType === 'InstaReelsBlock') {
         return <InstaReelsSliderComponent key={idx} {...node.fields} />
+      }
+
+      if (blockType === 'QuizRewardsBlock') {
+        return <QuizRewardsComponent key={idx} {...node.fields} />
       }
 
       if (blockType === 'creativeHero') {
