@@ -78,7 +78,8 @@ export function ProfileHeaderCard({
                   name={titleInfo.name}
                   tierIndex={titleInfo.tierIndex}
                   tierCount={titleInfo.tierCount}
-                  className="!text-xs !px-3 !py-1.5"
+                  variant="hero"
+                  className="origin-center scale-90 sm:origin-left"
                 />
                 {titleInfo.nextName ? (
                   <div className="mt-2 w-56">
@@ -128,7 +129,14 @@ export function ProfileHeaderCard({
 
 // 2. My Stats Grid Card
 export function MyStatsSection({ stats }: { stats: any }) {
+  // Same order as the profile design: score, quizzes played, winning streak (+ accuracy)
   const statCards = [
+    {
+      label: 'Total Score',
+      value: `${stats.totalScore} XP`,
+      icon: Star,
+      iconBg: 'bg-amber-50 text-[#F5A623]',
+    },
     {
       label: 'Quizzes Played',
       value: stats.quizzesPlayed,
@@ -136,17 +144,18 @@ export function MyStatsSection({ stats }: { stats: any }) {
       iconBg: 'bg-indigo-50 text-[#5B2EFF]',
     },
     {
+      label: 'Winning Streak',
+      value: `${stats.currentStreak || 0} ${stats.currentStreak === 1 ? 'day' : 'days'}`,
+      secondary: stats.bestStreak ? `Best: ${stats.bestStreak} ${stats.bestStreak === 1 ? 'day' : 'days'}` : undefined,
+      icon: Flame,
+      iconBg: 'bg-orange-50 text-orange-500',
+    },
+    {
       label: 'Correct Answers',
       value: stats.correctAnswers,
       secondary: `${stats.accuracy}% Accuracy`,
       icon: CheckCircle2,
       iconBg: 'bg-emerald-50 text-emerald-600',
-    },
-    {
-      label: 'Total Score',
-      value: stats.totalScore,
-      icon: Star,
-      iconBg: 'bg-amber-50 text-[#F5A623]',
     },
     // {
     //   label: 'Best Score',
@@ -273,7 +282,7 @@ export function RankAndStreakSection({
   )
 }
 // 4. Quiz History List Table
-export function QuizHistorySection({ attempts }: { attempts: any[] }) {
+export function QuizHistorySection({ attempts, total }: { attempts: any[]; total?: number }) {
   if (!attempts || attempts.length === 0) {
     return (
       <div className="bg-white border border-slate-100 rounded-3xl p-8 text-center shadow-md shadow-slate-100/80">
@@ -304,7 +313,8 @@ export function QuizHistorySection({ attempts }: { attempts: any[] }) {
           href="/history"
           className="text-[#5B2EFF] hover:text-[#4c22e0] font-bold text-xs md:text-sm flex items-center gap-1 transition"
         >
-          View All <ChevronRight className="w-4 h-4" />
+          View All{(total ?? attempts.length) > 0 ? ` (${total ?? attempts.length})` : ''}{' '}
+          <ChevronRight className="w-4 h-4" />
         </Link>
       </div>
 

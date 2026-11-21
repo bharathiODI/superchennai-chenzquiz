@@ -1,65 +1,20 @@
-// import { NextResponse } from 'next/server'
-// import { getPayload } from 'payload'
-// import configPromise from 'src/payload.config'
-
-// export async function POST(req: Request) {
-//   try {
-//     const body = await req.json()
-
-//     const quizId = body.quizId
-//     const userId = body.userId
-//     const scoreEarned = Number(body.scoreEarned ?? body.score ?? 0)
-//     const rawLogs = body.answers || body.logs || []
-
-//     // Time taken in seconds (default 0 if not passed from client)
-//     const timeTaken = Number(body.timeTaken || 0)
-
-//     console.log('📝 [API SUBMIT] Processing submission for User ID:', userId)
-
-//     const payload = await getPayload({ config: configPromise })
-
-//     const totalQuestions = rawLogs.length
-//     const correctAnswers = rawLogs.filter((log: any) => Boolean(log.isCorrect)).length
-
-//     // 1. Save directly into 'quiz-attempts' Collection
-//     const attempt = await payload.create({
-//       collection: 'quiz-attempts',
-//       data: {
-//         user: userId,
-//         quiz: quizId,
-//         score: scoreEarned,
-//         totalQuestions: totalQuestions,
-//         correctAnswers: correctAnswers,
-//         timeTaken: timeTaken,
-//         completedAt: new Date().toISOString(),
-//       },
-//       overrideAccess: true,
-//     })
-
-//     // 2. Increment Total XP on User Profile
-//     const existingUser = await payload
-//       .findByID({
-//         collection: 'quiz-users',
-//         id: userId,
-//         overrideAccess: true,
-//       })
-//       .catch(() => null)
-
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import configPromise from 'src/payload.config'
 import { getQuizTitles } from '@/utilities/getQuizTitles'
 import { getTitleForXP } from '@/utilities/quizTitles'
+import { getTodayStatus, relId, roundScoreBounds, toId } from '@/utilities/quizRounds'
 
 export async function POST(req: Request) {
   try {
     const body = await req.json()
 
-    const quizId = body.quizId
-    const userId = body.userId
-    const scoreEarned = Number(body.scoreEarned ?? body.score ?? 0)
+    const quizId = body.quizId ? toId(body.quizId) : null
+    const userId = body.userId ? toId(body.userId) : null
+    const roundId = body.roundId ? toId(body.roundId) : null
+    let scoreEarned = Math.round(Number(body.scoreEarned ?? body.score ?? 0)) || 0
     const rawLogs = body.answers || body.logs || []
-    const timeTaken = Number(body.timeTaken || 0)
+    const timeTaken = Math.max(0, Number(body.timeTaken || 0))
 
     if (!quizId || !userId) {
       return NextResponse.json(
@@ -69,64 +24,87 @@ export async function POST(req: Request) {
     }
 
     const payload = await getPayload({ config: configPromise })
+    let roundNo: number | null = null
 
-    // 🛑 1. CHECK IF USER ALREADY PLAYED TODAY
-    const startOfToday = new Date()
-    startOfToday.setHours(0, 0, 0, 0)
+    if (roundId) {
+      // Daily rounds: the round must belong to this player and quiz, and not be submitted yet.
+      const round: any = await payload
+        .findByID({ collection: 'quiz-rounds' as any, id: roundId, depth: 0, overrideAccess: true })
+        .catch(() => null)
 
-    const existingAttemptsToday = await payload.find({
-      collection: 'quiz-attempts',
-      where: {
-        and: [
-          { user: { equals: userId } },
-          { quiz: { equals: quizId } },
-          { completedAt: { greater_than_equal: startOfToday.toISOString() } },
-        ],
-      },
-      limit: 1,
-      overrideAccess: true,
-    })
+      if (!round || String(relId(round.user)) !== String(userId) || String(relId(round.quiz)) !== String(quizId)) {
+        return NextResponse.json({ success: false, error: 'Invalid round.' }, { status: 400 })
+      }
 
-    if (existingAttemptsToday.docs.length > 0) {
-      return NextResponse.json(
-        {
-          success: false,
-          alreadyPlayed: true,
-          error: 'You have already played this quiz today. Try again tomorrow!',
+      // Reject impossible scores (tampered requests)
+      const { min, max } = await roundScoreBounds(payload, round)
+      scoreEarned = Math.min(max, Math.max(min, scoreEarned))
+
+      // Claim the round atomically so a double submit can't add XP twice
+      const claimed = await payload.update({
+        collection: 'quiz-rounds' as any,
+        where: { and: [{ id: { equals: roundId } }, { status: { not_equals: 'completed' } }] },
+        data: { status: 'completed', score: scoreEarned, completedAt: new Date().toISOString() } as any,
+        overrideAccess: true,
+      })
+      if (!claimed.docs?.length) {
+        return NextResponse.json(
+          { success: false, alreadyPlayed: true, error: 'You have already completed this round.' },
+          { status: 400 },
+        )
+      }
+      roundNo = Number(round.round) || null
+    } else {
+      // Legacy flow (no rounds): one attempt per quiz per day
+      const startOfToday = new Date()
+      startOfToday.setHours(0, 0, 0, 0)
+      const existingAttemptsToday = await payload.find({
+        collection: 'quiz-attempts',
+        where: {
+          and: [
+            { user: { equals: userId } },
+            { quiz: { equals: quizId } },
+            { completedAt: { greater_than_equal: startOfToday.toISOString() } },
+          ],
         },
-        { status: 400 },
-      )
+        limit: 1,
+        overrideAccess: true,
+      })
+      if (existingAttemptsToday.docs.length > 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            alreadyPlayed: true,
+            error: 'You have already played this quiz today. Try again tomorrow!',
+          },
+          { status: 400 },
+        )
+      }
     }
 
     const totalQuestions = rawLogs.length
     const correctAnswers = rawLogs.filter((log: any) => Boolean(log.isCorrect)).length
 
-    // 2. Save into 'quiz-attempts' Collection
     const attempt = await payload.create({
       collection: 'quiz-attempts',
       data: {
         user: userId,
         quiz: quizId,
         score: scoreEarned,
-        totalQuestions: totalQuestions,
-        correctAnswers: correctAnswers,
-        timeTaken: timeTaken,
+        totalQuestions,
+        correctAnswers,
+        timeTaken,
         completedAt: new Date().toISOString(),
-      },
+        ...(roundNo ? { round: roundNo } : {}),
+      } as any,
       overrideAccess: true,
     })
 
-    // 3. Increment Total XP on User Profile
     const existingUser = await payload
-      .findByID({
-        collection: 'quiz-users',
-        id: userId,
-        overrideAccess: true,
-      })
+      .findByID({ collection: 'quiz-users', id: userId, overrideAccess: true })
       .catch(() => null)
 
     let totalXP = scoreEarned
-
     if (existingUser) {
       totalXP = (Number(existingUser.totalXP) || 0) + scoreEarned
       await payload.update({
@@ -140,15 +118,18 @@ export async function POST(req: Request) {
       })
     }
 
-    // 4. Player title (tier) based on the updated total XP
-    const titles = await getQuizTitles(payload)
-    const titleInfo = getTitleForXP(totalXP, titles)
+    // Player title (tier) based on the updated total XP
+    const titleInfo = getTitleForXP(totalXP, await getQuizTitles(payload))
+    const today = roundId ? await getTodayStatus(payload, quizId, userId) : null
 
     return NextResponse.json({
       success: true,
       attempt,
       scoreEarned,
       totalXP,
+      rounds: today
+        ? { completed: today.roundsCompleted, total: today.totalRounds, todayScore: today.todayScore }
+        : null,
       title: {
         name: titleInfo.title.name,
         tierIndex: titleInfo.tierIndex,

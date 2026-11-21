@@ -18,6 +18,7 @@ import { QuizUsers } from './collections/Games/QuizUsers'
 import { Quizzes } from './collections/Games/Quizzes'
 import { UserSubmissions } from './collections/Games/UserSubmissions'
 import { QuizAttempts } from './collections/Games/QuizAttempts'
+import { QuizRounds } from './collections/Games/QuizRounds'
 import { QuizSettings } from './globals/QuizSettings'
 
 const filename = fileURLToPath(import.meta.url)
@@ -85,6 +86,7 @@ export default buildConfig({
     Questions,
     UserSubmissions,
     QuizAttempts,
+    QuizRounds,
   ],
 
   // #################################################################################

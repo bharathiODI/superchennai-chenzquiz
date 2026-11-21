@@ -2,6 +2,9 @@
 import { ImageResponse } from 'next/og'
 import { readFile } from 'fs/promises'
 import path from 'path'
+import { getPayload } from 'payload'
+import configPromise from '@payload-config'
+import sharp from 'sharp'
 import { tierTone } from '@/utilities/quizTitles'
 
 // Shareable scorecard PNG (1080x1350, Instagram/WhatsApp friendly).
@@ -32,6 +35,68 @@ function loadAssets() {
     })
   }
   return assetsPromise
+}
+
+type Picture = { src: string; width: number; height: number }
+type Branding = {
+  logo: Picture | null
+  badgeLogo: Picture | null
+  picture: Picture | null
+  headline: string
+  highlight: string
+  footer: string
+}
+
+/** A media upload as a PNG data URI that fits in maxW x maxH (Satori needs exact sizes). */
+async function mediaPicture(doc: unknown, maxW: number, maxH: number): Promise<Picture | null> {
+  const filename = doc && typeof doc === 'object' ? (doc as { filename?: string }).filename : null
+  if (!filename || filename.includes('/') || filename.includes('..')) return null
+  try {
+    const { data, info } = await sharp(path.join(process.cwd(), 'public', 'media', filename))
+      .resize({ width: maxW, height: maxH, fit: 'inside', withoutEnlargement: true })
+      .png()
+      .toBuffer({ resolveWithObject: true })
+    return { src: `data:image/png;base64,${data.toString('base64')}`, width: info.width, height: info.height }
+  } catch {
+    return null
+  }
+}
+
+// Logos, picture and text from CMS > Quiz Settings > Share Scorecard (falls back to the built-in look)
+let brandingCache: { at: number; value: Promise<Branding> } | null = null
+function loadBranding(): Promise<Branding> {
+  if (brandingCache && Date.now() - brandingCache.at < 5 * 60 * 1000) return brandingCache.value
+  const value = (async (): Promise<Branding> => {
+    const payload = await getPayload({ config: configPromise })
+    const [settings, header] = await Promise.all([
+      payload.findGlobal({ slug: 'quiz-settings', depth: 1 }).catch(() => null),
+      payload.findGlobal({ slug: 'header', depth: 1 }).catch(() => null),
+    ])
+    const sc = ((settings as Record<string, unknown> | null)?.scorecard || {}) as Record<string, unknown>
+    const [logo, badgeLogo, picture] = await Promise.all([
+      mediaPicture(sc.logo, 300, 96),
+      mediaPicture(sc.badgeLogo || (header as Record<string, unknown> | null)?.secondarylogo, 180, 110),
+      mediaPicture(sc.image, 900, 280),
+    ])
+    const text = (v: unknown, fallback: string) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, 80) : fallback)
+    return {
+      logo,
+      badgeLogo,
+      picture,
+      headline: text(sc.headline, 'I just played the'),
+      highlight: text(sc.highlight, 'Super Chennai Quiz!'),
+      footer: text(sc.footerText, 'Think you know Chennai? Play at chenzquiz.superchennai.com'),
+    }
+  })().catch(() => ({
+    logo: null,
+    badgeLogo: null,
+    picture: null,
+    headline: 'I just played the',
+    highlight: 'Super Chennai Quiz!',
+    footer: 'Think you know Chennai? Play at chenzquiz.superchennai.com',
+  }))
+  brandingCache = { at: Date.now(), value }
+  return value
 }
 
 const laurelSvg = (flip: boolean) =>
@@ -65,7 +130,7 @@ export async function GET(req: Request) {
   const tiers = Math.max(1, Number(searchParams.get('tiers')) || 3)
   const tone = tierTone(tier, tiers)
 
-  const { black, bold, skyline } = await loadAssets()
+  const [{ black, bold, skyline }, brand] = await Promise.all([loadAssets(), loadBranding()])
 
   return new ImageResponse(
     (
@@ -103,34 +168,42 @@ export async function GET(req: Request) {
               padding: '44px 56px 0',
             }}
           >
-            <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-              <div style={{ fontSize: 34, fontWeight: 900, color: '#10145C', letterSpacing: 1 }}>
-                SUPER
+            {brand.logo ? (
+              <img src={brand.logo.src} width={brand.logo.width} height={brand.logo.height} />
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
+                <div style={{ fontSize: 34, fontWeight: 900, color: '#10145C', letterSpacing: 1 }}>
+                  SUPER
+                </div>
+                <div style={{ fontSize: 34, fontWeight: 900, color: '#E0249A', letterSpacing: 1 }}>
+                  CHENNAI
+                </div>
               </div>
-              <div style={{ fontSize: 34, fontWeight: 900, color: '#E0249A', letterSpacing: 1 }}>
-                CHENNAI
+            )}
+            {brand.badgeLogo ? (
+              <img src={brand.badgeLogo.src} width={brand.badgeLogo.width} height={brand.badgeLogo.height} />
+            ) : (
+              <div
+                style={{
+                  display: 'flex',
+                  padding: '12px 26px',
+                  borderRadius: 999,
+                  backgroundImage: 'linear-gradient(90deg, #FACC15, #F97316)',
+                  color: '#3B0764',
+                  fontSize: 28,
+                  fontWeight: 900,
+                }}
+              >
+                CHENZ QUIZ
               </div>
-            </div>
-            <div
-              style={{
-                display: 'flex',
-                padding: '12px 26px',
-                borderRadius: 999,
-                backgroundImage: 'linear-gradient(90deg, #FACC15, #F97316)',
-                color: '#3B0764',
-                fontSize: 28,
-                fontWeight: 900,
-              }}
-            >
-              CHENZ QUIZ
-            </div>
+            )}
           </div>
 
           {/* Headline */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 40 }}>
-            <div style={{ fontSize: 44, fontWeight: 700, color: '#1E1B4B' }}>I just played the</div>
+            <div style={{ fontSize: 44, fontWeight: 700, color: '#1E1B4B' }}>{brand.headline}</div>
             <div style={{ fontSize: 60, fontWeight: 900, color: '#6D28D9', marginTop: 4 }}>
-              Super Chennai Quiz!
+              {brand.highlight}
             </div>
           </div>
 
@@ -180,11 +253,15 @@ export async function GET(req: Request) {
           </div>
 
           {/* Skyline */}
-          <img src={skyline} width={900} height={152} style={{ marginTop: 24 }} />
+          {brand.picture ? (
+            <img src={brand.picture.src} width={brand.picture.width} height={brand.picture.height} style={{ marginTop: 24 }} />
+          ) : (
+            <img src={skyline} width={900} height={152} style={{ marginTop: 24 }} />
+          )}
         </div>
 
         <div style={{ display: 'flex', marginTop: 44, fontSize: 34, fontWeight: 700, color: '#FFFFFF' }}>
-          Think you know Chennai? Play at chenzquiz.superchennai.com
+          {brand.footer}
         </div>
       </div>
     ),
@@ -195,7 +272,7 @@ export async function GET(req: Request) {
         { name: 'Geist', data: black, weight: 900, style: 'normal' },
         { name: 'Geist', data: bold, weight: 700, style: 'normal' },
       ],
-      headers: { 'Cache-Control': 'public, max-age=3600' },
+      headers: { 'Cache-Control': 'public, max-age=300' },
     },
   )
 }

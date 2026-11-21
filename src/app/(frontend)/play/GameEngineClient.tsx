@@ -14,10 +14,19 @@ import { DragDropGame } from './components/games/DragDropGame'
 
 import confetti from 'canvas-confetti'
 import QuizResultCard, { type SubmitTitle } from './components/QuizResultCard'
+import { questionScore, speedBonus } from '@/utilities/gameScoring'
 
 export default function GameEngineClient({ quiz }: { quiz: any }) {
   const router = useRouter()
-  const questions = quiz?.questions || []
+  // This player's questions for the current round (from /api/quiz-round)
+  const [questions, setQuestions] = useState<any[]>([])
+  const [roundInfo, setRoundInfo] = useState<{
+    round: number
+    totalRounds: number
+    roundId: string | number | null
+  } | null>(null)
+  const [roundsDone, setRoundsDone] = useState<{ completed: number; total: number } | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [totalScore, setTotalScore] = useState(0)
   const [isCompleted, setIsCompleted] = useState(false)
@@ -39,6 +48,8 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
   const currentQ = questions[currentIndex]
   const questionTimeLimit = Number(currentQ?.timeLimit ?? 60)
   const [timeLeft, setTimeLeft] = useState<number>(questionTimeLimit)
+  const timeLeftRef = useRef(timeLeft)
+  timeLeftRef.current = timeLeft
   const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   // ⏱️ கேம் ஆரம்பிக்கும் நேரத்தை சேமிக்க Ref
@@ -61,13 +72,27 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
 
         if (quiz?.id && parsedUser?.id) {
           const res = await fetch(
-            `/api/quiz-check-played?userId=${parsedUser.id}&quizId=${quiz.id}`,
+            `/api/quiz-round?quizId=${quiz.id}&userId=${parsedUser.id}`,
+            { cache: 'no-store' },
           )
           const data = await res.json()
 
-          if (data?.hasPlayedToday) {
+          if (data?.state === 'ready') {
+            setQuestions(data.questions || [])
+            setRoundInfo({ round: data.round, totalRounds: data.totalRounds, roundId: data.roundId })
+            startTimeRef.current = Date.now()
+          } else if (data?.state === 'done') {
             setAlreadyPlayedToday(true)
-            setLastAttemptScore(data?.lastScore ?? 0)
+            setLastAttemptScore(data?.todayScore ?? 0)
+            setRoundInfo({ round: data.totalRounds, totalRounds: data.totalRounds, roundId: null })
+          } else if (data?.state === 'not_started') {
+            setNotice('This challenge has not started yet. Check back soon!')
+          } else if (data?.state === 'closed') {
+            setNotice('This challenge has ended. Thanks for playing!')
+          } else if (data?.state === 'empty') {
+            setNotice('No new questions are available for you right now. Please check back later.')
+          } else {
+            setNotice('We could not load your questions. Please reload the page.')
           }
         }
       } catch (e) {
@@ -106,7 +131,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [currentIndex, isCompleted, questionTimeLimit, showSkipWarningModal])
+  }, [currentIndex, currentQ?.id, isCompleted, questionTimeLimit, showSkipWarningModal])
 
   const celebrate = () => {
     // Center burst
@@ -191,13 +216,21 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
 
     const defaultPoints = Number(currentQ?.points ?? 10)
     const negativePoints = Number(currentQ?.negativePoints ?? 0)
+    const secondsLeft = timeLeftRef.current
 
+    // Correct: question points + speed bonus (x2 for Double Up). Wrong: negative points (or partial points).
     let pointsToAdd = 0
+    let bonus = 0
     if (result.isCorrect) {
-      pointsToAdd = result.pointsEarned ?? defaultPoints
-      if (currentQ?.enableDoubleUp) {
-        pointsToAdd *= 2
-      }
+      const scored = questionScore({
+        isCorrect: true,
+        basePoints: result.pointsEarned ?? defaultPoints,
+        secondsLeft,
+        timeLimit: questionTimeLimit,
+        doubleUp: Boolean(currentQ?.enableDoubleUp),
+      })
+      pointsToAdd = scored.points
+      bonus = scored.bonus
     } else {
       pointsToAdd =
         result.pointsEarned !== undefined ? result.pointsEarned : -Math.abs(negativePoints)
@@ -210,6 +243,8 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
       gameType: currentQ?.gameType,
       isCorrect: result.isCorrect,
       pointsEarned: pointsToAdd,
+      speedBonus: bonus,
+      secondsLeft,
       userAnswer: result.answerDetail || null,
     }
 
@@ -279,6 +314,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         body: JSON.stringify({
           quizId: quiz?.id,
           userId: activeUserId,
+          roundId: roundInfo?.roundId,
           scoreEarned: finalScore,
           answers: logs,
           timeTaken: timeSpentSeconds,
@@ -291,6 +327,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         setAlreadyPlayedToday(true)
       } else {
         if (data?.title) setResultTitle(data.title)
+        if (data?.rounds) setRoundsDone({ completed: data.rounds.completed, total: data.rounds.total })
       }
     } catch (err) {
       console.error('❌ Error submitting score:', err)
@@ -377,11 +414,13 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         </div>
 
         <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a] mb-2">
-          Already Played Today!
+          {roundInfo && roundInfo.totalRounds > 1
+            ? `All ${roundInfo.totalRounds} Rounds Done Today!`
+            : 'Already Played Today!'}
         </h2>
 
         <p className="text-slate-600 text-sm leading-relaxed mb-6">
-          You can attempt this challenge again tomorrow.
+          Come back tomorrow for a fresh set of questions.
         </p>
 
         {lastAttemptScore !== null && (
@@ -419,6 +458,17 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         scoreEarned={totalScore}
         title={resultTitle}
         isSubmitting={isSubmitting}
+        roundLabel={
+          roundInfo && roundInfo.totalRounds > 1
+            ? `Round ${roundInfo.round} of ${roundInfo.totalRounds} completed`
+            : undefined
+        }
+        nextRound={
+          roundInfo && roundsDone && roundsDone.completed < roundsDone.total
+            ? roundsDone.completed + 1
+            : undefined
+        }
+        onNextRound={() => window.location.reload()}
       />
     )
   }
@@ -455,7 +505,8 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
           No Questions Available
         </h3>
         <p className="text-slate-500 text-sm md:text-base leading-relaxed mb-8 max-w-sm mx-auto">
-          We couldn’t find any questions for this quiz module or all challenges have been completed.
+          {notice ||
+            'We couldn’t find any questions for this quiz module or all challenges have been completed.'}
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -556,8 +607,14 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
       <div className="flex items-center justify-between border-b border-slate-100 pb-5 mb-6 flex-wrap gap-2">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="px-3 py-1 bg-indigo-50 text-indigo-700 font-bold text-[18px] rounded-full uppercase">
+            {roundInfo && roundInfo.totalRounds > 1 ? `Round ${roundInfo.round}/${roundInfo.totalRounds} · ` : ''}
             Question {currentIndex + 1} of {questions.length}
           </span>
+          {currentQ?.isSponsored && (
+            <span className="px-2.5 py-1 bg-amber-100 text-amber-800 font-bold text-xs rounded-full uppercase">
+              Sponsored
+            </span>
+          )}
           <span
             className={`px-3 py-1 font-bold text-[18px] rounded-full transition-colors flex items-center gap-1 ${
               isTimeLow ? 'bg-rose-100 text-rose-700 animate-pulse' : 'bg-slate-100 text-slate-700'
@@ -573,7 +630,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
           </span>
         </div>
         <span className="font-extrabold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full text-xs">
-          +{points} XP {currentQ?.enableDoubleUp ? '(2x ⚡)' : ''}
+          +{points} XP {currentQ?.enableDoubleUp ? '(2x)' : ''} · ⚡ +{speedBonus(timeLeft, questionTimeLimit)} speed
         </span>
       </div>
 

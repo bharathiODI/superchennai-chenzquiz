@@ -19,9 +19,22 @@ type Props = {
   scoreEarned: number
   title: SubmitTitle | null
   isSubmitting: boolean
+  /** e.g. "Round 1 of 3 completed" */
+  roundLabel?: string
+  /** Next round number when more rounds are left today */
+  nextRound?: number
+  onNextRound?: () => void
 }
 
-export default function QuizResultCard({ playerName, scoreEarned, title, isSubmitting }: Props) {
+export default function QuizResultCard({
+  playerName,
+  scoreEarned,
+  title,
+  isSubmitting,
+  roundLabel,
+  nextRound,
+  onNextRound,
+}: Props) {
   const name = playerName?.trim() || 'Chennai Player'
   const [file, setFile] = useState<File | null>(null)
   const [busy, setBusy] = useState<'whatsapp' | 'instagram' | null>(null)
@@ -111,6 +124,9 @@ export default function QuizResultCard({ playerName, scoreEarned, title, isSubmi
         🏆
       </div>
 
+      {roundLabel && (
+        <p className="mb-1 text-xs font-bold uppercase tracking-wider text-[#6D28D9]">{roundLabel}</p>
+      )}
       <h2 className="mb-2 text-3xl font-black text-slate-900">Quiz Completed!</h2>
       <p className="mb-6 text-slate-500">Great effort {name}! Here is your total score:</p>
 
@@ -180,12 +196,23 @@ export default function QuizResultCard({ playerName, scoreEarned, title, isSubmi
         {note && <p className="mt-2 text-xs font-semibold text-slate-500">{note}</p>}
       </div>
 
-      <Link
-        href="/leaderboard"
-        className="inline-block rounded-2xl bg-slate-900 px-8 py-4 font-bold text-white transition hover:bg-slate-800"
-      >
-        View Leaderboard
-      </Link>
+      <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+        {nextRound && onNextRound && (
+          <button
+            type="button"
+            onClick={onNextRound}
+            className="inline-block rounded-2xl bg-gradient-to-r from-[#5B21F5] to-[#7C3AED] px-8 py-4 font-bold text-white shadow-lg shadow-purple-500/25 transition hover:scale-[1.02]"
+          >
+            Play Round {nextRound} →
+          </button>
+        )}
+        <Link
+          href="/leaderboard"
+          className="inline-block rounded-2xl bg-slate-900 px-8 py-4 font-bold text-white transition hover:bg-slate-800"
+        >
+          View Leaderboard
+        </Link>
+      </div>
     </div>
   )
 }

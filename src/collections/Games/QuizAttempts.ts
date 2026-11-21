@@ -81,6 +81,11 @@ export const QuizAttempts: CollectionConfig = {
       name: 'rankAtCompletion',
       type: 'number',
     },
+    {
+      name: 'round',
+      type: 'number',
+      admin: { description: 'Round of the day (1, 2, 3...)' },
+    },
   ],
 }
 // import type { CollectionConfig } from 'payload'

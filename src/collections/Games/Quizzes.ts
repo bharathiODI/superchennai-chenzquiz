@@ -88,7 +88,88 @@ export const Quizzes: CollectionConfig = {
       relationTo: 'questions',
       hasMany: true,
       required: true,
-      label: 'Select Games/Questions for Today',
+      label: 'Question Pool',
+      admin: {
+        description:
+          'All questions for this challenge. Every round, each player gets random questions from this pool that they have not answered before, in a different order.',
+      },
+    },
+    {
+      type: 'collapsible',
+      label: 'Daily Rounds & Sponsored Questions',
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'roundsPerDay',
+              type: 'number',
+              label: 'Rounds per day',
+              defaultValue: 3,
+              min: 1,
+              max: 10,
+              admin: { width: '33%' },
+            },
+            {
+              name: 'questionsPerRound',
+              type: 'number',
+              label: 'Questions per round',
+              defaultValue: 3,
+              min: 1,
+              max: 20,
+              admin: { width: '33%' },
+            },
+            {
+              name: 'sponsoredPosition',
+              type: 'number',
+              label: 'Sponsored question slot',
+              defaultValue: 3,
+              min: 0,
+              max: 20,
+              admin: {
+                width: '33%',
+                description: 'Which question in each round is sponsored (3 = third). 0 = no sponsored slot.',
+              },
+            },
+          ],
+        },
+        {
+          name: 'sponsoredQuestions',
+          type: 'array',
+          label: 'Sponsored question schedule',
+          admin: {
+            description:
+              'Sponsored question per day (same for every player). Leave "Round" empty to use it in all rounds that day. Days without one get a regular question in that slot. Sponsored questions are never served as regular questions.',
+          },
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'date',
+                  type: 'date',
+                  required: true,
+                  admin: { width: '30%', date: { pickerAppearance: 'dayOnly', displayFormat: 'dd MMM yyyy' } },
+                },
+                {
+                  name: 'round',
+                  type: 'number',
+                  min: 1,
+                  max: 10,
+                  admin: { width: '20%', placeholder: 'All rounds' },
+                },
+                {
+                  name: 'question',
+                  type: 'relationship',
+                  relationTo: 'questions',
+                  required: true,
+                  admin: { width: '50%' },
+                },
+              ],
+            },
+          ],
+        },
+      ],
     },
     {
       name: 'status',
