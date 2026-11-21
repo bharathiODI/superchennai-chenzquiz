@@ -111,10 +111,10 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
                 : [],
               contentImage: imgUrl
                 ? {
-                    filename: item.link.contentImage.filename,
-                    mimeType: item.link.contentImage.mimeType,
-                    url: imgUrl,
-                  }
+                  filename: item.link.contentImage.filename,
+                  mimeType: item.link.contentImage.mimeType,
+                  url: imgUrl,
+                }
                 : undefined,
             }
           }),
@@ -157,16 +157,14 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
   return (
     <div className="w-full">
       <header
-        className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${
-          scrolled ? 'bg-white shadow-md scrolleddddheaderrr' : 'bg-transparent'
-        }`}
+        className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${scrolled ? 'bg-white shadow-md scrolleddddheaderrr' : 'bg-transparent'
+          }`}
       >
         {/* #################### DESKTOP MENU NAVBAR ########################### */}
         <nav className="relative hidden w-full flex-col md:flex" onMouseLeave={handleMenuLeave}>
           <div
-            className={`grid grid-cols-3 items-center px-8 py-5 transition-all duration-300 ${
-              activeMenu ? 'bg-white shadow-md' : ''
-            }`}
+            className={`grid grid-cols-3 items-center px-8 py-5 transition-all duration-300 ${activeMenu ? 'bg-white shadow-md' : ''
+              }`}
           >
             <div className="flex justify-start">
               <a href="https://www.superchennai.com/" aria-label="Home">
@@ -208,6 +206,17 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
                   style={{ borderRadius: '100px' }}
                 />
               </a>
+
+
+              {/* <div className='dralogoggg'> */}
+              {/* <img
+                src="/images/dra-logo.jpg"
+                alt="dra-logo"
+                className="max-h-[150px] object-contain superchennailogoosizeee"
+              /> */}
+              {/* </div> */}
+
+
               <a href="/" aria-label="Home">
                 {secondaryLogoUrl && (
                   <img
@@ -314,7 +323,10 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
             </Link>
           </div>
 
-          <div className="flex h-10 w-10 items-center justify-center mobilebannerrrlayouuttt">
+
+
+
+          <div className="flex h-10 w-10 items-center justify-center mobilebannerrrlayouuttt  dralogocsss">
             <Link href="/">
               {secondaryLogoUrl && (
                 <img

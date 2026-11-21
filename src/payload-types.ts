@@ -6284,6 +6284,28 @@ export interface VideoBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "OurPartnersBlockType".
+ */
+export interface OurPartnersBlockType {
+  heading: string;
+  /**
+   * Lower value = faster scroll, Higher value = slower scroll
+   */
+  scrollSpeed?: number | null;
+  partners?:
+    | {
+        name: string;
+        logo: number | Media;
+        link?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'ourPartners';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
