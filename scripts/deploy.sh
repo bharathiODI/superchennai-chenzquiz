@@ -127,9 +127,11 @@ printf '{"release":"%s","sha":"%s"}\n' "$RELEASE" "$SHA" > "$RELEASE_DIR/public/
 log "Installing dependencies"
 ELECTRON_SKIP_BINARY_DOWNLOAD=1 npm ci --no-audit --no-fund
 
-if compgen -G "src/migrations/*.ts" >/dev/null; then
-  log "Running database migrations"
-  npx payload migrate
+# Plain-SQL migrations in /migrations (additive and repeatable). They run before the build so
+# pages that read new tables can be built; the live app is unaffected by new tables or columns.
+if [ -f scripts/db-migrate.mjs ]; then
+  log "Applying database migrations"
+  node scripts/db-migrate.mjs
 fi
 
 log "Building"

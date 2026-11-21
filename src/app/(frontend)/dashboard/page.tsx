@@ -66,9 +66,9 @@ export default function AdminDashboardPage() {
 
   // Filter Winners by Selected Timeframe (Today, Monthly, Yearly, Custom Date)
   const getFilteredWinners = () => {
-    if (!data?.recentAttempts) return []
-
-    const attempts = data.recentAttempts || []
+    // winnerAttempts = every real player's attempt from the last year (recentAttempts is only the latest 50)
+    const attempts = data?.winnerAttempts || data?.recentAttempts || []
+    if (!attempts.length) return []
     const now = new Date()
 
     const filtered = attempts.filter((attempt: any) => {
