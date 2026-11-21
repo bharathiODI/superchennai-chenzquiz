@@ -297,6 +297,7 @@ import Link from 'next/link'
 import configPromise from 'src/payload.config'
 import AuthGuard from './AuthGuard'
 import { isTestPhone, realPlayersWhere } from '@/utilities/testPlayers'
+import { getQuizSiteSettings } from '@/globals/QuizSiteSettings/getQuizSiteSettings'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -377,19 +378,21 @@ export default async function LeaderboardPage({
 }) {
   const resolvedSearchParams = await searchParams
   const payload = await getPayload({ config: configPromise })
+  // Text, page size and the first tab come from CMS > Globals > Quiz Site Settings > Leaderboard
+  const { leaderboard: settings } = await getQuizSiteSettings()
 
   const requestedTab = resolvedSearchParams?.tab
   const tab =
     typeof requestedTab === 'string' &&
     ['daily', 'weekly', 'monthly', 'all'].includes(requestedTab)
       ? requestedTab
-      : 'all'
+      : settings.defaultTab
 
   const requestedPage = Number(resolvedSearchParams?.page)
   const pageParam =
     Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
 
-  const limit = 10
+  const limit = Math.min(50, Math.max(5, Math.round(Number(settings.rowsPerPage) || 10)))
   const now = new Date()
 
   let topUsers: LeaderboardUser[] = []
@@ -570,11 +573,9 @@ export default async function LeaderboardPage({
 
             <div className="text-center mb-8">
               <h1 className="text-3xl sm:text-5xl font-black text-[#10145C] tracking-tight mb-2">
-                Leaderboard
+                {settings.heading}
               </h1>
-              <p className="text-slate-500 text-sm font-medium">
-                Top scorers and champions across all Chennai quiz challenges.
-              </p>
+              <p className="text-slate-500 text-sm font-medium">{settings.description}</p>
             </div>
 
             {/* FILTER TABS */}
@@ -604,7 +605,7 @@ export default async function LeaderboardPage({
 
             {topUsers.length === 0 ? (
               <div className="text-center py-16 text-slate-400 font-medium">
-                No champions ranked for this period yet. Play a game to claim your spot!
+                {settings.emptyText}
               </div>
             ) : (
               <>

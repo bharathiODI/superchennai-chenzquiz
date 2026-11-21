@@ -5,6 +5,7 @@ import QuizCountdown from './QuizCountdown'
 import QuizHeader from './QuizHeader'
 import { generateMeta } from '@/utilities/generateMeta'
 import { cache } from 'react'
+import { getQuizSiteSettings } from '@/globals/QuizSiteSettings/getQuizSiteSettings'
 
 export const revalidate = 600
 
@@ -54,11 +55,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function QuizzesPage() {
   const todayQuiz = await queryTodayQuiz()
+  // Header and "no quiz" text come from CMS > Globals > Quiz Site Settings > Quizzes page
+  const { quizzesPage: text } = await getQuizSiteSettings()
 
   return (
     <div className="relative min-h-screen text-slate-800 pt-16 pb-24 border-t border-slate-100 bg-cover bg-center bg-no-repeat bg-fixed bg-[url('/app-images/background-one.png')] padddingtopppp">
       <div className="relative z-10 container mx-auto px-4 max-w-7xl quizeesectionconatinerrr">
-        <QuizHeader />
+        <QuizHeader badge={text.badge} heading={text.heading} description={text.description} />
         {todayQuiz ? (
           <QuizCountdown
             quizDate={todayQuiz.quizDate}
@@ -109,13 +112,13 @@ export default async function QuizzesPage() {
               </div>
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/60 text-indigo-400 text-xs font-bold uppercase tracking-wider mb-4">
                 <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse" />
-                Daily Quiz Schedule
+                {text.emptyEyebrow}
               </div>
               <h3 className="text-2xl md:text-3xl font-black text-white mb-3 tracking-tight">
-                No Active Quiz Scheduled
+                {text.emptyHeading}
               </h3>
               <p className="text-slate-400 text-base leading-relaxed mb-8">
-                We are preparing fresh challenges! Check back in a bit or explore previous quizzes.
+                {text.emptyText}
               </p>
             </div>
           </div>

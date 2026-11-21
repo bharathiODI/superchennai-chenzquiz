@@ -3,6 +3,7 @@ import configPromise from '@payload-config'
 import { NextRequest, NextResponse } from 'next/server'
 import { clearPhoneVerified, isPhoneVerified } from '@/utilities/otpSession'
 import { issuePlayerToken, setPlayerCookie } from '@/utilities/playerSession'
+import { getQuizSiteSettings } from '@/globals/QuizSiteSettings/getQuizSiteSettings'
 
 // Sign up: creates the player and logs them straight in (one OTP instead of two)
 export async function POST(req: NextRequest) {
@@ -11,14 +12,21 @@ export async function POST(req: NextRequest) {
     const { name, phone, message } = body
     const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
 
-    if (!phone || !name || !email) {
+    // "Email is required" is switched on/off in CMS > Quiz Site Settings > Login & Sign up
+    const { login } = await getQuizSiteSettings()
+
+    if (!phone || !name || (login.requireEmail && !email)) {
       return NextResponse.json(
-        { message: 'Name, email and mobile number are required' },
+        {
+          message: login.requireEmail
+            ? 'Name, email and mobile number are required'
+            : 'Name and mobile number are required',
+        },
         { status: 400 }
       )
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ message: 'Please enter a valid email address' }, { status: 400 })
     }
 
@@ -53,7 +61,7 @@ export async function POST(req: NextRequest) {
       data: {
         name,
         phone,
-        email,
+        email: email || undefined,
         message: message?.trim() || undefined,
       },
     })

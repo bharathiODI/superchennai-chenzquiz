@@ -7,6 +7,7 @@ import {
   startOtpChallenge,
 } from '@/utilities/otpSession'
 import { getTestOtp, isTestPhone } from '@/utilities/testPlayers'
+import { getQuizSiteSettings } from '@/globals/QuizSiteSettings/getQuizSiteSettings'
 
 export async function POST(req: NextRequest) {
   try {
@@ -47,8 +48,10 @@ export async function POST(req: NextRequest) {
 
     let code: string
     if (isTestPhone(mobile)) {
+      // Needs TEST_OTP in the server .env AND "Allow test player logins" ticked in the CMS
       const testOtp = getTestOtp()
-      if (!testOtp) {
+      const { testPlayers } = await getQuizSiteSettings()
+      if (!testOtp || !testPlayers.allowTestLogins) {
         return NextResponse.json(
           { success: false, message: 'Test logins are switched off.' },
           { status: 403 },

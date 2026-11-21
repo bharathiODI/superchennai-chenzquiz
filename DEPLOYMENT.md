@@ -8,7 +8,7 @@ You can also redeploy by hand: **Actions > Deploy to production > Run workflow**
 
 1. GitHub Actions uploads the code to a new folder on the VPS: `/var/www/chenzquiz/releases/<time>-<commit>`.
 2. `scripts/deploy.sh` runs there: links the shared `.env` and uploaded media, `npm ci`,
-   runs Payload migrations (if `src/migrations/` has any), then `npm run build`.
+   applies new database migrations (`migrations/*.sql`), then `npm run build`.
    **The live site keeps running during all of this.** A failed install/build changes nothing.
 3. `current` is switched to the new release and PM2 (`chenzquiz-superchennai`, port 3007) restarts it
    (a few seconds of downtime).
@@ -69,11 +69,43 @@ ln -sfn /var/www/chenzquiz/releases/<release> current.tmp && mv -Tf current.tmp 
 pm2 reload chenzquiz-superchennai --update-env
 ```
 
-## Database changes
+## Database changes (migrations)
 
-`payload.config.ts` has `push: false`, so schema changes (new collections, globals or fields) are not
-applied automatically. Create a migration locally with `npx payload migrate:create <name>` and commit
-`src/migrations/` - the deploy runs `payload migrate` before building.
+Production never changes the database schema by itself. New tables and columns go in
+`migrations/NNN_name.sql`; every deploy runs `npm run db:migrate` (`scripts/db-migrate.mjs`) before
+the build. It applies the files that haven't run yet, each in a transaction, and records them in the
+`app_migrations` table. Migrations must be additive and repeatable (`IF NOT EXISTS`), so the old
+release keeps working while the new one builds.
+
+Writing one: change the Payload config, then generate the SQL from the schema diff (compare the
+Drizzle snapshot of `main` with yours, see `migrations/001_quiz_site_settings.sql`), wrap any
+`CREATE TYPE` in a `DO $$ ... EXCEPTION WHEN duplicate_object` block, and test it on a copy of the
+live database with `npm run db:migrate`.
+
+(`payload migrate` isn't used: on a database that was ever schema-pushed in dev mode it waits for a
+yes/no answer, which an unattended deploy can't give.)
+
+## Seed data
+
+```bash
+cd /var/www/chenzquiz/current && npm run seed      # locally: npm run db:migrate && npm run seed
+```
+
+Safe to run any number of times; it never changes data that already exists:
+- **Quiz Site Settings**: imports the default text and options the first time
+- **Test players**: creates Test Player 1-5 (see below)
+
+## CMS settings
+
+Admin > Globals > **Quiz Site Settings** controls:
+- **Login & Sign up**: headings, side panel text, Terms/Privacy links, "Email is required",
+  "Show the Message field"
+- **Quizzes page**: badge, heading, description, "no quiz today" text
+- **Leaderboard**: heading, description, empty text, players per page, the tab shown first
+- **Test players**: allow / block test logins
+
+Saving refreshes `/login`, `/quizzes` and `/leaderboard` immediately. If the settings can't be read,
+the pages fall back to the built-in defaults (`src/globals/QuizSiteSettings/defaults.ts`).
 
 ## Test players
 
@@ -87,9 +119,6 @@ and they log in with a fixed code instead of an SMS.
    pm2 restart chenzquiz-superchennai
    grep TEST_OTP /var/www/chenzquiz/shared/.env
    ```
-2. Create the players (safe to re-run):
-   ```bash
-   cd /var/www/chenzquiz/current && NODE_ENV=production npx payload run scripts/seed-test-players.ts
-   ```
-3. Log in at `/login` with e.g. `0000000001` and the TEST_OTP code. To turn test logins off, remove
-   the `TEST_OTP` line and restart the app.
+2. Create the players: `npm run seed` (see above).
+3. Log in at `/login` with e.g. `0000000001` and the TEST_OTP code. Test logins can be blocked from
+   the CMS (Quiz Site Settings > Test players) or by removing the `TEST_OTP` line and restarting.
