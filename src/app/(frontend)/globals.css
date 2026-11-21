@@ -147,7 +147,38 @@ header {
   left: 248px;
 } */
 
+
+@keyframes partner-marquee {
+  0% {
+    transform: translateX(0%);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-partner-marquee {
+  animation: partner-marquee linear infinite;
+}
+
+/* header {
+  position: relative;
+} */
+
 @media (max-width:700px) {
+
+
+
+  /* .dralogocsss {
+    width: auto;
+    height: 100px;
+    width: 166px !important;
+    gap: 10px;
+  } */
+
+
+
   .mobileimagessss {
     height: 700px;
     width: 100%;

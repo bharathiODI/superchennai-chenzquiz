@@ -16,6 +16,7 @@ import LetsTalkChennaiFAQBlockComponent from '@/collections/Games/Blocks/LetsTal
 import { CreativeHeroBlock } from '@/collections/Games/Blocks/CreativeHero/Component'
 import InstaReelsSliderComponent from '@/collections/Games/Blocks/InstaReelsSlider/Component'
 import QuizRewardsComponent from '@/collections/Games/Blocks/QuizRewards/Component'
+import { OurPartners } from '@/collections/Games/Blocks/OurPartnersBlock/component'
 // import LetsTalkChennaiFAQBlockComponent from '@/collections/Games/Blocks/FAQ/FAQBlockComponent'
 
 export function renderNode(node: any, idx: number, eventData?: any): React.ReactNode {
@@ -155,6 +156,15 @@ export function renderNode(node: any, idx: number, eventData?: any): React.React
       if (blockType === 'creativeHero') {
         return <CreativeHeroBlock key={idx} {...node.fields} />
       }
+
+      if (blockType === 'ourPartners') {
+        return <OurPartners key={idx} {...node.fields} />
+      }
+
+
+
+
+
 
       console.warn('UNHANDLED BLOCK TYPE =>', blockType)
       return null

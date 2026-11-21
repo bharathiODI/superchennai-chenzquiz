@@ -42,6 +42,7 @@ import { CreativeHeroBlock } from '../Games/Blocks/CreativeHero/config'
 import { InstaReelsBlock } from '../Games/Blocks/InstaReelsSlider/config'
 import { QuizRewardsBlock } from '../Games/Blocks/QuizRewards/config'
 import { isAdmin, isAdminAdminAccess } from '@/access/isAdmin'
+import { OurPartnersBlock } from '../Games/Blocks/OurPartnersBlock/config'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -117,6 +118,7 @@ export const Pages: CollectionConfig<'pages'> = {
                         CreativeHeroBlock,
                         InstaReelsBlock,
                         QuizRewardsBlock,
+                        OurPartnersBlock
                       ],
                     }),
                     FixedToolbarFeature(),
