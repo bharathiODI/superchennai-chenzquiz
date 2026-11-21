@@ -1,13 +1,12 @@
 'use client'
 
-import { useState } from 'react'
-import { LogOut, Edit3, X, User, Check } from 'lucide-react'
+import { Check, LogOut, User, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 
 export function LogoutButton() {
   const router = useRouter()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
-
   const handleLogout = async () => {
     setIsLoggingOut(true)
     try {
@@ -21,7 +20,6 @@ export function LogoutButton() {
       setIsLoggingOut(false)
     }
   }
-
   return (
     <div className="mt-12 text-center">
       <button
@@ -41,7 +39,6 @@ export function EditProfileModal({ user }: { user: any }) {
   const [name, setName] = useState(user?.name || '')
   const [saving, setSaving] = useState(false)
   const router = useRouter()
-
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
@@ -63,18 +60,9 @@ export function EditProfileModal({ user }: { user: any }) {
       setSaving(false)
     }
   }
-
   return (
     <>
-      {/* <button
-        onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-2 px-4 py-2 border-2 border-[#5B2EFF]/30 hover:border-[#5B2EFF] text-[#5B2EFF] font-bold text-xs rounded-xl hover:bg-[#5B2EFF]/5 transition-all duration-200 active:scale-95 cursor-pointer"
-      >
-        <Edit3 className="w-3.5 h-3.5" />
-        Edit Profile
-      </button> */}
-
-      {isOpen && (
+   {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#11145A]/40 backdrop-blur-sm p-4">
           <div className="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
             <button

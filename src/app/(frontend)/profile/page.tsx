@@ -34,6 +34,7 @@ export default async function ProfilePage() {
     },
     sort: '-completedAt',
     limit: 1000,
+    overrideAccess: true,
   })
 
   const userXP = Number((user as any)?.totalXP || 0)
@@ -44,12 +45,15 @@ export default async function ProfilePage() {
         greater_than: userXP,
       },
     },
+    overrideAccess: true,
   })
 
-  // Rank = Higher XP Users + 1
+  console.log('quiz-attempts', attemptsRes)
   const currentRank = higherXPUsers.totalDocs + 1
+
   const attempts = attemptsRes.docs as any[]
-  const userStats = calculateUserStats(attempts)
+
+  const userStats = calculateUserStats(attempts, userXP)
 
   return (
     <div className="relative min-h-screen text-slate-800 pt-16 pb-24 border-t border-slate-100 bg-cover bg-center bg-no-repeat bg-fixed bg-[url('/app-images/background-one.png')]">
@@ -61,7 +65,7 @@ export default async function ProfilePage() {
       <main className="relative z-10 max-w-[1100px] mx-auto px-4 md:px-6 pt-4 padddingtopppp">
         <ProfileHeaderCard user={user} />
         <MyStatsSection stats={userStats} />
-        {/* <RankAndStreakSection stats={userStats} currentRank={currentRank} /> */}
+        <RankAndStreakSection stats={userStats} currentRank={currentRank} />
         <QuizHistorySection attempts={attempts} />
         <LogoutButton />
       </main>

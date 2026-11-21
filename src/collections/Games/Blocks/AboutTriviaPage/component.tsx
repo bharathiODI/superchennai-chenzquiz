@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client'
 
 import React, { useEffect, useState } from 'react'
@@ -74,6 +75,10 @@ export default function AboutTriviaComponent({
   }, [])
 
   const imageUrl = typeof centerImage === 'object' ? centerImage?.url : centerImage
+
+  const imageAlt =
+    (typeof centerImage === 'object' && centerImage?.alt) ||
+    `${highlightText || 'Chennai Trivia'} Illustration`
 
   const renderIcon = (type?: string) => {
     switch (type) {
@@ -187,7 +192,7 @@ export default function AboutTriviaComponent({
         <div className="rounded-3xl overflow-hidden shadow-2xl shadow-purple-900/10 border-4 border-white aspect-square sm:aspect-[4/3] lg:aspect-square relative">
           <img
             src={imageUrl || '/images/chennai-central.jpg'}
-            alt="Chennai Central"
+            alt={imageAlt}
             className="w-full h-full object-cover"
           />
         </div>

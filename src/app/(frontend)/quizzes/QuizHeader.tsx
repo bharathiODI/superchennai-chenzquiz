@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Trophy, User, LogOut, LogIn } from 'lucide-react'
 
-export default function QuizHeader() {
+type QuizHeaderProps = { badge: string; heading: string; description: string }
+
+export default function QuizHeader({ badge, heading, description }: QuizHeaderProps) {
   const [user, setUser] = useState<{ name?: string; email?: string } | null>(null)
   const router = useRouter()
 
@@ -31,15 +33,12 @@ export default function QuizHeader() {
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 bg-white p-8 rounded-3xl shadow-sm border border-slate-200/80">
       <div>
         <span className="inline-block px-3 py-1 bg-amber-100 text-amber-800 font-semibold text-xs rounded-full uppercase tracking-wider mb-3">
-          ⚡ Daily Brain Challenge
+          {badge}
         </span>
         <h1 className="text-4xl font-black text-slate-900 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a]">
-          Super Chennai Quizzes
+          {heading}
         </h1>
-        <p className="text-slate-500 mt-2 text-base max-w-xl">
-          Play today assigned interactive games, climb the local leaderboard, and claim your Chennai
-          master badge!
-        </p>
+        <p className="text-slate-500 mt-2 text-base max-w-xl">{description}</p>
       </div>
 
       <div className="flex items-center flex-wrap gap-3">
