@@ -24,7 +24,9 @@ import { default as default_d500ae2ad98a0a33d640ae0ac1a3417c } from '@/component
 import { default as default_b80a86fce1072afc84cd6a430a965697 } from '@/components/admin/AdminLogo'
 import { default as default_1a7510af427896d367a49dbf838d2de6 } from '@/components/BeforeDashboard'
 import { default as default_8a7ab0eb7ab5c511aba12e68480bfe5e } from '@/components/BeforeLogin'
+import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
+/** @type import('payload').ImportMap */
 export const importMap = {
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,
@@ -51,5 +53,6 @@ export const importMap = {
   "@/components/admin/AdminIcon#default": default_d500ae2ad98a0a33d640ae0ac1a3417c,
   "@/components/admin/AdminLogo#default": default_b80a86fce1072afc84cd6a430a965697,
   "@/components/BeforeDashboard#default": default_1a7510af427896d367a49dbf838d2de6,
-  "@/components/BeforeLogin#default": default_8a7ab0eb7ab5c511aba12e68480bfe5e
+  "@/components/BeforeLogin#default": default_8a7ab0eb7ab5c511aba12e68480bfe5e,
+  "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }
