@@ -52,8 +52,11 @@ The running site is not touched.
 
 Then delete the private key from the server: `rm ~/.ssh/chenzquiz_deploy`.
 
-**3. First deploy**: merge to `main` or use *Run workflow*. The first deploy moves PM2 from
-`/var/www/chenzquiz.superchennai.com` to `/var/www/chenzquiz/current` (copying any new uploads first).
+**3. First deploy**: merge to `main` or use *Run workflow*. The first deploy finds whichever PM2 app is
+serving port 3007 (on this server it was `chenzquiz-payload-cms`, running from
+`/var/www/chenzquiz.superchennai.com`), copies any new uploads, stops that app and starts
+`chenzquiz-superchennai` from `/var/www/chenzquiz/current`. The old app is deleted from PM2 only after
+the new release passes its health check; if it fails, the old app is started again.
 The old folder is left in place; delete it once you're happy.
 
 ## Rolling back

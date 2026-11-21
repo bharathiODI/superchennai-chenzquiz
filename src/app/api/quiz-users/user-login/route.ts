@@ -5,13 +5,18 @@ import { NextResponse } from 'next/server'
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { name, phone, email, message } = body 
+    const { name, phone, message } = body
+    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
 
-    if (!phone || !name) {
+    if (!phone || !name || !email) {
       return NextResponse.json(
-        { message: 'Name and Phone number are required' },
+        { message: 'Name, email and mobile number are required' },
         { status: 400 }
       )
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ message: 'Please enter a valid email address' }, { status: 400 })
     }
 
     const payload = await getPayload({ config: configPromise })
@@ -37,7 +42,7 @@ export async function POST(req: Request) {
       data: {
         name,
         phone,
-        email: email || undefined,
+        email,
         message: message?.trim() || undefined,
       },
     })

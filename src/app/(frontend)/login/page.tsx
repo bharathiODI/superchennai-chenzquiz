@@ -525,6 +525,11 @@ export default function LoginPage() {
       return
     }
 
+    if (isRegister && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError('Please enter a valid email address.')
+      return
+    }
+
     setLoading(true)
 
     const endpoint = isRegister ? '/api/quiz-users/user-login' : '/api/quiz-users/login-otp'
@@ -533,7 +538,7 @@ export default function LoginPage() {
           name,
           phone: formattedPhone,
           username: formattedPhone,
-          email: email.trim() || undefined,
+          email: email.trim(),
           message: message.trim() || undefined, // 👈 payload அனுப்பப்படுகிறது
         }
       : {
@@ -647,7 +652,7 @@ export default function LoginPage() {
               <>
                 <div>
                   <label className="block text-xs font-bold text-[#000] mb-1.5 uppercase tracking-wider">
-                    Full Name
+                    Full Name <span className="text-red-500" aria-hidden="true">*</span>
                   </label>
                   <div className="relative flex items-center">
                     <User className="w-5 h-5 absolute left-4 text-[#858AA8]" />
@@ -664,12 +669,13 @@ export default function LoginPage() {
 
                 <div>
                   <label className="block text-xs font-bold text-[#000] mb-1.5 uppercase tracking-wider">
-                    Email Address <span className="text-slate-400 font-normal">(Optional)</span>
+                    Email Address <span className="text-red-500" aria-hidden="true">*</span>
                   </label>
                   <div className="relative flex items-center">
                     <Mail className="w-5 h-5 absolute left-4 text-[#858AA8]" />
                     <input
                       type="email"
+                      required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="name@example.com"
@@ -699,7 +705,7 @@ export default function LoginPage() {
 
             <div>
               <label className="block text-xs font-bold text-[#000] mb-1.5 uppercase tracking-wider">
-                Mobile Number
+                Mobile Number <span className="text-red-500" aria-hidden="true">*</span>
               </label>
               <div className="flex gap-2">
                 <div className="relative flex-1 flex items-center">
@@ -735,7 +741,7 @@ export default function LoginPage() {
             {!otpVerified && generatedOtp && (
               <div>
                 <label className="block text-xs font-bold text-[#000] mb-1.5 uppercase tracking-wider">
-                  Enter 6-digit OTP
+                  Enter 6-digit OTP <span className="text-red-500" aria-hidden="true">*</span>
                 </label>
                 <div className="flex gap-2">
                   <div className="relative flex-1 flex items-center">
@@ -778,7 +784,7 @@ export default function LoginPage() {
                   <a href="/privacy" className="text-[#4B20D8] font-bold hover:underline">
                     Privacy Policy
                   </a>
-                  .
+                  . <span className="text-red-500" aria-hidden="true">*</span>
                 </label>
               </div>
             )}
