@@ -72,6 +72,7 @@ export default buildConfig({
       connectionTimeoutMillis: 300000,
       idleTimeoutMillis: 300000,
     },
+    push: false,
   }),
 
   collections: [

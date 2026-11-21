@@ -629,9 +629,9 @@ export default async function LeaderboardPage({
                         <span className="text-xs font-black text-[#9AA3B8]">
                           {rank2.totalXP || 0} XP
                         </span>
-                        <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full border border-slate-200">
-                          ⏱️ {formatTime(rank2.totalTimeTaken || 0)}
-                        </span>
+                        {/* <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full border border-slate-200">
+                          ⏱️ {formatTime((rank2 as any).totalTimeTaken || 0)}
+                        </span> */}
                       </div>
                     </div>
                   ) : (
@@ -659,9 +659,9 @@ export default async function LeaderboardPage({
                         <span className="text-xs sm:text-sm font-black text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
                           {rank1.totalXP || 0} XP
                         </span>
-                        <span className="text-[10px] sm:text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
-                          ⏱️ {formatTime(rank1.totalTimeTaken || 0)}
-                        </span>
+                        {/* <span className="text-[10px] sm:text-xs font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                          ⏱️ {formatTime((rank1 as any).totalTimeTaken || 0)}
+                        </span> */}
                       </div>
                     </div>
                   ) : (
@@ -686,9 +686,9 @@ export default async function LeaderboardPage({
                         <span className="text-xs font-black text-[#C96A3A]">
                           {rank3.totalXP || 0} XP
                         </span>
-                        <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full border border-slate-200">
-                          ⏱️ {formatTime(rank3.totalTimeTaken || 0)}
-                        </span>
+                        {/* <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full border border-slate-200">
+                          ⏱️ {formatTime((rank3 as any).totalTimeTaken || 0)}
+                        </span> */}
                       </div>
                     </div>
                   ) : (
@@ -702,7 +702,7 @@ export default async function LeaderboardPage({
                   <div className="grid grid-cols-12 bg-[#f8f9fc] px-4 sm:px-6 py-3.5 text-xs font-extrabold text-[#10145C] border-b border-slate-200 tracking-wider">
                     <div className="col-span-2 sm:col-span-1">Rank</div>
                     <div className="col-span-5 sm:col-span-6">Player</div>
-                    <div className="col-span-2 sm:col-span-2 text-center">Time ⏱️</div>
+                    {/* <div className="col-span-2 sm:col-span-2 text-center">Time ⏱️</div> */}
                     <div className="col-span-3 sm:col-span-3 text-right">Score</div>
                   </div>
 
@@ -734,9 +734,9 @@ export default async function LeaderboardPage({
                           </div>
 
                           {/* Time Taken Column */}
-                          <div className="col-span-2 sm:col-span-2 text-center font-bold text-slate-500 text-xs sm:text-sm">
+                          {/* <div className="col-span-2 sm:col-span-2 text-center font-bold text-slate-500 text-xs sm:text-sm">
                             {formatTime(user.totalTimeTaken || 0)}
-                          </div>
+                          </div> */}
 
                           {/* XP Score Column */}
                           <div className="col-span-3 sm:col-span-3 text-right font-black text-purple-600">

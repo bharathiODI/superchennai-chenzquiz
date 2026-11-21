@@ -660,7 +660,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
       <div className="flex items-center justify-between border-b border-slate-100 pb-5 mb-6 flex-wrap gap-2">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="px-3 py-1 bg-indigo-50 text-indigo-700 font-bold text-[18px] rounded-full uppercase">
-            Game {currentIndex + 1} of {questions.length}
+            Question {currentIndex + 1} of {questions.length}
           </span>
           <span
             className={`px-3 py-1 font-bold text-[18px] rounded-full transition-colors flex items-center gap-1 ${

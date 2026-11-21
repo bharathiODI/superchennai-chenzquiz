@@ -424,14 +424,36 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
               </ul>
             </div>
 
-            <div className="flex justify-end">
+            {/* <div className="flex justify-end">
+              <a href="/" aria-label="Home">
+                <img
+                  src="/images/login-account.jpg"
+                  alt={secondaryLogoAlt}
+                  width={150}
+                  height={60}
+                  className="h-auto w-[100px] object-contain chenaquizzzzimage"
+                />
+              </a>
+            </div> */}
+            <div className="flex justify-end gap-10">
+              <a href="/profile" aria-label="Home">
+                <img
+                  src="/images/login-account.jpg"
+                  alt={secondaryLogoAlt}
+                  width={150}
+                  height={40}
+                  className="h-auto w-[100px] object-contain chenaquizzzzimage"
+
+                  style={{ borderRadius: '100px' }}
+                />
+              </a>
               <a href="/" aria-label="Home">
                 {secondaryLogoUrl && (
                   <img
                     src={secondaryLogoUrl}
                     alt={secondaryLogoAlt}
                     width={150}
-                    height={60}
+                    height={40}
                     className="h-auto w-[100px] object-contain chenaquizzzzimage"
                   />
                 )}

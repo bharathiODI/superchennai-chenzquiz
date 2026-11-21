@@ -17,6 +17,9 @@ import { getServerSideURL } from 'src/utilities/getURL'
 import './globals.css'
 
 import '@/assets/Css/style.css'
+import Link from 'next/link'
+import LeaderboardComponent from '@/blocks/Leaderboard/Leaderboard'
+import StickyNavigation from '@/blocks/StickyNavigation/StickyNavigation'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
@@ -40,6 +43,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Header />
           {children}
           <Footer />
+          <LeaderboardComponent />
+          <StickyNavigation />
         </Providers>
       </body>
     </html>
