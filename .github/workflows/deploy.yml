@@ -1,0 +1,91 @@
+name: Deploy to production
+
+# Runs on every push to main (including merged pull requests); can also be run by hand
+# from the Actions tab. Code is uploaded to the VPS and built there (the build needs the
+# production database), then switched live by scripts/deploy.sh. See DEPLOYMENT.md.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy chenzquiz.superchennai.com
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '/var/www/chenzquiz' }}
+
+    steps:
+      - name: Check deploy secrets
+        env:
+          HAS_KEY: ${{ secrets.DEPLOY_SSH_KEY != '' }}
+        run: |
+          missing=0
+          for v in DEPLOY_HOST DEPLOY_USER; do
+            if [ -z "${!v}" ]; then echo "::error::Missing repository secret $v (see DEPLOYMENT.md)"; missing=1; fi
+          done
+          if [ "$HAS_KEY" != "true" ]; then echo "::error::Missing repository secret DEPLOY_SSH_KEY (see DEPLOYMENT.md)"; missing=1; fi
+          exit $missing
+
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Release name
+        id: release
+        run: echo "name=$(date -u +%Y%m%d-%H%M%S)-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          if [ -n "$KNOWN_HOSTS" ]; then
+            printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "$DEPLOY_PORT" "$DEPLOY_HOST" > ~/.ssh/known_hosts
+          fi
+          chmod 600 ~/.ssh/known_hosts
+          printf 'Host prod\n  HostName %s\n  User %s\n  Port %s\n  IdentityFile ~/.ssh/deploy_key\n  IdentitiesOnly yes\n  ServerAliveInterval 30\n' \
+            "$DEPLOY_HOST" "$DEPLOY_USER" "$DEPLOY_PORT" > ~/.ssh/config
+
+      - name: Upload release
+        env:
+          RELEASE: ${{ steps.release.outputs.name }}
+        run: |
+          # shellcheck disable=SC2029  # paths are meant to expand here, on the runner
+          ssh prod "mkdir -p '$DEPLOY_PATH/releases/$RELEASE'"
+          rsync -az --delete \
+            --exclude '.git/' --exclude 'node_modules/' --exclude '.next/' \
+            --exclude '.env' --exclude '.env.*' --exclude 'public/media/' \
+            --exclude 'db/' --exclude '_local/' \
+            ./ "prod:$DEPLOY_PATH/releases/$RELEASE/"
+
+      - name: Install, build and go live
+        env:
+          RELEASE: ${{ steps.release.outputs.name }}
+        run: |
+          # shellcheck disable=SC2029  # paths are meant to expand here, on the runner
+          ssh prod "APP_ROOT='$DEPLOY_PATH' bash '$DEPLOY_PATH/releases/$RELEASE/scripts/deploy.sh' '$RELEASE' '$GITHUB_SHA'"
+
+      - name: Summary
+        if: success()
+        env:
+          RELEASE: ${{ steps.release.outputs.name }}
+        run: |
+          echo "### Deployed \`$RELEASE\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "Live at https://chenzquiz.superchennai.com (check /version.json)" >> "$GITHUB_STEP_SUMMARY"

@@ -15,6 +15,7 @@ import { getQuizTitles } from '@/utilities/getQuizTitles'
 import { getTitleForXP } from '@/utilities/quizTitles'
 import { LogoutButton } from './components/ClientActions'
 import { calculateUserStats } from './lib/profile-stats'
+import { realPlayersWhere } from '@/utilities/testPlayers'
 
 export const metadata = {
   title: 'My Profile | Super Chennai Trivia',
@@ -39,22 +40,23 @@ export default async function ProfilePage() {
     },
     sort: '-completedAt',
     limit: 1000,
+    overrideAccess: true,
   })
 
   const userXP = Number((user as any)?.totalXP || 0)
+  // Rank among real players (test players are left out, as on the leaderboard)
   const higherXPUsers = await payload.count({
     collection: 'quiz-users',
     where: {
-      totalXP: {
-        greater_than: userXP,
-      },
+      and: [{ totalXP: { greater_than: userXP } }, realPlayersWhere],
     },
+    overrideAccess: true,
   })
 
   // Rank = Higher XP Users + 1
   const currentRank = higherXPUsers.totalDocs + 1
   const attempts = attemptsRes.docs as any[]
-  const userStats = calculateUserStats(attempts)
+  const userStats = calculateUserStats(attempts, userXP)
 
   // Title (tier) from total XP - tiers are editable in admin (Globals > Quiz Titles)
   const titles = await getQuizTitles(payload)

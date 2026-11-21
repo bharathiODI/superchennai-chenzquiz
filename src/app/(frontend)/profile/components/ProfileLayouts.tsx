@@ -1,5 +1,8 @@
+'use client'
+
 /* eslint-disable @next/next/no-img-element */
 import Link from 'next/link'
+import { useState } from 'react'
 import {
   Calendar,
   HelpCircle,
@@ -18,6 +21,7 @@ import {
   Rocket,
   Sparkles,
   Zap,
+  X,
 } from 'lucide-react'
 import { EditProfileModal } from './ClientActions'
 import { TitleBadge } from '@/components/quiz/TitleBadge'
@@ -282,7 +286,9 @@ export function RankAndStreakSection({
   )
 }
 // 4. Quiz History List Table
-export function QuizHistorySection({ attempts, total }: { attempts: any[]; total?: number }) {
+export function QuizHistorySection({ attempts }: { attempts: any[] }) {
+  const [showAllModal, setShowAllModal] = useState(false)
+
   if (!attempts || attempts.length === 0) {
     return (
       <div className="bg-white border border-slate-100 rounded-3xl p-8 text-center shadow-md shadow-slate-100/80">
@@ -303,22 +309,16 @@ export function QuizHistorySection({ attempts, total }: { attempts: any[]; total
     )
   }
 
-  return (
-    <div className="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 shadow-md shadow-slate-100/80">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl md:text-2xl font-extrabold text-[#11145A]">
-          Quiz History <span className="text-sm font-normal text-slate-400">(Recent 5)</span>
-        </h2>
-        <Link
-          href="/history"
-          className="text-[#5B2EFF] hover:text-[#4c22e0] font-bold text-xs md:text-sm flex items-center gap-1 transition"
-        >
-          View All{(total ?? attempts.length) > 0 ? ` (${total ?? attempts.length})` : ''}{' '}
-          <ChevronRight className="w-4 h-4" />
-        </Link>
-      </div>
+  // Dynamic helper to extract quiz title accurately from Payload relation
+  const getQuizTitle = (item: any) => {
+    if (typeof item?.quiz === 'object' && item.quiz !== null) {
+      return item.quiz.quizTitle || item.quiz.title || `Quiz #${item.quiz.id || item.id}`
+    }
+    return `Quiz Challenge #${item?.id}`
+  }
 
-      {/* Desktop Table View */}
+  const renderHistoryTable = (list: any[]) => (
+    <>
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
@@ -330,29 +330,27 @@ export function QuizHistorySection({ attempts, total }: { attempts: any[]; total
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 text-sm font-semibold text-[#11145A]">
-            {attempts.slice(0, 5).map((item) => {
-              const formattedDate = new Date(item.completedAt).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric',
-              })
-              const mins = Math.floor(item.timeTaken / 60)
-              const secs = item.timeTaken % 60
-              const formattedTime = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+            {list.map((item) => {
+              const formattedDate = item?.completedAt
+                ? new Date(item.completedAt).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric',
+                  })
+                : 'Recent'
 
-              // FIX HERE: Extract title properly checking quizTitle, title, or Fallback
-              const quizTitle =
-                typeof item.quiz === 'object' && item.quiz !== null
-                  ? item.quiz.quizTitle || item.quiz.title || 'Chennai Special Challenge'
-                  : 'Chennai Special Challenge'
+              const timeTakenSecs = Number(item?.timeTaken || 0)
+              const mins = Math.floor(timeTakenSecs / 60)
+              const secs = timeTakenSecs % 60
+              const formattedTime = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
 
               return (
                 <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
                   <td className="py-4 text-slate-500 font-medium">{formattedDate}</td>
-                  <td className="py-4 font-bold text-[#11145A]">{quizTitle}</td>
+                  <td className="py-4 font-bold text-[#11145A]">{getQuizTitle(item)}</td>
                   <td className="py-4 text-center">
                     <span className="px-3 py-1 bg-indigo-50 text-[#5B2EFF] font-black rounded-full text-xs">
-                      {item.score} XP
+                      {item.score ?? 0} XP
                     </span>
                   </td>
                   <td className="py-4 text-right font-mono text-slate-500 text-xs">
@@ -365,22 +363,19 @@ export function QuizHistorySection({ attempts, total }: { attempts: any[]; total
         </table>
       </div>
 
-      {/* Mobile Card List View */}
       <div className="sm:hidden space-y-3">
-        {attempts.slice(0, 5).map((item) => {
-          const formattedDate = new Date(item.completedAt).toLocaleDateString('en-US', {
-            month: 'short',
-            day: 'numeric',
-          })
-          const mins = Math.floor(item.timeTaken / 60)
-          const secs = item.timeTaken % 60
-          const formattedTime = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+        {list.map((item) => {
+          const formattedDate = item?.completedAt
+            ? new Date(item.completedAt).toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+              })
+            : 'Recent'
 
-          // FIX HERE: Extract title properly for Mobile view as well
-          const quizTitle =
-            typeof item.quiz === 'object' && item.quiz !== null
-              ? item.quiz.quizTitle || item.quiz.title || 'Chennai Special Challenge'
-              : 'Chennai Special Challenge'
+          const timeTakenSecs = Number(item?.timeTaken || 0)
+          const mins = Math.floor(timeTakenSecs / 60)
+          const secs = timeTakenSecs % 60
+          const formattedTime = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
 
           return (
             <div
@@ -388,19 +383,59 @@ export function QuizHistorySection({ attempts, total }: { attempts: any[]; total
               className="p-4 bg-slate-50/70 rounded-2xl flex items-center justify-between"
             >
               <div>
-                <p className="font-bold text-sm text-[#11145A] mb-0.5">{quizTitle}</p>
+                <p className="font-bold text-sm text-[#11145A] mb-0.5">{getQuizTitle(item)}</p>
                 <p className="text-xs text-slate-400">
                   {formattedDate} • {formattedTime}
                 </p>
               </div>
               <span className="px-3 py-1 bg-[#5B2EFF] text-white font-black rounded-xl text-xs">
-                {item.score} XP
+                {item.score ?? 0} XP
               </span>
             </div>
           )
         })}
       </div>
-    </div>
+    </>
+  )
+
+  return (
+    <>
+      <div className="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 shadow-md shadow-slate-100/80">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl md:text-2xl font-extrabold text-[#11145A]">
+            Quiz History <span className="text-sm font-normal text-slate-400">(Recent 5)</span>
+          </h2>
+          <button
+            onClick={() => setShowAllModal(true)}
+            className="text-[#5B2EFF] hover:text-[#4c22e0] font-bold text-xs md:text-sm flex items-center gap-1 transition cursor-pointer"
+          >
+            View All ({attempts.length}) <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {renderHistoryTable(attempts.slice(0, 5))}
+      </div>
+
+      {/* FULL HISTORY MODAL */}
+      {showAllModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#11145A]/50 backdrop-blur-sm p-4">
+          <div className="bg-white border border-slate-100 rounded-3xl p-6 md:p-8 max-w-3xl w-full max-h-[85vh] overflow-y-auto shadow-2xl relative">
+            <div className="flex items-center justify-between mb-6 border-b pb-4">
+              <h3 className="text-xl font-extrabold text-[#11145A]">
+                All Quiz Attempts ({attempts.length})
+              </h3>
+              <button
+                onClick={() => setShowAllModal(false)}
+                className="p-2 text-slate-400 hover:text-slate-600 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            {renderHistoryTable(attempts)}
+          </div>
+        </div>
+      )}
+    </>
   )
 }
 

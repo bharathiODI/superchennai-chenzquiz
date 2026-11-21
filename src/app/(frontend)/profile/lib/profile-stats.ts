@@ -1,67 +1,8 @@
-// export interface QuizAttempt {
-//   id: string
-//   quiz: { title: string } | string
-//   score: number
-//   totalQuestions: number
-//   correctAnswers: number
-//   timeTaken: number
-//   completedAt: string
-// }
-
-// export function calculateUserStats(attempts: QuizAttempt[]) {
-//   const totalPlayed = attempts.length
-//   if (totalPlayed === 0) {
-//     return {
-//       quizzesPlayed: 0,
-//       correctAnswers: 0,
-//       accuracy: 0,
-//       totalScore: 0,
-//       bestScore: '0 / 0',
-//       averageScore: '0 / 0',
-//       currentStreak: 0,
-//       bestStreak: 0,
-//     }
-//   }
-
-//   const correctAnswers = attempts.reduce((acc, curr) => acc + (curr.correctAnswers || 0), 0)
-//   const totalQuestionsSum = attempts.reduce((acc, curr) => acc + (curr.totalQuestions || 0), 0)
-//   const accuracy = totalQuestionsSum > 0 ? Math.round((correctAnswers / totalQuestionsSum) * 100) : 0
-//   const totalScore = attempts.reduce((acc, curr) => acc + (curr.score || 0), 0)
-
-//   // Average score
-//   const avgScoreNum = Math.round(totalScore / totalPlayed)
-//   const averageScore = `${avgScoreNum} / 30`
-
-//   // Streak Calculation
-//   const uniqueDates = Array.from(
-//     new Set(attempts.map((a) => new Date(a.completedAt).toISOString().split('T')[0]))
-//   ).sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
-
-//   let currentStreak = 0
-//   let tempStreak = 0
-
-//   const todayStr = new Date().toISOString().split('T')[0]
-//   const yesterday = new Date()
-//   yesterday.setDate(yesterday.getDate() - 1)
-//   const yesterdayStr = yesterday.toISOString().split('T')[0]
-
-//   return {
-//     quizzesPlayed: totalPlayed,
-//     correctAnswers,
-//     accuracy,
-//     totalScore,
-//     bestScore,
-//     averageScore,
-//     currentStreak,
-//     bestStreak: Math.max(currentStreak, 12),
-//   }
-// }
-
 import { computeStreaks } from '@/utilities/quizStreak'
 
 export interface QuizAttempt {
-  id: string
-  quiz: { title: string } | string
+  id: number | string
+  quiz?: { title?: string; quizTitle?: string } | number | string | null
   score: number
   totalQuestions: number
   correctAnswers: number
@@ -70,49 +11,42 @@ export interface QuizAttempt {
 }
 
 export function formatTimeTaken(seconds: number): string {
-  const mins = Math.floor(seconds / 60)
-  const secs = seconds % 60
+  const total = Math.max(0, Math.round(Number(seconds) || 0))
+  const mins = Math.floor(total / 60)
+  const secs = total % 60
   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
 }
 
-export function calculateUserStats(attempts: QuizAttempt[]) {
+/** Profile numbers. Total score is the player's saved XP when given, else the sum of attempts. */
+export function calculateUserStats(attempts: QuizAttempt[], userTotalXP?: number) {
   const totalPlayed = attempts.length
   if (totalPlayed === 0) {
     return {
       quizzesPlayed: 0,
       correctAnswers: 0,
       accuracy: 0,
-      totalScore: 0,
-      bestScore: '0 / 0',
-      averageScore: '0 / 0',
+      totalScore: userTotalXP ?? 0,
+      bestScore: '0 XP',
+      averageScore: '0 XP',
       currentStreak: 0,
       bestStreak: 0,
     }
   }
 
-  const correctAnswers = attempts.reduce((acc, curr) => acc + (curr.correctAnswers || 0), 0)
-  const totalQuestionsSum = attempts.reduce((acc, curr) => acc + (curr.totalQuestions || 0), 0)
+  const correctAnswers = attempts.reduce((acc, curr) => acc + Number(curr.correctAnswers || 0), 0)
+  const totalQuestionsSum = attempts.reduce((acc, curr) => acc + Number(curr.totalQuestions || 0), 0)
   const accuracy = totalQuestionsSum > 0 ? Math.round((correctAnswers / totalQuestionsSum) * 100) : 0
-  const totalScore = attempts.reduce((acc, curr) => acc + (curr.score || 0), 0)
 
-  // Best score
-  let maxScore = 0
-  let maxQuestions = 1
-  attempts.forEach((att) => {
-    if ((att.score || 0) >= maxScore) {
-      maxScore = att.score || 0
-      maxQuestions = att.totalQuestions || 1
-    }
-  })
-  const bestScore = `${maxScore} / ${maxQuestions * 10}`
+  const attemptsScoreSum = attempts.reduce((acc, curr) => acc + Number(curr.score || 0), 0)
+  const totalScore = userTotalXP !== undefined ? userTotalXP : attemptsScoreSum
 
-  // Average score
-  const avgScoreNum = Math.round(totalScore / totalPlayed)
-  const averageScore = `${avgScoreNum} / 30`
+  // Best and average XP of a single quiz attempt
+  const bestScore = `${Math.max(...attempts.map((a) => Number(a.score || 0)))} XP`
+  const averageScore = `${Math.round(attemptsScoreSum / totalPlayed)} XP`
 
   // Streaks: consecutive play days in India time
   const { current: currentStreak, best: bestStreak } = computeStreaks(
-    attempts.map((a) => a.completedAt),
+    attempts.map((a) => a.completedAt).filter(Boolean),
   )
 
   return {

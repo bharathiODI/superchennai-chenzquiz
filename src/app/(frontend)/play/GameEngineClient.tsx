@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
@@ -38,7 +39,8 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
   const [resultTitle, setResultTitle] = useState<SubmitTitle | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Warning Modal State for Skipped Questions
+  const [userAnswersState, setUserAnswersState] = useState<Record<number, any>>({})
+
   const [showSkipWarningModal, setShowSkipWarningModal] = useState(false)
   const [pendingFinalSubmit, setPendingFinalSubmit] = useState<{
     score: number
@@ -207,6 +209,46 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
   }
 
   // 🎯 Game Completion Logic
+  // const handleGameCompletion = (result: {
+  //   isCorrect: boolean
+  //   pointsEarned?: number
+  //   answerDetail?: any
+  // }) => {
+  //   if (timerRef.current) clearInterval(timerRef.current)
+
+  //   const defaultPoints = Number(currentQ?.points ?? 10)
+  //   const negativePoints = Number(currentQ?.negativePoints ?? 0)
+
+  //   let pointsToAdd = 0
+  //   if (result.isCorrect) {
+  //     pointsToAdd = result.pointsEarned ?? defaultPoints
+  //     if (currentQ?.enableDoubleUp) {
+  //       pointsToAdd *= 2
+  //     }
+  //   } else {
+  //     pointsToAdd =
+  //       result.pointsEarned !== undefined ? result.pointsEarned : -Math.abs(negativePoints)
+  //   }
+
+  //   const newScore = totalScore + pointsToAdd
+  //   const currentLog = {
+  //     questionId: currentQ?.id,
+  //     title: currentQ?.questionTitle || currentQ?.title,
+  //     gameType: currentQ?.gameType,
+  //     isCorrect: result.isCorrect,
+  //     pointsEarned: pointsToAdd,
+  //     userAnswer: result.answerDetail || null,
+  //   }
+
+  //   const updatedLog = [...answersLog, currentLog]
+
+  //   setTotalScore(newScore)
+  //   setAnswersLog(updatedLog)
+
+  //   processNextOrFinish(newScore, updatedLog)
+  // }
+
+  // 🎯 Game Completion Logic
   const handleGameCompletion = (result: {
     isCorrect: boolean
     pointsEarned?: number
@@ -236,6 +278,12 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         result.pointsEarned !== undefined ? result.pointsEarned : -Math.abs(negativePoints)
     }
 
+    // 💡 ADD THIS: Current index-kku user select panna answer-a save panrom
+    setUserAnswersState((prev) => ({
+      ...prev,
+      [currentIndex]: result.answerDetail || null,
+    }))
+
     const newScore = totalScore + pointsToAdd
     const currentLog = {
       questionId: currentQ?.id,
@@ -248,13 +296,34 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
       userAnswer: result.answerDetail || null,
     }
 
-    const updatedLog = [...answersLog, currentLog]
+    // 💡 UPDATE THIS: Array length increase aagama current index log-a replace/update panrom
+    const updatedLog = [...answersLog]
+    updatedLog[currentIndex] = currentLog
 
     setTotalScore(newScore)
     setAnswersLog(updatedLog)
 
     processNextOrFinish(newScore, updatedLog)
   }
+
+  // ⏭️ Skip Question Logic
+  // const handleSkip = () => {
+  //   if (timerRef.current) clearInterval(timerRef.current)
+
+  //   const currentLog = {
+  //     questionId: currentQ?.id,
+  //     title: currentQ?.questionTitle || currentQ?.title,
+  //     gameType: currentQ?.gameType,
+  //     isCorrect: false,
+  //     pointsEarned: 0,
+  //     userAnswer: 'Skipped',
+  //   }
+
+  //   const updatedLog = [...answersLog, currentLog]
+  //   setAnswersLog(updatedLog)
+
+  //   processNextOrFinish(totalScore, updatedLog)
+  // }
 
   // ⏭️ Skip Question Logic
   const handleSkip = () => {
@@ -269,21 +338,31 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
       userAnswer: 'Skipped',
     }
 
-    const updatedLog = [...answersLog, currentLog]
+    const updatedLog = [...answersLog]
+    updatedLog[currentIndex] = currentLog
+
     setAnswersLog(updatedLog)
 
     processNextOrFinish(totalScore, updatedLog)
   }
 
-  // ⏮️ Previous Question Logic
+  const handleBackToSkippedQuestion = () => {
+    setShowSkipWarningModal(false)
+    const firstSkippedIndex = answersLog.findIndex((log) => log?.userAnswer === 'Skipped')
+    if (firstSkippedIndex !== -1) {
+      setCurrentIndex(firstSkippedIndex)
+    } else if (currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1)
+    }
+  }
+
   const handlePrevious = () => {
     if (currentIndex > 0) {
       if (timerRef.current) clearInterval(timerRef.current)
 
-      const lastLog = answersLog[answersLog.length - 1]
-      if (lastLog) {
-        setTotalScore((prevScore) => prevScore - (lastLog.pointsEarned || 0))
-        setAnswersLog((prev) => prev.slice(0, -1))
+      const prevLog = answersLog[currentIndex - 1]
+      if (prevLog && prevLog.userAnswer !== 'Skipped') {
+        setTotalScore((prevScore) => Math.max(0, prevScore - (prevLog.pointsEarned || 0)))
       }
 
       setCurrentIndex((prev) => prev - 1)
@@ -534,10 +613,11 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
   const questionTitle = currentQ?.questionTitle || currentQ?.title || 'Challenge'
   const heroImage = currentQ?.heroImage
   const contentText = currentQ?.content
-
+  const initialAnswer = userAnswersState[currentIndex] || null
   const gameData = {
     ...currentQ,
     points: points,
+    initialAnswer,
     mcqGroup: currentQ?.mcqGroup,
     dropdownGroup: currentQ?.dropdownGroup,
     wordleGroup: currentQ?.wordleGroup,
@@ -572,7 +652,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
 
             <div className="flex flex-col gap-2.5">
               <button
-                onClick={() => setShowSkipWarningModal(false)}
+                onClick={handleBackToSkippedQuestion}
                 className="w-full py-3 px-5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-sm rounded-xl transition shadow-md shadow-indigo-500/20"
               >
                 ⬅️ Back to Quiz & Answer
@@ -657,7 +737,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
 
       {/* Active Sub Game Component Container */}
       <div className="min-h-[250px] mt-4">
-        {gameType === 'mcq' && (
+        {/* {gameType === 'mcq' && (
           <MCQGame
             key={currentQ?.id || currentIndex}
             data={gameData}
@@ -712,7 +792,34 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
             data={gameData}
             onComplete={handleGameCompletion}
           />
-        )}
+        )} */}
+
+        <div className="min-h-[250px] mt-4">
+          {gameType === 'mcq' && (
+            <MCQGame key={currentQ?.id} data={gameData} onComplete={handleGameCompletion} />
+          )}
+          {gameType === 'wordle' && (
+            <WordleGame key={currentQ?.id} data={gameData} onComplete={handleGameCompletion} />
+          )}
+          {gameType === 'word_finder' && (
+            <WordFinderGame key={currentQ?.id} data={gameData} onComplete={handleGameCompletion} />
+          )}
+          {gameType === 'dropdown' && (
+            <DropdownGame key={currentQ?.id} data={gameData} onComplete={handleGameCompletion} />
+          )}
+          {gameType === 'match_following' && (
+            <MatchGame key={currentQ?.id} data={gameData} onComplete={handleGameCompletion} />
+          )}
+          {gameType === 'spot_lie' && (
+            <SpotLieGame key={currentQ?.id} data={gameData} onSelect={handleGameCompletion} />
+          )}
+          {gameType === 'reorder' && (
+            <ReorderGame key={currentQ?.id} data={gameData} onComplete={handleGameCompletion} />
+          )}
+          {gameType === 'drag_drop' && (
+            <DragDropGame key={currentQ?.id} data={gameData} onComplete={handleGameCompletion} />
+          )}
+        </div>
       </div>
       {/* Navigation Controls: Previous & Skip Buttons */}
       <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-4">

@@ -1,16 +1,39 @@
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { clearPhoneVerified, isPhoneVerified } from '@/utilities/otpSession'
+import { issuePlayerToken, setPlayerCookie } from '@/utilities/playerSession'
+import { getQuizSiteSettings } from '@/globals/QuizSiteSettings/getQuizSiteSettings'
 
-export async function POST(req: Request) {
+// Sign up: creates the player and logs them straight in (one OTP instead of two)
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { name, phone, email, message } = body 
+    const { name, phone, message } = body
+    const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
 
-    if (!phone || !name) {
+    // "Email is required" is switched on/off in CMS > Quiz Site Settings > Login & Sign up
+    const { login } = await getQuizSiteSettings()
+
+    if (!phone || !name || (login.requireEmail && !email)) {
       return NextResponse.json(
-        { message: 'Name and Phone number are required' },
+        {
+          message: login.requireEmail
+            ? 'Name, email and mobile number are required'
+            : 'Name and mobile number are required',
+        },
         { status: 400 }
+      )
+    }
+
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ message: 'Please enter a valid email address' }, { status: 400 })
+    }
+
+    if (!isPhoneVerified(req, phone)) {
+      return NextResponse.json(
+        { message: 'Please verify your mobile number with OTP first.' },
+        { status: 401 }
       )
     }
 
@@ -22,6 +45,7 @@ export async function POST(req: Request) {
       where: {
         phone: { equals: phone },
       },
+      overrideAccess: true,
     })
 
     if (existing.docs.length > 0) {
@@ -42,10 +66,18 @@ export async function POST(req: Request) {
       },
     })
 
-    return NextResponse.json({
+    const token = await issuePlayerToken(payload, newUser)
+
+    const response = NextResponse.json({
       message: 'Account created successfully',
       doc: newUser,
+      user: newUser,
+      token,
     })
+    setPlayerCookie(response, token)
+    clearPhoneVerified(response)
+
+    return response
   } catch (error: any) {
     return NextResponse.json(
       { message: error?.message || 'Failed to create user' },

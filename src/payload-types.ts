@@ -115,11 +115,13 @@ export interface Config {
     header: Header;
     footer: Footer;
     'quiz-settings': QuizSetting;
+    'quiz-site-settings': QuizSiteSetting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     'quiz-settings': QuizSettingsSelect<false> | QuizSettingsSelect<true>;
+    'quiz-site-settings': QuizSiteSettingsSelect<false> | QuizSiteSettingsSelect<true>;
   };
   locale: null;
   user:
@@ -542,6 +544,26 @@ export interface Quiz {
       }[]
     | null;
   status?: ('draft' | 'active' | 'completed') | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+    /**
+     * Paste valid JSON-LD schema for this quiz
+     */
+    schema?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1482,6 +1504,14 @@ export interface QuizzesSelect<T extends boolean = true> {
         id?: T;
       };
   status?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+        schema?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2039,6 +2069,51 @@ export interface QuizSetting {
   createdAt?: string | null;
 }
 /**
+ * Text and options for the login, quizzes and leaderboard pages.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-site-settings".
+ */
+export interface QuizSiteSetting {
+  id: number;
+  login?: {
+    loginHeading?: string | null;
+    signupHeading?: string | null;
+    loginSubheading?: string | null;
+    signupSubheading?: string | null;
+    requireEmail?: boolean | null;
+    showMessageField?: boolean | null;
+    termsUrl?: string | null;
+    privacyUrl?: string | null;
+    sidePanelBadge?: string | null;
+    sidePanelText?: string | null;
+    sidePanelFooter?: string | null;
+  };
+  quizzesPage?: {
+    badge?: string | null;
+    heading?: string | null;
+    description?: string | null;
+    emptyEyebrow?: string | null;
+    emptyHeading?: string | null;
+    emptyText?: string | null;
+  };
+  leaderboard?: {
+    heading?: string | null;
+    description?: string | null;
+    emptyText?: string | null;
+    rowsPerPage?: number | null;
+    defaultTab?: ('daily' | 'weekly' | 'monthly' | 'all') | null;
+  };
+  testPlayers?: {
+    /**
+     * Untick to block every test login. Test logins also need TEST_OTP in the server .env.
+     */
+    allowTestLogins?: boolean | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
@@ -2119,6 +2194,54 @@ export interface QuizSettingsSelect<T extends boolean = true> {
         highlight?: T;
         image?: T;
         footerText?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-site-settings_select".
+ */
+export interface QuizSiteSettingsSelect<T extends boolean = true> {
+  login?:
+    | T
+    | {
+        loginHeading?: T;
+        signupHeading?: T;
+        loginSubheading?: T;
+        signupSubheading?: T;
+        requireEmail?: T;
+        showMessageField?: T;
+        termsUrl?: T;
+        privacyUrl?: T;
+        sidePanelBadge?: T;
+        sidePanelText?: T;
+        sidePanelFooter?: T;
+      };
+  quizzesPage?:
+    | T
+    | {
+        badge?: T;
+        heading?: T;
+        description?: T;
+        emptyEyebrow?: T;
+        emptyHeading?: T;
+        emptyText?: T;
+      };
+  leaderboard?:
+    | T
+    | {
+        heading?: T;
+        description?: T;
+        emptyText?: T;
+        rowsPerPage?: T;
+        defaultTab?: T;
+      };
+  testPlayers?:
+    | T
+    | {
+        allowTestLogins?: T;
       };
   updatedAt?: T;
   createdAt?: T;

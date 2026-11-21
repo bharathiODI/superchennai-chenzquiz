@@ -7,6 +7,8 @@ import { CalendarDays, CalendarRange, Crown, Flame, Sun } from 'lucide-react'
 import AuthGuard from './AuthGuard'
 import { Laurel, TitleBadge } from '@/components/quiz/TitleBadge'
 import { getQuizTitles } from '@/utilities/getQuizTitles'
+import { isTestPhone, realPlayersWhere } from '@/utilities/testPlayers'
+import { getQuizSiteSettings } from '@/globals/QuizSiteSettings/getQuizSiteSettings'
 import { getTitleForXP, type QuizTitle } from '@/utilities/quizTitles'
 import { computeStreaks } from '@/utilities/quizStreak'
 
@@ -43,7 +45,6 @@ type Player = Ranked & {
   title: ReturnType<typeof getTitleForXP>
 }
 
-const PAGE_SIZE = 10
 
 function relId(value: unknown): string | null {
   if (value === null || value === undefined) return null
@@ -88,12 +89,16 @@ export default async function LeaderboardPage({
 }) {
   const resolvedSearchParams = await searchParams
   const payload = await getPayload({ config: configPromise })
+  // Text, page size and the first tab come from CMS > Globals > Quiz Site Settings > Leaderboard
+  const { leaderboard: settings } = await getQuizSiteSettings()
+  const PAGE_SIZE = Math.min(50, Math.max(5, Math.round(Number(settings.rowsPerPage) || 10)))
+  const defaultTab: Tab = TABS.some((t) => t.id === settings.defaultTab) ? (settings.defaultTab as Tab) : 'all'
 
   const requestedTab = resolvedSearchParams?.tab
   const tab: Tab =
     typeof requestedTab === 'string' && TABS.some((t) => t.id === requestedTab)
       ? (requestedTab as Tab)
-      : 'all'
+      : defaultTab
 
   const requestedPage = Number(resolvedSearchParams?.page)
   const pageParam = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
@@ -111,6 +116,7 @@ export default async function LeaderboardPage({
     const findPage = (page: number, limit: number) =>
       payload.find({
         collection: 'quiz-users',
+        where: realPlayersWhere, // test players are never ranked
         sort: ['-totalXP', 'totalTimeTaken', 'createdAt'],
         limit,
         page,
@@ -187,6 +193,7 @@ export default async function LeaderboardPage({
     }
 
     const ranked = Array.from(stats.values())
+      .filter((r) => !isTestPhone(usersById.get(r.id)?.phone)) // test players are never ranked
       .map((r) => ({ ...r, name: r.name || 'Anonymous' }))
       .sort(byRank)
 
@@ -254,10 +261,10 @@ export default async function LeaderboardPage({
 
             <div className="text-center mb-8">
               <h1 className="text-3xl sm:text-5xl font-black text-[#10145C] tracking-tight mb-2">
-                Leaderboard
+                {settings.heading}
               </h1>
               <p className="text-slate-500 text-sm font-medium">
-                Top scorers and champions across all Chennai quiz challenges.
+                {settings.description}
               </p>
             </div>
 
@@ -287,7 +294,7 @@ export default async function LeaderboardPage({
 
             {players.length === 0 && podium.length === 0 ? (
               <div className="text-center py-16 text-slate-400 font-medium">
-                No champions ranked for this period yet. Play a game to claim your spot!
+                {settings.emptyText}
               </div>
             ) : (
               <>
