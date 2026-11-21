@@ -82,6 +82,7 @@ export interface Config {
     forms: Form;
     'form-submissions': FormSubmission;
     search: Search;
+    'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -103,6 +104,7 @@ export interface Config {
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -111,6 +113,7 @@ export interface Config {
   db: {
     defaultIDType: number;
   };
+  fallbackLocale: null;
   globals: {
     header: Header;
     footer: Footer;
@@ -124,13 +127,10 @@ export interface Config {
     'quiz-site-settings': QuizSiteSettingsSelect<false> | QuizSiteSettingsSelect<true>;
   };
   locale: null;
-  user:
-    | (User & {
-        collection: 'users';
-      })
-    | (QuizUser & {
-        collection: 'quiz-users';
-      });
+  widgets: {
+    collections: CollectionsWidget;
+  };
+  user: User | QuizUser;
   jobs: {
     tasks: {
       schedulePublish: TaskSchedulePublish;
@@ -222,11 +222,14 @@ export interface Page {
         }[]
       | null;
   };
-  content: {
+  /**
+   * The page content. Leave it empty if the page is built only in the Page Builder tab.
+   */
+  content?: {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -236,7 +239,8 @@ export interface Page {
       version: number;
     };
     [k: string]: unknown;
-  };
+  } | null;
+  layout?: PBSectionBlock[] | null;
   meta?: {
     title?: string | null;
     /**
@@ -296,7 +300,7 @@ export interface Media {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -389,7 +393,7 @@ export interface Post {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -483,6 +487,2151 @@ export interface User {
   loginAttempts?: number | null;
   lockUntil?: string | null;
   password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBSectionBlock".
+ */
+export interface PBSectionBlock {
+  rows?: PBRowBlock[] | null;
+  /**
+   * Internal name shown in the builder.
+   */
+  label?: string | null;
+  tag?: ('section' | 'div' | 'header' | 'footer' | 'main' | 'aside' | 'nav') | null;
+  /**
+   * Whether inner content is capped to the site width.
+   */
+  widthMode?: ('contained' | 'full') | null;
+  height?: ('auto' | 'full' | 'min') | null;
+  minHeight?: string | null;
+  space?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the desktop value.
+   */
+  spaceMd?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the tablet value.
+   */
+  spaceSm?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  color?: string | null;
+  fontSize?: string | null;
+  lineHeight?: string | null;
+  fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+  transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+  letterSpacing?: string | null;
+  bw?: string | null;
+  bc?: string | null;
+  br?: string | null;
+  bs?: string | null;
+  bg?: {
+    type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+    color?: string | null;
+    gFrom?: string | null;
+    gTo?: string | null;
+    gAngle?: number | null;
+    image?: (number | null) | Media;
+    pos?:
+      | (
+          | 'left-top'
+          | 'left-center'
+          | 'left-bottom'
+          | 'center-top'
+          | 'center-center'
+          | 'center-bottom'
+          | 'right-top'
+          | 'right-center'
+          | 'right-bottom'
+        )
+      | null;
+    fit?: ('cover' | 'contain' | 'auto') | null;
+    repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+    attach?: ('scroll' | 'fixed' | 'parallax') | null;
+    blend?: ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+    /**
+     * MP4 recommended. Plays muted and looped.
+     */
+    video?: (number | null) | Media;
+    poster?: (number | null) | Media;
+    overlay?: string | null;
+    overlayOpacity?: number | null;
+  };
+  anim?: {
+    preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+    duration?: number | null;
+    delay?: number | null;
+    /**
+     * Animate when the node scrolls into view rather than on load.
+     */
+    onScroll?: boolean | null;
+  };
+  hide?: {
+    desktop?: boolean | null;
+    tablet?: boolean | null;
+    mobile?: boolean | null;
+  };
+  /**
+   * Space-separated. Letters, digits and hyphens only.
+   */
+  cssClass?: string | null;
+  cssId?: string | null;
+  /**
+   * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+   */
+  attrs?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'builderSection';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBRowBlock".
+ */
+export interface PBRowBlock {
+  columns?:
+    | {
+        elements?:
+          | (
+              | PBHeadingBlock
+              | PBRichTextBlock
+              | PBButtonBlock
+              | PBImageBlock
+              | PBVideoBlock
+              | PBDividerBlock
+              | PBSpacerBlock
+              | PBChenzAboutTriviaBlock
+              | PBChenzHowItWorksBlock
+              | PBChenzReadyToPlayBlock
+              | PBChenzQuizRewardsBlock
+              | PBChenzFaqBlock
+              | PBChenzInstaReelsBlock
+              | PBChenzCreativeHeroBlock
+            )[]
+          | null;
+        width?:
+          | ('1/1' | '1/2' | '1/3' | '2/3' | '1/4' | '3/4' | '1/5' | '2/5' | '3/5' | '4/5' | '1/6' | '5/6' | 'auto')
+          | null;
+        valign?: ('inherit' | 'start' | 'center' | 'end') | null;
+        /**
+         * Makes the whole column a link. Links on elements inside are disabled when this is set.
+         */
+        linkUrl?: string | null;
+        space?: {
+          pt?: string | null;
+          pr?: string | null;
+          pb?: string | null;
+          pl?: string | null;
+          mt?: string | null;
+          mb?: string | null;
+        };
+        /**
+         * Leave blank to inherit the desktop value.
+         */
+        spaceMd?: {
+          pt?: string | null;
+          pr?: string | null;
+          pb?: string | null;
+          pl?: string | null;
+          mt?: string | null;
+          mb?: string | null;
+        };
+        /**
+         * Leave blank to inherit the tablet value.
+         */
+        spaceSm?: {
+          pt?: string | null;
+          pr?: string | null;
+          pb?: string | null;
+          pl?: string | null;
+          mt?: string | null;
+          mb?: string | null;
+        };
+        color?: string | null;
+        fontSize?: string | null;
+        lineHeight?: string | null;
+        fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+        transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+        letterSpacing?: string | null;
+        bw?: string | null;
+        bc?: string | null;
+        br?: string | null;
+        bs?: string | null;
+        bg?: {
+          type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+          color?: string | null;
+          gFrom?: string | null;
+          gTo?: string | null;
+          gAngle?: number | null;
+          image?: (number | null) | Media;
+          pos?:
+            | (
+                | 'left-top'
+                | 'left-center'
+                | 'left-bottom'
+                | 'center-top'
+                | 'center-center'
+                | 'center-bottom'
+                | 'right-top'
+                | 'right-center'
+                | 'right-bottom'
+              )
+            | null;
+          fit?: ('cover' | 'contain' | 'auto') | null;
+          repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+          attach?: ('scroll' | 'fixed' | 'parallax') | null;
+          blend?:
+            ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+          /**
+           * MP4 recommended. Plays muted and looped.
+           */
+          video?: (number | null) | Media;
+          poster?: (number | null) | Media;
+          overlay?: string | null;
+          overlayOpacity?: number | null;
+        };
+        anim?: {
+          preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+          duration?: number | null;
+          delay?: number | null;
+          /**
+           * Animate when the node scrolls into view rather than on load.
+           */
+          onScroll?: boolean | null;
+        };
+        hide?: {
+          desktop?: boolean | null;
+          tablet?: boolean | null;
+          mobile?: boolean | null;
+        };
+        /**
+         * Space-separated. Letters, digits and hyphens only.
+         */
+        cssClass?: string | null;
+        cssId?: string | null;
+        /**
+         * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+         */
+        attrs?:
+          | {
+              key?: string | null;
+              value?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Internal name shown in the builder.
+   */
+  label?: string | null;
+  gap?: ('none' | 'sm' | 'md' | 'lg') | null;
+  /**
+   * How columns align vertically within the row.
+   */
+  valign?: ('start' | 'center' | 'end' | 'stretch') | null;
+  /**
+   * How columns are justified horizontally.
+   */
+  justify?: ('start' | 'center' | 'end' | 'between' | 'around' | 'evenly') | null;
+  /**
+   * Allow columns to wrap onto more than one line.
+   */
+  wrap?: boolean | null;
+  space?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the desktop value.
+   */
+  spaceMd?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the tablet value.
+   */
+  spaceSm?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  color?: string | null;
+  fontSize?: string | null;
+  lineHeight?: string | null;
+  fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+  transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+  letterSpacing?: string | null;
+  bw?: string | null;
+  bc?: string | null;
+  br?: string | null;
+  bs?: string | null;
+  bg?: {
+    type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+    color?: string | null;
+    gFrom?: string | null;
+    gTo?: string | null;
+    gAngle?: number | null;
+    image?: (number | null) | Media;
+    pos?:
+      | (
+          | 'left-top'
+          | 'left-center'
+          | 'left-bottom'
+          | 'center-top'
+          | 'center-center'
+          | 'center-bottom'
+          | 'right-top'
+          | 'right-center'
+          | 'right-bottom'
+        )
+      | null;
+    fit?: ('cover' | 'contain' | 'auto') | null;
+    repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+    attach?: ('scroll' | 'fixed' | 'parallax') | null;
+    blend?: ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+    /**
+     * MP4 recommended. Plays muted and looped.
+     */
+    video?: (number | null) | Media;
+    poster?: (number | null) | Media;
+    overlay?: string | null;
+    overlayOpacity?: number | null;
+  };
+  anim?: {
+    preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+    duration?: number | null;
+    delay?: number | null;
+    /**
+     * Animate when the node scrolls into view rather than on load.
+     */
+    onScroll?: boolean | null;
+  };
+  hide?: {
+    desktop?: boolean | null;
+    tablet?: boolean | null;
+    mobile?: boolean | null;
+  };
+  /**
+   * Space-separated. Letters, digits and hyphens only.
+   */
+  cssClass?: string | null;
+  cssId?: string | null;
+  /**
+   * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+   */
+  attrs?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'builderRow';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBHeadingBlock".
+ */
+export interface PBHeadingBlock {
+  text: string;
+  /**
+   * Small label shown above the heading.
+   */
+  eyebrow?: string | null;
+  level?: ('h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') | null;
+  align?: ('inherit' | 'start' | 'center' | 'end') | null;
+  maxWidth?: string | null;
+  space?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the desktop value.
+   */
+  spaceMd?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the tablet value.
+   */
+  spaceSm?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  color?: string | null;
+  fontSize?: string | null;
+  lineHeight?: string | null;
+  fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+  transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+  letterSpacing?: string | null;
+  bw?: string | null;
+  bc?: string | null;
+  br?: string | null;
+  bs?: string | null;
+  bg?: {
+    type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+    color?: string | null;
+    gFrom?: string | null;
+    gTo?: string | null;
+    gAngle?: number | null;
+    image?: (number | null) | Media;
+    pos?:
+      | (
+          | 'left-top'
+          | 'left-center'
+          | 'left-bottom'
+          | 'center-top'
+          | 'center-center'
+          | 'center-bottom'
+          | 'right-top'
+          | 'right-center'
+          | 'right-bottom'
+        )
+      | null;
+    fit?: ('cover' | 'contain' | 'auto') | null;
+    repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+    attach?: ('scroll' | 'fixed' | 'parallax') | null;
+    blend?: ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+    /**
+     * MP4 recommended. Plays muted and looped.
+     */
+    video?: (number | null) | Media;
+    poster?: (number | null) | Media;
+    overlay?: string | null;
+    overlayOpacity?: number | null;
+  };
+  anim?: {
+    preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+    duration?: number | null;
+    delay?: number | null;
+    /**
+     * Animate when the node scrolls into view rather than on load.
+     */
+    onScroll?: boolean | null;
+  };
+  hide?: {
+    desktop?: boolean | null;
+    tablet?: boolean | null;
+    mobile?: boolean | null;
+  };
+  /**
+   * Space-separated. Letters, digits and hyphens only.
+   */
+  cssClass?: string | null;
+  cssId?: string | null;
+  /**
+   * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+   */
+  attrs?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'heading';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBRichTextBlock".
+ */
+export interface PBRichTextBlock {
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  align?: ('inherit' | 'start' | 'center' | 'end') | null;
+  maxWidth?: string | null;
+  space?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the desktop value.
+   */
+  spaceMd?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the tablet value.
+   */
+  spaceSm?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  color?: string | null;
+  fontSize?: string | null;
+  lineHeight?: string | null;
+  fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+  transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+  letterSpacing?: string | null;
+  bw?: string | null;
+  bc?: string | null;
+  br?: string | null;
+  bs?: string | null;
+  bg?: {
+    type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+    color?: string | null;
+    gFrom?: string | null;
+    gTo?: string | null;
+    gAngle?: number | null;
+    image?: (number | null) | Media;
+    pos?:
+      | (
+          | 'left-top'
+          | 'left-center'
+          | 'left-bottom'
+          | 'center-top'
+          | 'center-center'
+          | 'center-bottom'
+          | 'right-top'
+          | 'right-center'
+          | 'right-bottom'
+        )
+      | null;
+    fit?: ('cover' | 'contain' | 'auto') | null;
+    repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+    attach?: ('scroll' | 'fixed' | 'parallax') | null;
+    blend?: ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+    /**
+     * MP4 recommended. Plays muted and looped.
+     */
+    video?: (number | null) | Media;
+    poster?: (number | null) | Media;
+    overlay?: string | null;
+    overlayOpacity?: number | null;
+  };
+  anim?: {
+    preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+    duration?: number | null;
+    delay?: number | null;
+    /**
+     * Animate when the node scrolls into view rather than on load.
+     */
+    onScroll?: boolean | null;
+  };
+  hide?: {
+    desktop?: boolean | null;
+    tablet?: boolean | null;
+    mobile?: boolean | null;
+  };
+  /**
+   * Space-separated. Letters, digits and hyphens only.
+   */
+  cssClass?: string | null;
+  cssId?: string | null;
+  /**
+   * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+   */
+  attrs?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'richText';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBButtonBlock".
+ */
+export interface PBButtonBlock {
+  text: string;
+  url: string;
+  variant?: ('primary' | 'secondary' | 'outline' | 'ghost') | null;
+  size?: ('sm' | 'md' | 'lg') | null;
+  newTab?: boolean | null;
+  align?: ('inherit' | 'start' | 'center' | 'end') | null;
+  maxWidth?: string | null;
+  space?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the desktop value.
+   */
+  spaceMd?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the tablet value.
+   */
+  spaceSm?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  color?: string | null;
+  fontSize?: string | null;
+  lineHeight?: string | null;
+  fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+  transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+  letterSpacing?: string | null;
+  bw?: string | null;
+  bc?: string | null;
+  br?: string | null;
+  bs?: string | null;
+  bg?: {
+    type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+    color?: string | null;
+    gFrom?: string | null;
+    gTo?: string | null;
+    gAngle?: number | null;
+    image?: (number | null) | Media;
+    pos?:
+      | (
+          | 'left-top'
+          | 'left-center'
+          | 'left-bottom'
+          | 'center-top'
+          | 'center-center'
+          | 'center-bottom'
+          | 'right-top'
+          | 'right-center'
+          | 'right-bottom'
+        )
+      | null;
+    fit?: ('cover' | 'contain' | 'auto') | null;
+    repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+    attach?: ('scroll' | 'fixed' | 'parallax') | null;
+    blend?: ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+    /**
+     * MP4 recommended. Plays muted and looped.
+     */
+    video?: (number | null) | Media;
+    poster?: (number | null) | Media;
+    overlay?: string | null;
+    overlayOpacity?: number | null;
+  };
+  anim?: {
+    preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+    duration?: number | null;
+    delay?: number | null;
+    /**
+     * Animate when the node scrolls into view rather than on load.
+     */
+    onScroll?: boolean | null;
+  };
+  hide?: {
+    desktop?: boolean | null;
+    tablet?: boolean | null;
+    mobile?: boolean | null;
+  };
+  /**
+   * Space-separated. Letters, digits and hyphens only.
+   */
+  cssClass?: string | null;
+  cssId?: string | null;
+  /**
+   * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+   */
+  attrs?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'button';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBImageBlock".
+ */
+export interface PBImageBlock {
+  image: number | Media;
+  caption?: string | null;
+  ratio?: ('auto' | '16/9' | '4/3' | '3/2' | '1/1') | null;
+  rounded?: boolean | null;
+  url?: string | null;
+  align?: ('inherit' | 'start' | 'center' | 'end') | null;
+  maxWidth?: string | null;
+  space?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the desktop value.
+   */
+  spaceMd?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the tablet value.
+   */
+  spaceSm?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  color?: string | null;
+  fontSize?: string | null;
+  lineHeight?: string | null;
+  fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+  transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+  letterSpacing?: string | null;
+  bw?: string | null;
+  bc?: string | null;
+  br?: string | null;
+  bs?: string | null;
+  bg?: {
+    type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+    color?: string | null;
+    gFrom?: string | null;
+    gTo?: string | null;
+    gAngle?: number | null;
+    image?: (number | null) | Media;
+    pos?:
+      | (
+          | 'left-top'
+          | 'left-center'
+          | 'left-bottom'
+          | 'center-top'
+          | 'center-center'
+          | 'center-bottom'
+          | 'right-top'
+          | 'right-center'
+          | 'right-bottom'
+        )
+      | null;
+    fit?: ('cover' | 'contain' | 'auto') | null;
+    repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+    attach?: ('scroll' | 'fixed' | 'parallax') | null;
+    blend?: ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+    /**
+     * MP4 recommended. Plays muted and looped.
+     */
+    video?: (number | null) | Media;
+    poster?: (number | null) | Media;
+    overlay?: string | null;
+    overlayOpacity?: number | null;
+  };
+  anim?: {
+    preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+    duration?: number | null;
+    delay?: number | null;
+    /**
+     * Animate when the node scrolls into view rather than on load.
+     */
+    onScroll?: boolean | null;
+  };
+  hide?: {
+    desktop?: boolean | null;
+    tablet?: boolean | null;
+    mobile?: boolean | null;
+  };
+  /**
+   * Space-separated. Letters, digits and hyphens only.
+   */
+  cssClass?: string | null;
+  cssId?: string | null;
+  /**
+   * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+   */
+  attrs?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'image';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBVideoBlock".
+ */
+export interface PBVideoBlock {
+  source?: ('embed' | 'file') | null;
+  /**
+   * Use the embed URL, e.g. https://www.youtube.com/embed/VIDEO_ID
+   */
+  embedUrl?: string | null;
+  file?: (number | null) | Media;
+  poster?: (number | null) | Media;
+  ratio?: ('16/9' | '4/3' | '1/1') | null;
+  controls?: boolean | null;
+  align?: ('inherit' | 'start' | 'center' | 'end') | null;
+  maxWidth?: string | null;
+  space?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the desktop value.
+   */
+  spaceMd?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the tablet value.
+   */
+  spaceSm?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  color?: string | null;
+  fontSize?: string | null;
+  lineHeight?: string | null;
+  fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+  transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+  letterSpacing?: string | null;
+  bw?: string | null;
+  bc?: string | null;
+  br?: string | null;
+  bs?: string | null;
+  bg?: {
+    type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+    color?: string | null;
+    gFrom?: string | null;
+    gTo?: string | null;
+    gAngle?: number | null;
+    image?: (number | null) | Media;
+    pos?:
+      | (
+          | 'left-top'
+          | 'left-center'
+          | 'left-bottom'
+          | 'center-top'
+          | 'center-center'
+          | 'center-bottom'
+          | 'right-top'
+          | 'right-center'
+          | 'right-bottom'
+        )
+      | null;
+    fit?: ('cover' | 'contain' | 'auto') | null;
+    repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+    attach?: ('scroll' | 'fixed' | 'parallax') | null;
+    blend?: ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+    /**
+     * MP4 recommended. Plays muted and looped.
+     */
+    video?: (number | null) | Media;
+    poster?: (number | null) | Media;
+    overlay?: string | null;
+    overlayOpacity?: number | null;
+  };
+  anim?: {
+    preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+    duration?: number | null;
+    delay?: number | null;
+    /**
+     * Animate when the node scrolls into view rather than on load.
+     */
+    onScroll?: boolean | null;
+  };
+  hide?: {
+    desktop?: boolean | null;
+    tablet?: boolean | null;
+    mobile?: boolean | null;
+  };
+  /**
+   * Space-separated. Letters, digits and hyphens only.
+   */
+  cssClass?: string | null;
+  cssId?: string | null;
+  /**
+   * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+   */
+  attrs?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'video';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBDividerBlock".
+ */
+export interface PBDividerBlock {
+  height?: number | null;
+  line?: boolean | null;
+  align?: ('inherit' | 'start' | 'center' | 'end') | null;
+  maxWidth?: string | null;
+  space?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the desktop value.
+   */
+  spaceMd?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the tablet value.
+   */
+  spaceSm?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  color?: string | null;
+  fontSize?: string | null;
+  lineHeight?: string | null;
+  fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+  transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+  letterSpacing?: string | null;
+  bw?: string | null;
+  bc?: string | null;
+  br?: string | null;
+  bs?: string | null;
+  bg?: {
+    type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+    color?: string | null;
+    gFrom?: string | null;
+    gTo?: string | null;
+    gAngle?: number | null;
+    image?: (number | null) | Media;
+    pos?:
+      | (
+          | 'left-top'
+          | 'left-center'
+          | 'left-bottom'
+          | 'center-top'
+          | 'center-center'
+          | 'center-bottom'
+          | 'right-top'
+          | 'right-center'
+          | 'right-bottom'
+        )
+      | null;
+    fit?: ('cover' | 'contain' | 'auto') | null;
+    repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+    attach?: ('scroll' | 'fixed' | 'parallax') | null;
+    blend?: ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+    /**
+     * MP4 recommended. Plays muted and looped.
+     */
+    video?: (number | null) | Media;
+    poster?: (number | null) | Media;
+    overlay?: string | null;
+    overlayOpacity?: number | null;
+  };
+  anim?: {
+    preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+    duration?: number | null;
+    delay?: number | null;
+    /**
+     * Animate when the node scrolls into view rather than on load.
+     */
+    onScroll?: boolean | null;
+  };
+  hide?: {
+    desktop?: boolean | null;
+    tablet?: boolean | null;
+    mobile?: boolean | null;
+  };
+  /**
+   * Space-separated. Letters, digits and hyphens only.
+   */
+  cssClass?: string | null;
+  cssId?: string | null;
+  /**
+   * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+   */
+  attrs?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'divider';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBSpacerBlock".
+ */
+export interface PBSpacerBlock {
+  h?: number | null;
+  hMd?: number | null;
+  hSm?: number | null;
+  align?: ('inherit' | 'start' | 'center' | 'end') | null;
+  maxWidth?: string | null;
+  space?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the desktop value.
+   */
+  spaceMd?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the tablet value.
+   */
+  spaceSm?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  color?: string | null;
+  fontSize?: string | null;
+  lineHeight?: string | null;
+  fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+  transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+  letterSpacing?: string | null;
+  bw?: string | null;
+  bc?: string | null;
+  br?: string | null;
+  bs?: string | null;
+  bg?: {
+    type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+    color?: string | null;
+    gFrom?: string | null;
+    gTo?: string | null;
+    gAngle?: number | null;
+    image?: (number | null) | Media;
+    pos?:
+      | (
+          | 'left-top'
+          | 'left-center'
+          | 'left-bottom'
+          | 'center-top'
+          | 'center-center'
+          | 'center-bottom'
+          | 'right-top'
+          | 'right-center'
+          | 'right-bottom'
+        )
+      | null;
+    fit?: ('cover' | 'contain' | 'auto') | null;
+    repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+    attach?: ('scroll' | 'fixed' | 'parallax') | null;
+    blend?: ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+    /**
+     * MP4 recommended. Plays muted and looped.
+     */
+    video?: (number | null) | Media;
+    poster?: (number | null) | Media;
+    overlay?: string | null;
+    overlayOpacity?: number | null;
+  };
+  anim?: {
+    preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+    duration?: number | null;
+    delay?: number | null;
+    /**
+     * Animate when the node scrolls into view rather than on load.
+     */
+    onScroll?: boolean | null;
+  };
+  hide?: {
+    desktop?: boolean | null;
+    tablet?: boolean | null;
+    mobile?: boolean | null;
+  };
+  /**
+   * Space-separated. Letters, digits and hyphens only.
+   */
+  cssClass?: string | null;
+  cssId?: string | null;
+  /**
+   * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+   */
+  attrs?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'spacer';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBChenzAboutTriviaBlock".
+ */
+export interface PBChenzAboutTriviaBlock {
+  mainTitle?: string | null;
+  highlightText?: string | null;
+  subDescription?: string | null;
+  centerImage: number | Media;
+  leftCards?:
+    | {
+        title: string;
+        description: string;
+        iconType?: ('bulb' | 'gamepad' | 'users' | 'trophy' | 'list' | 'star' | 'fire' | 'chart') | null;
+        customIcon?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  rightCards?:
+    | {
+        title: string;
+        description: string;
+        iconType?: ('bulb' | 'gamepad' | 'users' | 'trophy' | 'list' | 'star' | 'fire' | 'chart') | null;
+        customIcon?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  signUpText?: string | null;
+  signUpUrl?: string | null;
+  loginText?: string | null;
+  loginUrl?: string | null;
+  align?: ('inherit' | 'start' | 'center' | 'end') | null;
+  maxWidth?: string | null;
+  space?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the desktop value.
+   */
+  spaceMd?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the tablet value.
+   */
+  spaceSm?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  color?: string | null;
+  fontSize?: string | null;
+  lineHeight?: string | null;
+  fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+  transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+  letterSpacing?: string | null;
+  bw?: string | null;
+  bc?: string | null;
+  br?: string | null;
+  bs?: string | null;
+  bg?: {
+    type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+    color?: string | null;
+    gFrom?: string | null;
+    gTo?: string | null;
+    gAngle?: number | null;
+    image?: (number | null) | Media;
+    pos?:
+      | (
+          | 'left-top'
+          | 'left-center'
+          | 'left-bottom'
+          | 'center-top'
+          | 'center-center'
+          | 'center-bottom'
+          | 'right-top'
+          | 'right-center'
+          | 'right-bottom'
+        )
+      | null;
+    fit?: ('cover' | 'contain' | 'auto') | null;
+    repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+    attach?: ('scroll' | 'fixed' | 'parallax') | null;
+    blend?: ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+    /**
+     * MP4 recommended. Plays muted and looped.
+     */
+    video?: (number | null) | Media;
+    poster?: (number | null) | Media;
+    overlay?: string | null;
+    overlayOpacity?: number | null;
+  };
+  anim?: {
+    preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+    duration?: number | null;
+    delay?: number | null;
+    /**
+     * Animate when the node scrolls into view rather than on load.
+     */
+    onScroll?: boolean | null;
+  };
+  hide?: {
+    desktop?: boolean | null;
+    tablet?: boolean | null;
+    mobile?: boolean | null;
+  };
+  /**
+   * Space-separated. Letters, digits and hyphens only.
+   */
+  cssClass?: string | null;
+  cssId?: string | null;
+  /**
+   * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+   */
+  attrs?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'chenzAboutTrivia';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBChenzHowItWorksBlock".
+ */
+export interface PBChenzHowItWorksBlock {
+  topSubtitle?: string | null;
+  mainTitle?: string | null;
+  highlightText?: string | null;
+  subDescription?: string | null;
+  steps?:
+    | {
+        stepNumber: string;
+        title: string;
+        description: string;
+        iconType?: ('userPlus' | 'quiz' | 'trophy' | 'gift') | null;
+        id?: string | null;
+      }[]
+    | null;
+  align?: ('inherit' | 'start' | 'center' | 'end') | null;
+  maxWidth?: string | null;
+  space?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the desktop value.
+   */
+  spaceMd?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the tablet value.
+   */
+  spaceSm?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  color?: string | null;
+  fontSize?: string | null;
+  lineHeight?: string | null;
+  fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+  transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+  letterSpacing?: string | null;
+  bw?: string | null;
+  bc?: string | null;
+  br?: string | null;
+  bs?: string | null;
+  bg?: {
+    type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+    color?: string | null;
+    gFrom?: string | null;
+    gTo?: string | null;
+    gAngle?: number | null;
+    image?: (number | null) | Media;
+    pos?:
+      | (
+          | 'left-top'
+          | 'left-center'
+          | 'left-bottom'
+          | 'center-top'
+          | 'center-center'
+          | 'center-bottom'
+          | 'right-top'
+          | 'right-center'
+          | 'right-bottom'
+        )
+      | null;
+    fit?: ('cover' | 'contain' | 'auto') | null;
+    repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+    attach?: ('scroll' | 'fixed' | 'parallax') | null;
+    blend?: ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+    /**
+     * MP4 recommended. Plays muted and looped.
+     */
+    video?: (number | null) | Media;
+    poster?: (number | null) | Media;
+    overlay?: string | null;
+    overlayOpacity?: number | null;
+  };
+  anim?: {
+    preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+    duration?: number | null;
+    delay?: number | null;
+    /**
+     * Animate when the node scrolls into view rather than on load.
+     */
+    onScroll?: boolean | null;
+  };
+  hide?: {
+    desktop?: boolean | null;
+    tablet?: boolean | null;
+    mobile?: boolean | null;
+  };
+  /**
+   * Space-separated. Letters, digits and hyphens only.
+   */
+  cssClass?: string | null;
+  cssId?: string | null;
+  /**
+   * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+   */
+  attrs?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'chenzHowItWorks';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBChenzReadyToPlayBlock".
+ */
+export interface PBChenzReadyToPlayBlock {
+  topSubtitle?: string | null;
+  mainTitle?: string | null;
+  highlightText?: string | null;
+  subDescription?: string | null;
+  cards?:
+    | {
+        title: string;
+        description: string;
+        buttonText: string;
+        buttonUrl: string;
+        cardBgColor?: ('white' | 'cream') | null;
+        id?: string | null;
+      }[]
+    | null;
+  align?: ('inherit' | 'start' | 'center' | 'end') | null;
+  maxWidth?: string | null;
+  space?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the desktop value.
+   */
+  spaceMd?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the tablet value.
+   */
+  spaceSm?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  color?: string | null;
+  fontSize?: string | null;
+  lineHeight?: string | null;
+  fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+  transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+  letterSpacing?: string | null;
+  bw?: string | null;
+  bc?: string | null;
+  br?: string | null;
+  bs?: string | null;
+  bg?: {
+    type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+    color?: string | null;
+    gFrom?: string | null;
+    gTo?: string | null;
+    gAngle?: number | null;
+    image?: (number | null) | Media;
+    pos?:
+      | (
+          | 'left-top'
+          | 'left-center'
+          | 'left-bottom'
+          | 'center-top'
+          | 'center-center'
+          | 'center-bottom'
+          | 'right-top'
+          | 'right-center'
+          | 'right-bottom'
+        )
+      | null;
+    fit?: ('cover' | 'contain' | 'auto') | null;
+    repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+    attach?: ('scroll' | 'fixed' | 'parallax') | null;
+    blend?: ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+    /**
+     * MP4 recommended. Plays muted and looped.
+     */
+    video?: (number | null) | Media;
+    poster?: (number | null) | Media;
+    overlay?: string | null;
+    overlayOpacity?: number | null;
+  };
+  anim?: {
+    preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+    duration?: number | null;
+    delay?: number | null;
+    /**
+     * Animate when the node scrolls into view rather than on load.
+     */
+    onScroll?: boolean | null;
+  };
+  hide?: {
+    desktop?: boolean | null;
+    tablet?: boolean | null;
+    mobile?: boolean | null;
+  };
+  /**
+   * Space-separated. Letters, digits and hyphens only.
+   */
+  cssClass?: string | null;
+  cssId?: string | null;
+  /**
+   * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+   */
+  attrs?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'chenzReadyToPlay';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBChenzQuizRewardsBlock".
+ */
+export interface PBChenzQuizRewardsBlock {
+  eyebrow?: string | null;
+  title?: string | null;
+  subtitle?: string | null;
+  /**
+   * Leave empty to use the default Chennai skyline background.
+   */
+  backgroundImage?: (number | null) | Media;
+  challengeCard?: {
+    icon?: (number | null) | Media;
+    title?: string | null;
+    description?: string | null;
+    scheduleLabel?: string | null;
+    scheduleTime?: string | null;
+    buttonText?: string | null;
+    buttonUrl?: string | null;
+    /**
+     * Hex colour, e.g. #FFE8F3
+     */
+    bgColor?: string | null;
+    /**
+     * Hex colour, e.g. #F0157D
+     */
+    accentColor?: string | null;
+  };
+  rewardCard?: {
+    icon?: (number | null) | Media;
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Upload the voucher artwork (e.g. Rs.300 Daily Winner Voucher). If empty, the amount and label below are shown instead.
+     */
+    voucherImage?: (number | null) | Media;
+    voucherAmount?: string | null;
+    voucherLabel?: string | null;
+    buttonText?: string | null;
+    buttonUrl?: string | null;
+    /**
+     * Hex colour, e.g. #EFE9FF
+     */
+    bgColor?: string | null;
+    /**
+     * Hex colour, e.g. #5B21F5
+     */
+    accentColor?: string | null;
+  };
+  align?: ('inherit' | 'start' | 'center' | 'end') | null;
+  maxWidth?: string | null;
+  space?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the desktop value.
+   */
+  spaceMd?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the tablet value.
+   */
+  spaceSm?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  color?: string | null;
+  fontSize?: string | null;
+  lineHeight?: string | null;
+  fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+  transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+  letterSpacing?: string | null;
+  bw?: string | null;
+  bc?: string | null;
+  br?: string | null;
+  bs?: string | null;
+  bg?: {
+    type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+    color?: string | null;
+    gFrom?: string | null;
+    gTo?: string | null;
+    gAngle?: number | null;
+    image?: (number | null) | Media;
+    pos?:
+      | (
+          | 'left-top'
+          | 'left-center'
+          | 'left-bottom'
+          | 'center-top'
+          | 'center-center'
+          | 'center-bottom'
+          | 'right-top'
+          | 'right-center'
+          | 'right-bottom'
+        )
+      | null;
+    fit?: ('cover' | 'contain' | 'auto') | null;
+    repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+    attach?: ('scroll' | 'fixed' | 'parallax') | null;
+    blend?: ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+    /**
+     * MP4 recommended. Plays muted and looped.
+     */
+    video?: (number | null) | Media;
+    poster?: (number | null) | Media;
+    overlay?: string | null;
+    overlayOpacity?: number | null;
+  };
+  anim?: {
+    preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+    duration?: number | null;
+    delay?: number | null;
+    /**
+     * Animate when the node scrolls into view rather than on load.
+     */
+    onScroll?: boolean | null;
+  };
+  hide?: {
+    desktop?: boolean | null;
+    tablet?: boolean | null;
+    mobile?: boolean | null;
+  };
+  /**
+   * Space-separated. Letters, digits and hyphens only.
+   */
+  cssClass?: string | null;
+  cssId?: string | null;
+  /**
+   * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+   */
+  attrs?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'chenzQuizRewards';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBChenzFaqBlock".
+ */
+export interface PBChenzFaqBlock {
+  /**
+   * Purely for SEO H1 ranking purpose (hidden visually).
+   */
+  seoH1?: string | null;
+  /**
+   * Optional section background image.
+   */
+  sectionBgImage?: (number | null) | Media;
+  eyebrow: string;
+  heading: string;
+  description?: string | null;
+  /**
+   * If checked, multiple FAQ cards can remain open at the same time. Default opens one at a time.
+   */
+  allowMultipleOpen?: boolean | null;
+  faqs?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  ctaText?: string | null;
+  ctaUrl?: string | null;
+  align?: ('inherit' | 'start' | 'center' | 'end') | null;
+  maxWidth?: string | null;
+  space?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the desktop value.
+   */
+  spaceMd?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the tablet value.
+   */
+  spaceSm?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  color?: string | null;
+  fontSize?: string | null;
+  lineHeight?: string | null;
+  fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+  transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+  letterSpacing?: string | null;
+  bw?: string | null;
+  bc?: string | null;
+  br?: string | null;
+  bs?: string | null;
+  bg?: {
+    type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+    color?: string | null;
+    gFrom?: string | null;
+    gTo?: string | null;
+    gAngle?: number | null;
+    image?: (number | null) | Media;
+    pos?:
+      | (
+          | 'left-top'
+          | 'left-center'
+          | 'left-bottom'
+          | 'center-top'
+          | 'center-center'
+          | 'center-bottom'
+          | 'right-top'
+          | 'right-center'
+          | 'right-bottom'
+        )
+      | null;
+    fit?: ('cover' | 'contain' | 'auto') | null;
+    repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+    attach?: ('scroll' | 'fixed' | 'parallax') | null;
+    blend?: ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+    /**
+     * MP4 recommended. Plays muted and looped.
+     */
+    video?: (number | null) | Media;
+    poster?: (number | null) | Media;
+    overlay?: string | null;
+    overlayOpacity?: number | null;
+  };
+  anim?: {
+    preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+    duration?: number | null;
+    delay?: number | null;
+    /**
+     * Animate when the node scrolls into view rather than on load.
+     */
+    onScroll?: boolean | null;
+  };
+  hide?: {
+    desktop?: boolean | null;
+    tablet?: boolean | null;
+    mobile?: boolean | null;
+  };
+  /**
+   * Space-separated. Letters, digits and hyphens only.
+   */
+  cssClass?: string | null;
+  cssId?: string | null;
+  /**
+   * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+   */
+  attrs?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'chenzFaq';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBChenzInstaReelsBlock".
+ */
+export interface PBChenzInstaReelsBlock {
+  topBadge?: string | null;
+  mainHeading?: string | null;
+  highlightText?: string | null;
+  subDescription?: string | null;
+  reels?:
+    | {
+        title: string;
+        subtitle?: string | null;
+        thumbnail: number | Media;
+        redirectUrl: string;
+        id?: string | null;
+      }[]
+    | null;
+  align?: ('inherit' | 'start' | 'center' | 'end') | null;
+  maxWidth?: string | null;
+  space?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the desktop value.
+   */
+  spaceMd?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the tablet value.
+   */
+  spaceSm?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  color?: string | null;
+  fontSize?: string | null;
+  lineHeight?: string | null;
+  fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+  transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+  letterSpacing?: string | null;
+  bw?: string | null;
+  bc?: string | null;
+  br?: string | null;
+  bs?: string | null;
+  bg?: {
+    type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+    color?: string | null;
+    gFrom?: string | null;
+    gTo?: string | null;
+    gAngle?: number | null;
+    image?: (number | null) | Media;
+    pos?:
+      | (
+          | 'left-top'
+          | 'left-center'
+          | 'left-bottom'
+          | 'center-top'
+          | 'center-center'
+          | 'center-bottom'
+          | 'right-top'
+          | 'right-center'
+          | 'right-bottom'
+        )
+      | null;
+    fit?: ('cover' | 'contain' | 'auto') | null;
+    repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+    attach?: ('scroll' | 'fixed' | 'parallax') | null;
+    blend?: ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+    /**
+     * MP4 recommended. Plays muted and looped.
+     */
+    video?: (number | null) | Media;
+    poster?: (number | null) | Media;
+    overlay?: string | null;
+    overlayOpacity?: number | null;
+  };
+  anim?: {
+    preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+    duration?: number | null;
+    delay?: number | null;
+    /**
+     * Animate when the node scrolls into view rather than on load.
+     */
+    onScroll?: boolean | null;
+  };
+  hide?: {
+    desktop?: boolean | null;
+    tablet?: boolean | null;
+    mobile?: boolean | null;
+  };
+  /**
+   * Space-separated. Letters, digits and hyphens only.
+   */
+  cssClass?: string | null;
+  cssId?: string | null;
+  /**
+   * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+   */
+  attrs?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'chenzInstaReels';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBChenzCreativeHeroBlock".
+ */
+export interface PBChenzCreativeHeroBlock {
+  eyebrow: string;
+  heading: string;
+  subtitle?: string | null;
+  ctaLabel?: string | null;
+  ctaUrl?: string | null;
+  image: number | Media;
+  imageAlt?: string | null;
+  imageScale?: ('0.8' | '1' | '1.2') | null;
+  imageRotation?: ('rotate-0' | '-rotate-3' | 'rotate-4') | null;
+  backgroundColor?: string | null;
+  textColor?: string | null;
+  interactionEnabled?: boolean | null;
+  animationIntensity?: ('low' | 'medium' | 'high') | null;
+  footerText?: string | null;
+  align?: ('inherit' | 'start' | 'center' | 'end') | null;
+  maxWidth?: string | null;
+  space?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the desktop value.
+   */
+  spaceMd?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  /**
+   * Leave blank to inherit the tablet value.
+   */
+  spaceSm?: {
+    pt?: string | null;
+    pr?: string | null;
+    pb?: string | null;
+    pl?: string | null;
+    mt?: string | null;
+    mb?: string | null;
+  };
+  color?: string | null;
+  fontSize?: string | null;
+  lineHeight?: string | null;
+  fontWeight?: ('300' | '400' | '500' | '600' | '700' | '800') | null;
+  transform?: ('none' | 'uppercase' | 'lowercase' | 'capitalize') | null;
+  letterSpacing?: string | null;
+  bw?: string | null;
+  bc?: string | null;
+  br?: string | null;
+  bs?: string | null;
+  bg?: {
+    type?: ('none' | 'color' | 'gradient' | 'image' | 'video') | null;
+    color?: string | null;
+    gFrom?: string | null;
+    gTo?: string | null;
+    gAngle?: number | null;
+    image?: (number | null) | Media;
+    pos?:
+      | (
+          | 'left-top'
+          | 'left-center'
+          | 'left-bottom'
+          | 'center-top'
+          | 'center-center'
+          | 'center-bottom'
+          | 'right-top'
+          | 'right-center'
+          | 'right-bottom'
+        )
+      | null;
+    fit?: ('cover' | 'contain' | 'auto') | null;
+    repeat?: ('no-repeat' | 'repeat' | 'repeat-x' | 'repeat-y') | null;
+    attach?: ('scroll' | 'fixed' | 'parallax') | null;
+    blend?: ('normal' | 'multiply' | 'screen' | 'overlay' | 'darken' | 'lighten' | 'soft-light' | 'luminosity') | null;
+    /**
+     * MP4 recommended. Plays muted and looped.
+     */
+    video?: (number | null) | Media;
+    poster?: (number | null) | Media;
+    overlay?: string | null;
+    overlayOpacity?: number | null;
+  };
+  anim?: {
+    preset?: ('none' | 'fade' | 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom') | null;
+    duration?: number | null;
+    delay?: number | null;
+    /**
+     * Animate when the node scrolls into view rather than on load.
+     */
+    onScroll?: boolean | null;
+  };
+  hide?: {
+    desktop?: boolean | null;
+    tablet?: boolean | null;
+    mobile?: boolean | null;
+  };
+  /**
+   * Space-separated. Letters, digits and hyphens only.
+   */
+  cssClass?: string | null;
+  cssId?: string | null;
+  /**
+   * Rendered on the wrapper. Event handlers and style/class/id are ignored for security.
+   */
+  attrs?:
+    | {
+        key?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'chenzCreativeHero';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -505,6 +2654,7 @@ export interface QuizUser {
   avatar?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
+  collection: 'quiz-users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -580,7 +2730,7 @@ export interface Question {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -601,7 +2751,7 @@ export interface Question {
       root: {
         type: string;
         children: {
-          type: string;
+          type: any;
           version: number;
           [k: string]: unknown;
         }[];
@@ -700,7 +2850,7 @@ export interface Question {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -867,7 +3017,7 @@ export interface Form {
               root: {
                 type: string;
                 children: {
-                  type: string;
+                  type: any;
                   version: number;
                   [k: string]: unknown;
                 }[];
@@ -942,15 +3092,12 @@ export interface Form {
       )[]
     | null;
   submitButtonLabel?: string | null;
-  /**
-   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
-   */
   confirmationType?: ('message' | 'redirect') | null;
   confirmationMessage?: {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -964,9 +3111,6 @@ export interface Form {
   redirect?: {
     url: string;
   };
-  /**
-   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
-   */
   emails?:
     | {
         emailTo?: string | null;
@@ -975,14 +3119,11 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
-        /**
-         * Enter the message that should be sent in this email.
-         */
         message?: {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -1045,6 +3186,23 @@ export interface Search {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: number;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1200,10 +3358,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'search';
         value: number | Search;
-      } | null)
-    | ({
-        relationTo: 'payload-jobs';
-        value: number | PayloadJob;
       } | null);
   globalSlug?: string | null;
   user:
@@ -1288,6 +3442,11 @@ export interface PagesSelect<T extends boolean = true> {
             };
       };
   content?: T;
+  layout?:
+    | T
+    | {
+        builderSection?: T | PBSectionBlockSelect<T>;
+      };
   meta?:
     | T
     | {
@@ -1317,6 +3476,1765 @@ export interface PagesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBSectionBlock_select".
+ */
+export interface PBSectionBlockSelect<T extends boolean = true> {
+  rows?:
+    | T
+    | {
+        builderRow?: T | PBRowBlockSelect<T>;
+      };
+  label?: T;
+  tag?: T;
+  widthMode?: T;
+  height?: T;
+  minHeight?: T;
+  space?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceMd?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceSm?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  color?: T;
+  fontSize?: T;
+  lineHeight?: T;
+  fontWeight?: T;
+  transform?: T;
+  letterSpacing?: T;
+  bw?: T;
+  bc?: T;
+  br?: T;
+  bs?: T;
+  bg?:
+    | T
+    | {
+        type?: T;
+        color?: T;
+        gFrom?: T;
+        gTo?: T;
+        gAngle?: T;
+        image?: T;
+        pos?: T;
+        fit?: T;
+        repeat?: T;
+        attach?: T;
+        blend?: T;
+        video?: T;
+        poster?: T;
+        overlay?: T;
+        overlayOpacity?: T;
+      };
+  anim?:
+    | T
+    | {
+        preset?: T;
+        duration?: T;
+        delay?: T;
+        onScroll?: T;
+      };
+  hide?:
+    | T
+    | {
+        desktop?: T;
+        tablet?: T;
+        mobile?: T;
+      };
+  cssClass?: T;
+  cssId?: T;
+  attrs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBRowBlock_select".
+ */
+export interface PBRowBlockSelect<T extends boolean = true> {
+  columns?:
+    | T
+    | {
+        elements?:
+          | T
+          | {
+              heading?: T | PBHeadingBlockSelect<T>;
+              richText?: T | PBRichTextBlockSelect<T>;
+              button?: T | PBButtonBlockSelect<T>;
+              image?: T | PBImageBlockSelect<T>;
+              video?: T | PBVideoBlockSelect<T>;
+              divider?: T | PBDividerBlockSelect<T>;
+              spacer?: T | PBSpacerBlockSelect<T>;
+              chenzAboutTrivia?: T | PBChenzAboutTriviaBlockSelect<T>;
+              chenzHowItWorks?: T | PBChenzHowItWorksBlockSelect<T>;
+              chenzReadyToPlay?: T | PBChenzReadyToPlayBlockSelect<T>;
+              chenzQuizRewards?: T | PBChenzQuizRewardsBlockSelect<T>;
+              chenzFaq?: T | PBChenzFaqBlockSelect<T>;
+              chenzInstaReels?: T | PBChenzInstaReelsBlockSelect<T>;
+              chenzCreativeHero?: T | PBChenzCreativeHeroBlockSelect<T>;
+            };
+        width?: T;
+        valign?: T;
+        linkUrl?: T;
+        space?:
+          | T
+          | {
+              pt?: T;
+              pr?: T;
+              pb?: T;
+              pl?: T;
+              mt?: T;
+              mb?: T;
+            };
+        spaceMd?:
+          | T
+          | {
+              pt?: T;
+              pr?: T;
+              pb?: T;
+              pl?: T;
+              mt?: T;
+              mb?: T;
+            };
+        spaceSm?:
+          | T
+          | {
+              pt?: T;
+              pr?: T;
+              pb?: T;
+              pl?: T;
+              mt?: T;
+              mb?: T;
+            };
+        color?: T;
+        fontSize?: T;
+        lineHeight?: T;
+        fontWeight?: T;
+        transform?: T;
+        letterSpacing?: T;
+        bw?: T;
+        bc?: T;
+        br?: T;
+        bs?: T;
+        bg?:
+          | T
+          | {
+              type?: T;
+              color?: T;
+              gFrom?: T;
+              gTo?: T;
+              gAngle?: T;
+              image?: T;
+              pos?: T;
+              fit?: T;
+              repeat?: T;
+              attach?: T;
+              blend?: T;
+              video?: T;
+              poster?: T;
+              overlay?: T;
+              overlayOpacity?: T;
+            };
+        anim?:
+          | T
+          | {
+              preset?: T;
+              duration?: T;
+              delay?: T;
+              onScroll?: T;
+            };
+        hide?:
+          | T
+          | {
+              desktop?: T;
+              tablet?: T;
+              mobile?: T;
+            };
+        cssClass?: T;
+        cssId?: T;
+        attrs?:
+          | T
+          | {
+              key?: T;
+              value?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  label?: T;
+  gap?: T;
+  valign?: T;
+  justify?: T;
+  wrap?: T;
+  space?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceMd?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceSm?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  color?: T;
+  fontSize?: T;
+  lineHeight?: T;
+  fontWeight?: T;
+  transform?: T;
+  letterSpacing?: T;
+  bw?: T;
+  bc?: T;
+  br?: T;
+  bs?: T;
+  bg?:
+    | T
+    | {
+        type?: T;
+        color?: T;
+        gFrom?: T;
+        gTo?: T;
+        gAngle?: T;
+        image?: T;
+        pos?: T;
+        fit?: T;
+        repeat?: T;
+        attach?: T;
+        blend?: T;
+        video?: T;
+        poster?: T;
+        overlay?: T;
+        overlayOpacity?: T;
+      };
+  anim?:
+    | T
+    | {
+        preset?: T;
+        duration?: T;
+        delay?: T;
+        onScroll?: T;
+      };
+  hide?:
+    | T
+    | {
+        desktop?: T;
+        tablet?: T;
+        mobile?: T;
+      };
+  cssClass?: T;
+  cssId?: T;
+  attrs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBHeadingBlock_select".
+ */
+export interface PBHeadingBlockSelect<T extends boolean = true> {
+  text?: T;
+  eyebrow?: T;
+  level?: T;
+  align?: T;
+  maxWidth?: T;
+  space?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceMd?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceSm?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  color?: T;
+  fontSize?: T;
+  lineHeight?: T;
+  fontWeight?: T;
+  transform?: T;
+  letterSpacing?: T;
+  bw?: T;
+  bc?: T;
+  br?: T;
+  bs?: T;
+  bg?:
+    | T
+    | {
+        type?: T;
+        color?: T;
+        gFrom?: T;
+        gTo?: T;
+        gAngle?: T;
+        image?: T;
+        pos?: T;
+        fit?: T;
+        repeat?: T;
+        attach?: T;
+        blend?: T;
+        video?: T;
+        poster?: T;
+        overlay?: T;
+        overlayOpacity?: T;
+      };
+  anim?:
+    | T
+    | {
+        preset?: T;
+        duration?: T;
+        delay?: T;
+        onScroll?: T;
+      };
+  hide?:
+    | T
+    | {
+        desktop?: T;
+        tablet?: T;
+        mobile?: T;
+      };
+  cssClass?: T;
+  cssId?: T;
+  attrs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBRichTextBlock_select".
+ */
+export interface PBRichTextBlockSelect<T extends boolean = true> {
+  content?: T;
+  align?: T;
+  maxWidth?: T;
+  space?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceMd?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceSm?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  color?: T;
+  fontSize?: T;
+  lineHeight?: T;
+  fontWeight?: T;
+  transform?: T;
+  letterSpacing?: T;
+  bw?: T;
+  bc?: T;
+  br?: T;
+  bs?: T;
+  bg?:
+    | T
+    | {
+        type?: T;
+        color?: T;
+        gFrom?: T;
+        gTo?: T;
+        gAngle?: T;
+        image?: T;
+        pos?: T;
+        fit?: T;
+        repeat?: T;
+        attach?: T;
+        blend?: T;
+        video?: T;
+        poster?: T;
+        overlay?: T;
+        overlayOpacity?: T;
+      };
+  anim?:
+    | T
+    | {
+        preset?: T;
+        duration?: T;
+        delay?: T;
+        onScroll?: T;
+      };
+  hide?:
+    | T
+    | {
+        desktop?: T;
+        tablet?: T;
+        mobile?: T;
+      };
+  cssClass?: T;
+  cssId?: T;
+  attrs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBButtonBlock_select".
+ */
+export interface PBButtonBlockSelect<T extends boolean = true> {
+  text?: T;
+  url?: T;
+  variant?: T;
+  size?: T;
+  newTab?: T;
+  align?: T;
+  maxWidth?: T;
+  space?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceMd?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceSm?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  color?: T;
+  fontSize?: T;
+  lineHeight?: T;
+  fontWeight?: T;
+  transform?: T;
+  letterSpacing?: T;
+  bw?: T;
+  bc?: T;
+  br?: T;
+  bs?: T;
+  bg?:
+    | T
+    | {
+        type?: T;
+        color?: T;
+        gFrom?: T;
+        gTo?: T;
+        gAngle?: T;
+        image?: T;
+        pos?: T;
+        fit?: T;
+        repeat?: T;
+        attach?: T;
+        blend?: T;
+        video?: T;
+        poster?: T;
+        overlay?: T;
+        overlayOpacity?: T;
+      };
+  anim?:
+    | T
+    | {
+        preset?: T;
+        duration?: T;
+        delay?: T;
+        onScroll?: T;
+      };
+  hide?:
+    | T
+    | {
+        desktop?: T;
+        tablet?: T;
+        mobile?: T;
+      };
+  cssClass?: T;
+  cssId?: T;
+  attrs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBImageBlock_select".
+ */
+export interface PBImageBlockSelect<T extends boolean = true> {
+  image?: T;
+  caption?: T;
+  ratio?: T;
+  rounded?: T;
+  url?: T;
+  align?: T;
+  maxWidth?: T;
+  space?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceMd?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceSm?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  color?: T;
+  fontSize?: T;
+  lineHeight?: T;
+  fontWeight?: T;
+  transform?: T;
+  letterSpacing?: T;
+  bw?: T;
+  bc?: T;
+  br?: T;
+  bs?: T;
+  bg?:
+    | T
+    | {
+        type?: T;
+        color?: T;
+        gFrom?: T;
+        gTo?: T;
+        gAngle?: T;
+        image?: T;
+        pos?: T;
+        fit?: T;
+        repeat?: T;
+        attach?: T;
+        blend?: T;
+        video?: T;
+        poster?: T;
+        overlay?: T;
+        overlayOpacity?: T;
+      };
+  anim?:
+    | T
+    | {
+        preset?: T;
+        duration?: T;
+        delay?: T;
+        onScroll?: T;
+      };
+  hide?:
+    | T
+    | {
+        desktop?: T;
+        tablet?: T;
+        mobile?: T;
+      };
+  cssClass?: T;
+  cssId?: T;
+  attrs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBVideoBlock_select".
+ */
+export interface PBVideoBlockSelect<T extends boolean = true> {
+  source?: T;
+  embedUrl?: T;
+  file?: T;
+  poster?: T;
+  ratio?: T;
+  controls?: T;
+  align?: T;
+  maxWidth?: T;
+  space?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceMd?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceSm?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  color?: T;
+  fontSize?: T;
+  lineHeight?: T;
+  fontWeight?: T;
+  transform?: T;
+  letterSpacing?: T;
+  bw?: T;
+  bc?: T;
+  br?: T;
+  bs?: T;
+  bg?:
+    | T
+    | {
+        type?: T;
+        color?: T;
+        gFrom?: T;
+        gTo?: T;
+        gAngle?: T;
+        image?: T;
+        pos?: T;
+        fit?: T;
+        repeat?: T;
+        attach?: T;
+        blend?: T;
+        video?: T;
+        poster?: T;
+        overlay?: T;
+        overlayOpacity?: T;
+      };
+  anim?:
+    | T
+    | {
+        preset?: T;
+        duration?: T;
+        delay?: T;
+        onScroll?: T;
+      };
+  hide?:
+    | T
+    | {
+        desktop?: T;
+        tablet?: T;
+        mobile?: T;
+      };
+  cssClass?: T;
+  cssId?: T;
+  attrs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBDividerBlock_select".
+ */
+export interface PBDividerBlockSelect<T extends boolean = true> {
+  height?: T;
+  line?: T;
+  align?: T;
+  maxWidth?: T;
+  space?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceMd?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceSm?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  color?: T;
+  fontSize?: T;
+  lineHeight?: T;
+  fontWeight?: T;
+  transform?: T;
+  letterSpacing?: T;
+  bw?: T;
+  bc?: T;
+  br?: T;
+  bs?: T;
+  bg?:
+    | T
+    | {
+        type?: T;
+        color?: T;
+        gFrom?: T;
+        gTo?: T;
+        gAngle?: T;
+        image?: T;
+        pos?: T;
+        fit?: T;
+        repeat?: T;
+        attach?: T;
+        blend?: T;
+        video?: T;
+        poster?: T;
+        overlay?: T;
+        overlayOpacity?: T;
+      };
+  anim?:
+    | T
+    | {
+        preset?: T;
+        duration?: T;
+        delay?: T;
+        onScroll?: T;
+      };
+  hide?:
+    | T
+    | {
+        desktop?: T;
+        tablet?: T;
+        mobile?: T;
+      };
+  cssClass?: T;
+  cssId?: T;
+  attrs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBSpacerBlock_select".
+ */
+export interface PBSpacerBlockSelect<T extends boolean = true> {
+  h?: T;
+  hMd?: T;
+  hSm?: T;
+  align?: T;
+  maxWidth?: T;
+  space?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceMd?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceSm?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  color?: T;
+  fontSize?: T;
+  lineHeight?: T;
+  fontWeight?: T;
+  transform?: T;
+  letterSpacing?: T;
+  bw?: T;
+  bc?: T;
+  br?: T;
+  bs?: T;
+  bg?:
+    | T
+    | {
+        type?: T;
+        color?: T;
+        gFrom?: T;
+        gTo?: T;
+        gAngle?: T;
+        image?: T;
+        pos?: T;
+        fit?: T;
+        repeat?: T;
+        attach?: T;
+        blend?: T;
+        video?: T;
+        poster?: T;
+        overlay?: T;
+        overlayOpacity?: T;
+      };
+  anim?:
+    | T
+    | {
+        preset?: T;
+        duration?: T;
+        delay?: T;
+        onScroll?: T;
+      };
+  hide?:
+    | T
+    | {
+        desktop?: T;
+        tablet?: T;
+        mobile?: T;
+      };
+  cssClass?: T;
+  cssId?: T;
+  attrs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBChenzAboutTriviaBlock_select".
+ */
+export interface PBChenzAboutTriviaBlockSelect<T extends boolean = true> {
+  mainTitle?: T;
+  highlightText?: T;
+  subDescription?: T;
+  centerImage?: T;
+  leftCards?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        iconType?: T;
+        customIcon?: T;
+        id?: T;
+      };
+  rightCards?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        iconType?: T;
+        customIcon?: T;
+        id?: T;
+      };
+  signUpText?: T;
+  signUpUrl?: T;
+  loginText?: T;
+  loginUrl?: T;
+  align?: T;
+  maxWidth?: T;
+  space?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceMd?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceSm?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  color?: T;
+  fontSize?: T;
+  lineHeight?: T;
+  fontWeight?: T;
+  transform?: T;
+  letterSpacing?: T;
+  bw?: T;
+  bc?: T;
+  br?: T;
+  bs?: T;
+  bg?:
+    | T
+    | {
+        type?: T;
+        color?: T;
+        gFrom?: T;
+        gTo?: T;
+        gAngle?: T;
+        image?: T;
+        pos?: T;
+        fit?: T;
+        repeat?: T;
+        attach?: T;
+        blend?: T;
+        video?: T;
+        poster?: T;
+        overlay?: T;
+        overlayOpacity?: T;
+      };
+  anim?:
+    | T
+    | {
+        preset?: T;
+        duration?: T;
+        delay?: T;
+        onScroll?: T;
+      };
+  hide?:
+    | T
+    | {
+        desktop?: T;
+        tablet?: T;
+        mobile?: T;
+      };
+  cssClass?: T;
+  cssId?: T;
+  attrs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBChenzHowItWorksBlock_select".
+ */
+export interface PBChenzHowItWorksBlockSelect<T extends boolean = true> {
+  topSubtitle?: T;
+  mainTitle?: T;
+  highlightText?: T;
+  subDescription?: T;
+  steps?:
+    | T
+    | {
+        stepNumber?: T;
+        title?: T;
+        description?: T;
+        iconType?: T;
+        id?: T;
+      };
+  align?: T;
+  maxWidth?: T;
+  space?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceMd?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceSm?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  color?: T;
+  fontSize?: T;
+  lineHeight?: T;
+  fontWeight?: T;
+  transform?: T;
+  letterSpacing?: T;
+  bw?: T;
+  bc?: T;
+  br?: T;
+  bs?: T;
+  bg?:
+    | T
+    | {
+        type?: T;
+        color?: T;
+        gFrom?: T;
+        gTo?: T;
+        gAngle?: T;
+        image?: T;
+        pos?: T;
+        fit?: T;
+        repeat?: T;
+        attach?: T;
+        blend?: T;
+        video?: T;
+        poster?: T;
+        overlay?: T;
+        overlayOpacity?: T;
+      };
+  anim?:
+    | T
+    | {
+        preset?: T;
+        duration?: T;
+        delay?: T;
+        onScroll?: T;
+      };
+  hide?:
+    | T
+    | {
+        desktop?: T;
+        tablet?: T;
+        mobile?: T;
+      };
+  cssClass?: T;
+  cssId?: T;
+  attrs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBChenzReadyToPlayBlock_select".
+ */
+export interface PBChenzReadyToPlayBlockSelect<T extends boolean = true> {
+  topSubtitle?: T;
+  mainTitle?: T;
+  highlightText?: T;
+  subDescription?: T;
+  cards?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        buttonText?: T;
+        buttonUrl?: T;
+        cardBgColor?: T;
+        id?: T;
+      };
+  align?: T;
+  maxWidth?: T;
+  space?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceMd?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceSm?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  color?: T;
+  fontSize?: T;
+  lineHeight?: T;
+  fontWeight?: T;
+  transform?: T;
+  letterSpacing?: T;
+  bw?: T;
+  bc?: T;
+  br?: T;
+  bs?: T;
+  bg?:
+    | T
+    | {
+        type?: T;
+        color?: T;
+        gFrom?: T;
+        gTo?: T;
+        gAngle?: T;
+        image?: T;
+        pos?: T;
+        fit?: T;
+        repeat?: T;
+        attach?: T;
+        blend?: T;
+        video?: T;
+        poster?: T;
+        overlay?: T;
+        overlayOpacity?: T;
+      };
+  anim?:
+    | T
+    | {
+        preset?: T;
+        duration?: T;
+        delay?: T;
+        onScroll?: T;
+      };
+  hide?:
+    | T
+    | {
+        desktop?: T;
+        tablet?: T;
+        mobile?: T;
+      };
+  cssClass?: T;
+  cssId?: T;
+  attrs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBChenzQuizRewardsBlock_select".
+ */
+export interface PBChenzQuizRewardsBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  title?: T;
+  subtitle?: T;
+  backgroundImage?: T;
+  challengeCard?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        description?: T;
+        scheduleLabel?: T;
+        scheduleTime?: T;
+        buttonText?: T;
+        buttonUrl?: T;
+        bgColor?: T;
+        accentColor?: T;
+      };
+  rewardCard?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        description?: T;
+        voucherImage?: T;
+        voucherAmount?: T;
+        voucherLabel?: T;
+        buttonText?: T;
+        buttonUrl?: T;
+        bgColor?: T;
+        accentColor?: T;
+      };
+  align?: T;
+  maxWidth?: T;
+  space?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceMd?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceSm?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  color?: T;
+  fontSize?: T;
+  lineHeight?: T;
+  fontWeight?: T;
+  transform?: T;
+  letterSpacing?: T;
+  bw?: T;
+  bc?: T;
+  br?: T;
+  bs?: T;
+  bg?:
+    | T
+    | {
+        type?: T;
+        color?: T;
+        gFrom?: T;
+        gTo?: T;
+        gAngle?: T;
+        image?: T;
+        pos?: T;
+        fit?: T;
+        repeat?: T;
+        attach?: T;
+        blend?: T;
+        video?: T;
+        poster?: T;
+        overlay?: T;
+        overlayOpacity?: T;
+      };
+  anim?:
+    | T
+    | {
+        preset?: T;
+        duration?: T;
+        delay?: T;
+        onScroll?: T;
+      };
+  hide?:
+    | T
+    | {
+        desktop?: T;
+        tablet?: T;
+        mobile?: T;
+      };
+  cssClass?: T;
+  cssId?: T;
+  attrs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBChenzFaqBlock_select".
+ */
+export interface PBChenzFaqBlockSelect<T extends boolean = true> {
+  seoH1?: T;
+  sectionBgImage?: T;
+  eyebrow?: T;
+  heading?: T;
+  description?: T;
+  allowMultipleOpen?: T;
+  faqs?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  ctaText?: T;
+  ctaUrl?: T;
+  align?: T;
+  maxWidth?: T;
+  space?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceMd?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceSm?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  color?: T;
+  fontSize?: T;
+  lineHeight?: T;
+  fontWeight?: T;
+  transform?: T;
+  letterSpacing?: T;
+  bw?: T;
+  bc?: T;
+  br?: T;
+  bs?: T;
+  bg?:
+    | T
+    | {
+        type?: T;
+        color?: T;
+        gFrom?: T;
+        gTo?: T;
+        gAngle?: T;
+        image?: T;
+        pos?: T;
+        fit?: T;
+        repeat?: T;
+        attach?: T;
+        blend?: T;
+        video?: T;
+        poster?: T;
+        overlay?: T;
+        overlayOpacity?: T;
+      };
+  anim?:
+    | T
+    | {
+        preset?: T;
+        duration?: T;
+        delay?: T;
+        onScroll?: T;
+      };
+  hide?:
+    | T
+    | {
+        desktop?: T;
+        tablet?: T;
+        mobile?: T;
+      };
+  cssClass?: T;
+  cssId?: T;
+  attrs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBChenzInstaReelsBlock_select".
+ */
+export interface PBChenzInstaReelsBlockSelect<T extends boolean = true> {
+  topBadge?: T;
+  mainHeading?: T;
+  highlightText?: T;
+  subDescription?: T;
+  reels?:
+    | T
+    | {
+        title?: T;
+        subtitle?: T;
+        thumbnail?: T;
+        redirectUrl?: T;
+        id?: T;
+      };
+  align?: T;
+  maxWidth?: T;
+  space?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceMd?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceSm?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  color?: T;
+  fontSize?: T;
+  lineHeight?: T;
+  fontWeight?: T;
+  transform?: T;
+  letterSpacing?: T;
+  bw?: T;
+  bc?: T;
+  br?: T;
+  bs?: T;
+  bg?:
+    | T
+    | {
+        type?: T;
+        color?: T;
+        gFrom?: T;
+        gTo?: T;
+        gAngle?: T;
+        image?: T;
+        pos?: T;
+        fit?: T;
+        repeat?: T;
+        attach?: T;
+        blend?: T;
+        video?: T;
+        poster?: T;
+        overlay?: T;
+        overlayOpacity?: T;
+      };
+  anim?:
+    | T
+    | {
+        preset?: T;
+        duration?: T;
+        delay?: T;
+        onScroll?: T;
+      };
+  hide?:
+    | T
+    | {
+        desktop?: T;
+        tablet?: T;
+        mobile?: T;
+      };
+  cssClass?: T;
+  cssId?: T;
+  attrs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PBChenzCreativeHeroBlock_select".
+ */
+export interface PBChenzCreativeHeroBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  heading?: T;
+  subtitle?: T;
+  ctaLabel?: T;
+  ctaUrl?: T;
+  image?: T;
+  imageAlt?: T;
+  imageScale?: T;
+  imageRotation?: T;
+  backgroundColor?: T;
+  textColor?: T;
+  interactionEnabled?: T;
+  animationIntensity?: T;
+  footerText?: T;
+  align?: T;
+  maxWidth?: T;
+  space?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceMd?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  spaceSm?:
+    | T
+    | {
+        pt?: T;
+        pr?: T;
+        pb?: T;
+        pl?: T;
+        mt?: T;
+        mb?: T;
+      };
+  color?: T;
+  fontSize?: T;
+  lineHeight?: T;
+  fontWeight?: T;
+  transform?: T;
+  letterSpacing?: T;
+  bw?: T;
+  bc?: T;
+  br?: T;
+  bs?: T;
+  bg?:
+    | T
+    | {
+        type?: T;
+        color?: T;
+        gFrom?: T;
+        gTo?: T;
+        gAngle?: T;
+        image?: T;
+        pos?: T;
+        fit?: T;
+        repeat?: T;
+        attach?: T;
+        blend?: T;
+        video?: T;
+        poster?: T;
+        overlay?: T;
+        overlayOpacity?: T;
+      };
+  anim?:
+    | T
+    | {
+        preset?: T;
+        duration?: T;
+        delay?: T;
+        onScroll?: T;
+      };
+  hide?:
+    | T
+    | {
+        desktop?: T;
+        tablet?: T;
+        mobile?: T;
+      };
+  cssClass?: T;
+  cssId?: T;
+  attrs?:
+    | T
+    | {
+        key?: T;
+        value?: T;
+        id?: T;
+      };
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1901,6 +5819,14 @@ export interface SearchSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs_select".
  */
 export interface PayloadJobsSelect<T extends boolean = true> {
@@ -2249,6 +6175,16 @@ export interface QuizSiteSettingsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskSchedulePublish".
  */
 export interface TaskSchedulePublish {
@@ -2283,7 +6219,7 @@ export interface BannerBlock {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];

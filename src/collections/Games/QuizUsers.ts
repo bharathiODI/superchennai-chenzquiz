@@ -7,6 +7,9 @@ export const QuizUsers: CollectionConfig = {
   auth: {
     disableLocalStrategy: true,
     tokenExpiration: 2592000,
+    // Player tokens are signed by our own OTP login (utilities/playerSession.ts) and carry
+    // no session id. Payload 3.87 turns sessions on by default, which would reject them.
+    useSessions: false,
   },
   admin: {
     useAsTitle: 'name',

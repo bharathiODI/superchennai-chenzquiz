@@ -30,7 +30,8 @@ export const Users: CollectionConfig = {
     // Client role user-kku Users tab sidebar-la hide aagum:
     hidden: isNotAdmin,
   },
-  auth: true,
+  // Sessions (on by default since Payload 3.4x) stay off so admin logins behave as before the upgrade.
+  auth: { useSessions: false },
   fields: [
     {
       name: 'role',

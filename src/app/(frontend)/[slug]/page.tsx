@@ -1,4 +1,5 @@
 import PageBody from '@/components/Page/PageBody'
+import BuilderLayout from '@/builder/BuilderLayout'
 import type { Metadata } from 'next'
 import { draftMode } from 'next/headers'
 import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
@@ -52,7 +53,7 @@ export default async function Page({ params: paramsPromise }: Args) {
     return <PayloadRedirects url={url} />
   }
 
-  const { hero, content } = page
+  const { hero, content, layout } = page
   const showHero = hero?.enableHero === true
 
   return (
@@ -75,6 +76,7 @@ export default async function Page({ params: paramsPromise }: Args) {
       <div>
         <PageBody content={content} />
       </div>
+      <BuilderLayout layout={layout} />
     </div>
   )
 }

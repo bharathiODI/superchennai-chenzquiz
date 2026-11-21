@@ -1,0 +1,159 @@
+/* Site-specific adjustments to the page builder's frontend styles (scoped to .chenz-builder). */
+
+/* A section only needs its own stacking layer when it has a background overlay or video.
+   Without one, pop-ups and dropdowns inside a quiz section could not rise above the site header. */
+.chenz-builder .pb-section:not(:has(> .pb-overlay)):not(:has(> .pb-bg-video-el)) > .pb-section-inner {
+  z-index: auto;
+}
+
+/* The kit lays rows out on a 60-track grid with a fixed gap: 59 gaps of 24px make every row at
+   least 1416px wide, so rows overflow on phones, tablets and inside site-width sections.
+   Rows use flexbox here instead: each column takes its share of the width minus its share of
+   the gaps, so the columns of a row always add up to exactly 100%. */
+.chenz-builder .pb-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+.chenz-builder .pb-row.pb-nowrap {
+  flex-wrap: nowrap;
+}
+.chenz-builder .pb-column {
+  flex: 0 0 calc(var(--pb-span, 60) / 60 * 100% - var(--pb-row-gap) * (1 - var(--pb-span, 60) / 60));
+  max-width: 100%;
+}
+@media (max-width: 767px) {
+  .chenz-builder .pb-column {
+    flex-basis: 100%;
+  }
+}
+
+/* ---------- kit elements in the quiz site's look ----------
+   Tailwind's reset strips headings and links, so the kit's Heading, Rich Text, Button, Image
+   and Video elements get the site's own type and colours here. Values set in an element's
+   Design tab (font size, colour) still win through the kit's --pb-* variables. */
+
+.chenz-builder .pb-eyebrow {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  background-image: linear-gradient(to right, #03045e, #7000ff, #ff007a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.chenz-builder .pb-heading {
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  background-image: linear-gradient(to right, #03045e, #7000ff, #ff007a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.chenz-builder h1.pb-heading { font-size: var(--pb-fs, 2.5rem); }
+.chenz-builder h2.pb-heading { font-size: var(--pb-fs, 2rem); }
+.chenz-builder h3.pb-heading { font-size: var(--pb-fs, 1.5rem); }
+.chenz-builder h4.pb-heading { font-size: var(--pb-fs, 1.25rem); }
+.chenz-builder h5.pb-heading,
+.chenz-builder h6.pb-heading { font-size: var(--pb-fs, 1.125rem); }
+@media (min-width: 768px) {
+  .chenz-builder h1.pb-heading { font-size: var(--pb-fs, 3.5rem); }
+  .chenz-builder h2.pb-heading { font-size: var(--pb-fs, 3rem); }
+  .chenz-builder h3.pb-heading { font-size: var(--pb-fs, 1.875rem); }
+  .chenz-builder h4.pb-heading { font-size: var(--pb-fs, 1.5rem); }
+}
+/* A colour picked in the Design tab replaces the gradient. */
+.chenz-builder .pb-has-color .pb-heading,
+.chenz-builder .pb-has-color .pb-eyebrow {
+  background-image: none;
+  color: inherit;
+}
+
+.chenz-builder .pb-richtext {
+  color: #4b5563;
+  font-size: var(--pb-fs, 1.125rem);
+  font-weight: 500;
+  line-height: 1.75;
+}
+.chenz-builder .pb-has-color .pb-richtext { color: inherit; }
+.chenz-builder .pb-richtext > * + * { margin-top: 1em; }
+.chenz-builder .pb-richtext h1,
+.chenz-builder .pb-richtext h2,
+.chenz-builder .pb-richtext h3,
+.chenz-builder .pb-richtext h4 { color: #03045e; font-weight: 800; line-height: 1.25; }
+.chenz-builder .pb-richtext h1 { font-size: 2em; }
+.chenz-builder .pb-richtext h2 { font-size: 1.6em; }
+.chenz-builder .pb-richtext h3 { font-size: 1.3em; }
+.chenz-builder .pb-richtext a { color: #5122f2; text-decoration: underline; text-underline-offset: 3px; }
+.chenz-builder .pb-richtext ul { list-style: disc; padding-left: 1.5em; }
+.chenz-builder .pb-richtext ol { list-style: decimal; padding-left: 1.5em; }
+.chenz-builder .pb-richtext blockquote { border-left: 4px solid #7000ff; padding-left: 1em; font-style: italic; }
+
+.chenz-builder .pb-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  font-weight: 600;
+  line-height: 1.25;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+.chenz-builder .pb-button:hover { transform: translateY(-1px); }
+.chenz-builder .pb-button:focus-visible { outline: 3px solid #a78bfa; outline-offset: 2px; }
+.chenz-builder .pb-button--sm { padding: 0.5rem 1.25rem; font-size: 0.875rem; }
+.chenz-builder .pb-button--md { padding: 0.75rem 2rem; font-size: 1rem; }
+.chenz-builder .pb-button--lg { padding: 1rem 2.5rem; font-size: 1.125rem; }
+.chenz-builder .pb-button--primary {
+  color: #fff;
+  background-image: linear-gradient(to right, #5122f2, #6d3aff);
+  box-shadow: 0 8px 20px -8px rgba(81, 34, 242, 0.6);
+}
+.chenz-builder .pb-button--secondary {
+  color: #fff;
+  background-color: #fc0182;
+  box-shadow: 0 8px 20px -8px rgba(252, 1, 130, 0.55);
+}
+.chenz-builder .pb-button--outline {
+  color: #5122f2;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-color: #5122f2;
+}
+.chenz-builder .pb-button--ghost {
+  color: #5122f2;
+  padding-left: 0;
+  padding-right: 0;
+}
+.chenz-builder .pb-button--ghost:hover { text-decoration: underline; transform: none; }
+
+.chenz-builder .pb-image { margin: 0; }
+.chenz-builder .pb-image img { width: 100%; height: 100%; object-fit: cover; }
+.chenz-builder .pb-image--rounded img { border-radius: 1rem; }
+.chenz-builder .pb-image figcaption { margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280; }
+
+.chenz-builder .pb-video { width: 100%; overflow: hidden; border-radius: 1rem; background: #0f0a2e; }
+.chenz-builder .pb-video iframe,
+.chenz-builder .pb-video video { display: block; width: 100%; height: 100%; border: 0; }
+
+/* ---------- spacing between elements in a column ----------
+   Kit elements stacked in one column get 1rem between them unless the element's own top margin
+   is set. Full quiz sections (About Trivia, FAQ, ...) stay flush, as on the Content tab. */
+.chenz-builder .chenz-section { display: contents; }
+.chenz-builder .pb-column > .pb-element:not(:has(> .chenz-section)) + .pb-element:not(:has(> .chenz-section)) {
+  margin-top: var(--pb-mt, 1rem);
+}
+@media (max-width: 1024px) {
+  .chenz-builder .pb-column > .pb-element:not(:has(> .chenz-section)) + .pb-element:not(:has(> .chenz-section)) {
+    margin-top: var(--pb-mt-md, var(--pb-mt, 1rem));
+  }
+}
+@media (max-width: 767px) {
+  .chenz-builder .pb-column > .pb-element:not(:has(> .chenz-section)) + .pb-element:not(:has(> .chenz-section)) {
+    margin-top: var(--pb-mt-sm, var(--pb-mt-md, var(--pb-mt, 1rem)));
+  }
+}

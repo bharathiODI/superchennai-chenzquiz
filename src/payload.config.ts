@@ -14,6 +14,8 @@ import Footer from './Footer/config'
 import { Header } from './Header/config'
 import { QuizSiteSettings } from './globals/QuizSiteSettings/config'
 import { plugins } from './plugins'
+import { builderPlugin } from '@opendesigns/payload-builder'
+import { builderElements } from './builder/elements'
 import { getServerSideURL } from './utilities/getURL'
 import { QuizUsers } from './collections/Games/QuizUsers'
 import { Quizzes } from './collections/Games/Quizzes'
@@ -103,7 +105,12 @@ export default buildConfig({
 
   globals: [Header, Footer, QuizSettings, QuizSiteSettings],
   blocks: [],
-  plugins: [...plugins],
+  plugins: [
+    ...plugins,
+    // Page builder canvas. The Pages collection adds its own layout field (Page Builder tab);
+    // the plugin only registers the element list for the admin canvas.
+    builderPlugin({ collections: [], elements: builderElements }),
+  ],
   secret: process.env.PAYLOAD_SECRET,
   sharp,
   typescript: {

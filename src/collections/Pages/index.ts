@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { BlocksField, CollectionConfig } from 'payload'
 
 import { slugField } from 'src/fields/slug'
 import { hero } from 'src/heros/config'
@@ -43,6 +43,12 @@ import { InstaReelsBlock } from '../Games/Blocks/InstaReelsSlider/config'
 import { QuizRewardsBlock } from '../Games/Blocks/QuizRewards/config'
 import { isAdmin, isAdminAdminAccess } from '@/access/isAdmin'
 import { OurPartnersBlock } from '../Games/Blocks/OurPartnersBlock/config'
+import { buildLayoutField } from '@opendesigns/payload-builder'
+import { builderElements } from '@/builder/elements'
+
+// Optional page-builder sections (Section > Row > Column > Element). They render below the
+// Content tab, so pages that leave this empty look exactly as before.
+const builderLayout = buildLayoutField(builderElements, 'layout', true) as BlocksField
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -128,10 +134,19 @@ export const Pages: CollectionConfig<'pages'> = {
                 },
               }),
               label: false,
-              required: true,
+              admin: {
+                description:
+                  'The page content. Leave it empty if the page is built only in the Page Builder tab.',
+              },
             },
           ],
           label: 'Content',
+        },
+        {
+          label: 'Page Builder',
+          description:
+            'Optional. Sections built here appear on the page below the Content tab, in this order. Leave it empty to show only the Content tab.',
+          fields: [{ ...builderLayout, label: 'Sections' }],
         },
         {
           name: 'meta',
