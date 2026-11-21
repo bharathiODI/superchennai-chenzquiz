@@ -296,6 +296,7 @@ import { getPayload } from 'payload'
 import Link from 'next/link'
 import configPromise from 'src/payload.config'
 import AuthGuard from './AuthGuard'
+import { isTestPhone, realPlayersWhere } from '@/utilities/testPlayers'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -398,6 +399,7 @@ export default async function LeaderboardPage({
     // All Time: preserve the existing users collection values.
     const usersResult = await payload.find({
       collection: 'quiz-users',
+      where: realPlayersWhere,
       sort: ['-totalXP', 'totalTimeTaken', 'createdAt'],
       limit,
       page: pageParam,
@@ -472,6 +474,8 @@ export default async function LeaderboardPage({
           ? attempt.user
           : null
 
+      if (isTestPhone((relation as { phone?: string | null } | null)?.phone)) continue
+
       let stats = userStats.get(userId)
 
       if (!stats) {
@@ -517,6 +521,7 @@ export default async function LeaderboardPage({
     if (tab === 'all') {
       const podiumResult = await payload.find({
         collection: 'quiz-users',
+        where: realPlayersWhere,
         sort: ['-totalXP', 'totalTimeTaken', 'createdAt'],
         limit: 3,
         page: 1,

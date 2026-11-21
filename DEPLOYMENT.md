@@ -74,3 +74,22 @@ pm2 reload chenzquiz-superchennai --update-env
 `payload.config.ts` has `push: false`, so schema changes (new collections, globals or fields) are not
 applied automatically. Create a migration locally with `npx payload migrate:create <name>` and commit
 `src/migrations/` - the deploy runs `payload migrate` before building.
+
+## Test players
+
+Numbers `0000000001` to `0000000010` (stored as `+910000000001` ...) are reserved for testing
+(`src/utilities/testPlayers.ts`). They are hidden from the leaderboard and the `/dashboard` stats,
+and they log in with a fixed code instead of an SMS.
+
+1. Turn test logins on (once): add a 6-digit code to the server env and restart the app
+   ```bash
+   echo "TEST_OTP=$(shuf -i 100000-999999 -n 1)" >> /var/www/chenzquiz/shared/.env
+   pm2 restart chenzquiz-superchennai
+   grep TEST_OTP /var/www/chenzquiz/shared/.env
+   ```
+2. Create the players (safe to re-run):
+   ```bash
+   cd /var/www/chenzquiz/current && NODE_ENV=production npx payload run scripts/seed-test-players.ts
+   ```
+3. Log in at `/login` with e.g. `0000000001` and the TEST_OTP code. To turn test logins off, remove
+   the `TEST_OTP` line and restart the app.

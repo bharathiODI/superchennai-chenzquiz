@@ -1,8 +1,11 @@
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
+import { clearPhoneVerified, isPhoneVerified } from '@/utilities/otpSession'
+import { issuePlayerToken, setPlayerCookie } from '@/utilities/playerSession'
 
-export async function POST(req: Request) {
+// Sign up: creates the player and logs them straight in (one OTP instead of two)
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const { name, phone, message } = body
@@ -19,6 +22,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Please enter a valid email address' }, { status: 400 })
     }
 
+    if (!isPhoneVerified(req, phone)) {
+      return NextResponse.json(
+        { message: 'Please verify your mobile number with OTP first.' },
+        { status: 401 }
+      )
+    }
+
     const payload = await getPayload({ config: configPromise })
 
     // Check if phone already registered
@@ -27,6 +37,7 @@ export async function POST(req: Request) {
       where: {
         phone: { equals: phone },
       },
+      overrideAccess: true,
     })
 
     if (existing.docs.length > 0) {
@@ -47,10 +58,18 @@ export async function POST(req: Request) {
       },
     })
 
-    return NextResponse.json({
+    const token = await issuePlayerToken(payload, newUser)
+
+    const response = NextResponse.json({
       message: 'Account created successfully',
       doc: newUser,
+      user: newUser,
+      token,
     })
+    setPlayerCookie(response, token)
+    clearPhoneVerified(response)
+
+    return response
   } catch (error: any) {
     return NextResponse.json(
       { message: error?.message || 'Failed to create user' },

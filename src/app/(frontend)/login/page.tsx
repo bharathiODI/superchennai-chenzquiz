@@ -409,7 +409,6 @@
 // }
 /* eslint-disable @next/next/no-html-link-for-pages */
 'use client'
-import axios from 'axios'
 import { Building2, Key, Lightbulb, Mail, MessageSquare, Smartphone, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -424,8 +423,9 @@ export default function LoginPage() {
   const [name, setName] = useState('')
   const [agreeTerms, setAgreeTerms] = useState(false)
   const [otp, setOtp] = useState('')
-  const [generatedOtp, setGeneratedOtp] = useState('')
+  const [otpSent, setOtpSent] = useState(false)
   const [sendingOtp, setSendingOtp] = useState(false)
+  const [verifyingOtp, setVerifyingOtp] = useState(false)
   const [otpVerified, setOtpVerified] = useState(false)
   const [resendTimer, setResendTimer] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -456,7 +456,7 @@ export default function LoginPage() {
     setError('')
     setSuccessMsg('')
     setOtp('')
-    setGeneratedOtp('')
+    setOtpSent(false)
     setOtpVerified(false)
     setMessage('')
   }
@@ -483,28 +483,56 @@ export default function LoginPage() {
       }
 
       setSendingOtp(true)
-      const newOtp = Math.floor(100000 + Math.random() * 900000).toString()
-      setGeneratedOtp(newOtp)
-
-      await axios.post('/api/send-otp', { mobile: `${countryCode}${phone}`, otp: newOtp })
-      setSuccessMsg('OTP sent successfully to your mobile number!')
+      // The server creates the OTP and keeps it to itself; it is checked in /api/verify-otp
+      const res = await fetch('/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile: `${countryCode}${phone.trim()}` }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError(data.message || 'Failed to send OTP. Please try again.')
+        if (data.retryAfter) setResendTimer(Number(data.retryAfter))
+        return
+      }
+      setOtp('')
+      setOtpSent(true)
+      setSuccessMsg(data.message || 'OTP sent successfully to your mobile number!')
       setResendTimer(30)
-    } catch (err: any) {
+    } catch {
       setError('Failed to send OTP. Please try again.')
     } finally {
       setSendingOtp(false)
     }
   }
 
-  const handleVerifyOtp = () => {
+  const handleVerifyOtp = async () => {
     setError('')
     setSuccessMsg('')
 
-    if (otp && otp === generatedOtp) {
+    if (!/^\d{6}$/.test(otp.trim())) {
+      setError('Enter the 6-digit OTP.')
+      return
+    }
+
+    setVerifyingOtp(true)
+    try {
+      const res = await fetch('/api/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mobile: `${countryCode}${phone.trim()}`, otp: otp.trim() }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) {
+        setError(data.message || 'Invalid OTP entered. Please check and try again.')
+        return
+      }
       setOtpVerified(true)
       setSuccessMsg('Mobile number verified successfully!')
-    } else {
-      setError('Invalid OTP entered. Please check and try again.')
+    } catch {
+      setError('Could not verify the OTP. Please try again.')
+    } finally {
+      setVerifyingOtp(false)
     }
   }
 
@@ -513,7 +541,7 @@ export default function LoginPage() {
     setError('')
     setSuccessMsg('')
 
-    const formattedPhone = `${countryCode}${phone}`
+    const formattedPhone = `${countryCode}${phone.trim()}`
 
     if (!otpVerified) {
       setError('Please verify your mobile number with OTP first.')
@@ -543,7 +571,6 @@ export default function LoginPage() {
         }
       : {
           phone: formattedPhone,
-          otp: otp,
         }
 
     try {
@@ -738,7 +765,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {!otpVerified && generatedOtp && (
+            {!otpVerified && otpSent && (
               <div>
                 <label className="block text-xs font-bold text-[#000] mb-1.5 uppercase tracking-wider">
                   Enter 6-digit OTP <span className="text-red-500" aria-hidden="true">*</span>
@@ -758,9 +785,10 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={handleVerifyOtp}
-                    className="h-14 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition cursor-pointer"
+                    disabled={verifyingOtp}
+                    className="h-14 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition cursor-pointer disabled:opacity-60"
                   >
-                    Verify OTP
+                    {verifyingOtp ? 'Verifying...' : 'Verify OTP'}
                   </button>
                 </div>
               </div>
