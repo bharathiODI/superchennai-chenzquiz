@@ -1,0 +1,174 @@
+/* @opendesigns/payload-builder — frontend structural styles.
+   Everything themeable is a CSS variable; site CSS overrides freely.
+   Breakpoints: mobile <= 767, tablet 768–1024, desktop >= 1025. */
+
+:root {
+  --pb-container: 1200px;
+  --pb-container-gutter: 20px;
+  --pb-row-gap: 24px;
+}
+
+/* ---------- shared box model ---------- */
+.pb-section,
+.pb-row,
+.pb-column,
+.pb-element {
+  margin-top: var(--pb-mt, 0);
+  margin-bottom: var(--pb-mb, 0);
+  padding: var(--pb-pt, 0) var(--pb-pr, 0) var(--pb-pb, 0) var(--pb-pl, 0);
+}
+
+@media (max-width: 1024px) {
+  .pb-section, .pb-row, .pb-column, .pb-element {
+    margin-top: var(--pb-mt-md, var(--pb-mt, 0));
+    margin-bottom: var(--pb-mb-md, var(--pb-mb, 0));
+    padding: var(--pb-pt-md, var(--pb-pt, 0)) var(--pb-pr-md, var(--pb-pr, 0))
+             var(--pb-pb-md, var(--pb-pb, 0)) var(--pb-pl-md, var(--pb-pl, 0));
+  }
+}
+@media (max-width: 767px) {
+  .pb-section, .pb-row, .pb-column, .pb-element {
+    margin-top: var(--pb-mt-sm, var(--pb-mt-md, var(--pb-mt, 0)));
+    margin-bottom: var(--pb-mb-sm, var(--pb-mb-md, var(--pb-mb, 0)));
+    padding: var(--pb-pt-sm, var(--pb-pt-md, var(--pb-pt, 0)))
+             var(--pb-pr-sm, var(--pb-pr-md, var(--pb-pr, 0)))
+             var(--pb-pb-sm, var(--pb-pb-md, var(--pb-pb, 0)))
+             var(--pb-pl-sm, var(--pb-pl-md, var(--pb-pl, 0)));
+  }
+}
+
+/* ---------- typography ---------- */
+.pb-has-color { color: var(--pb-color); }
+.pb-element { font-size: var(--pb-fs, inherit); line-height: var(--pb-lh, inherit);
+              font-weight: var(--pb-fw, inherit); letter-spacing: var(--pb-ls, inherit); }
+.pb-has-tt { text-transform: var(--pb-tt); }
+
+/* ---------- border & shadow ---------- */
+.pb-has-border { border: var(--pb-bw) solid var(--pb-bc, currentColor); }
+.pb-section, .pb-row, .pb-column, .pb-element { border-radius: var(--pb-br, 0); }
+.pb-has-shadow { box-shadow: var(--pb-bs); }
+
+/* ---------- alignment / width ---------- */
+.pb-align-start  { text-align: start;  margin-inline-end: auto; }
+.pb-align-center { text-align: center; margin-inline: auto; }
+.pb-align-end    { text-align: end;    margin-inline-start: auto; }
+.pb-has-maxw { max-width: var(--pb-maxw); }
+
+/* ---------- section ---------- */
+.pb-section { position: relative; }
+.pb-section-inner { position: relative; z-index: 1; }
+.pb-w-contained > .pb-section-inner {
+  max-width: var(--pb-container);
+  margin-inline: auto;
+  padding-inline: var(--pb-container-gutter);
+}
+.pb-h-full { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+.pb-h-min  { min-height: var(--pb-minh, 400px); display: flex; flex-direction: column; justify-content: center; }
+
+/* ---------- backgrounds ---------- */
+.pb-bg-color    { background-color: var(--pb-bg); }
+.pb-bg-gradient { background-image: var(--pb-gradient); }
+.pb-bg-image {
+  background-image: var(--pb-bg-image);
+  background-position: var(--pb-bg-pos, center center);
+  background-size: var(--pb-bg-size, cover);
+  background-repeat: var(--pb-bg-repeat, no-repeat);
+  background-attachment: var(--pb-bg-attach, scroll);
+}
+/* Parallax: fixed attachment is unreliable on mobile, so scroll there. */
+.pb-bg-parallax { background-attachment: fixed; }
+@media (max-width: 1024px) { .pb-bg-parallax { background-attachment: scroll; } }
+.pb-has-blend { background-blend-mode: var(--pb-blend); }
+
+.pb-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--pb-overlay, rgba(0, 0, 0, .4));
+  opacity: var(--pb-overlay-op, 1);
+  pointer-events: none;
+  z-index: 0;
+}
+.pb-bg-video-el {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* ---------- row / columns ---------- */
+.pb-row {
+  display: grid;
+  grid-template-columns: repeat(60, minmax(0, 1fr));
+  gap: var(--pb-row-gap);
+}
+.pb-gap-none { --pb-row-gap: 0; }
+.pb-gap-sm   { --pb-row-gap: 12px; }
+.pb-gap-md   { --pb-row-gap: 24px; }
+.pb-gap-lg   { --pb-row-gap: 40px; }
+
+.pb-va-start   { align-items: start; }
+.pb-va-center  { align-items: center; }
+.pb-va-end     { align-items: end; }
+.pb-va-stretch { align-items: stretch; }
+
+.pb-jc-start   { justify-content: start; }
+.pb-jc-center  { justify-content: center; }
+.pb-jc-end     { justify-content: end; }
+.pb-jc-between { justify-content: space-between; }
+.pb-jc-around  { justify-content: space-around; }
+.pb-jc-evenly  { justify-content: space-evenly; }
+
+.pb-column { grid-column: span var(--pb-span, 60); min-width: 0; position: relative; }
+.pb-column--link { display: block; color: inherit; text-decoration: none; }
+
+@media (max-width: 767px) {
+  .pb-column { grid-column: span 60; }
+}
+
+/* ---------- responsive visibility ---------- */
+@media (min-width: 1025px) { .pb-hide-desktop { display: none !important; } }
+@media (min-width: 768px) and (max-width: 1024px) { .pb-hide-tablet { display: none !important; } }
+@media (max-width: 767px) { .pb-hide-mobile { display: none !important; } }
+
+/* ---------- animation ----------
+   On-load variants animate immediately; .pb-anim-scroll waits for the
+   IntersectionObserver in builderAnimations() to add .pb-in. */
+.pb-anim {
+  animation-duration: var(--pb-anim-dur, 400ms);
+  animation-delay: var(--pb-anim-delay, 0ms);
+  animation-fill-mode: both;
+}
+.pb-anim-scroll { animation-play-state: paused; opacity: 0; }
+.pb-anim-scroll.pb-in { animation-play-state: running; opacity: 1; }
+
+.pb-anim-fade       { animation-name: pb-fade; }
+.pb-anim-fade-up    { animation-name: pb-fade-up; }
+.pb-anim-fade-down  { animation-name: pb-fade-down; }
+.pb-anim-fade-left  { animation-name: pb-fade-left; }
+.pb-anim-fade-right { animation-name: pb-fade-right; }
+.pb-anim-zoom       { animation-name: pb-zoom; }
+
+@keyframes pb-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pb-fade-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+@keyframes pb-fade-down { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: none; } }
+@keyframes pb-fade-left { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: none; } }
+@keyframes pb-fade-right { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+@keyframes pb-zoom { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .pb-anim { animation: none !important; opacity: 1 !important; }
+}
+
+/* ---------- element defaults ---------- */
+.pb-missing { padding: 8px 12px; background: #fef2f2; color: #b91c1c; font: 13px/1.4 monospace; }
+.pb-image img { max-width: 100%; height: auto; display: block; }
+.pb-divider--line { border-bottom: 1px solid currentColor; opacity: .18; }
+.pb-spacer { width: 100%; }
+
+/* Content direction only — never flip the grid itself (ERDC RTL rule). */
+[data-locale='ar'] .pb-element :is(p, h1, h2, h3, h4, h5, h6, li, blockquote) {
+  direction: rtl;
+  text-align: right;
+}

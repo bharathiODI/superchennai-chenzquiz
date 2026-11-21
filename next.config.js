@@ -52,6 +52,8 @@ const nextConfig = {
     ],
   },
   reactStrictMode: true,
+  // The page builder ships as TypeScript source (vendored in packages/payload-builder).
+  transpilePackages: ['@opendesigns/payload-builder'],
   redirects,
 }
 

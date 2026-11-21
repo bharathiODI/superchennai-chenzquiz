@@ -1,0 +1,51 @@
+{
+  "name": "@opendesigns/payload-builder",
+  "version": "0.2.0",
+  "description": "Vendored copy of @opendesigns/payload-builder 0.2.0 (page builder canvas). devDependencies removed so npm does not install a second React/Next inside this folder.",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=20.9"
+  },
+  "files": [
+    "src",
+    "!src/**/*.test.ts",
+    "README.md",
+    "PLAYBOOK.md",
+    "BOILERPLATE.md",
+    "ELEMENTS.md",
+    "LAYOUTS.md",
+    "USING_WITH_EXISTING_PROJECT.md",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./client": {
+      "types": "./src/client/index.ts",
+      "default": "./src/client/index.ts"
+    },
+    "./rsc": {
+      "types": "./src/rsc/index.tsx",
+      "default": "./src/rsc/index.tsx"
+    },
+    "./client/canvas.css": "./src/client/canvas.css",
+    "./rsc/builder.css": "./src/rsc/builder.css"
+  },
+  "dependencies": {
+    "react-international-phone": "^4.3.0"
+  },
+  "peerDependencies": {
+    "@payloadcms/richtext-lexical": "^3.87.0",
+    "@payloadcms/ui": "^3.87.0",
+    "next": ">=15.0.0",
+    "payload": "^3.87.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

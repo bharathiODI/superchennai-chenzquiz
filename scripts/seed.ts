@@ -30,7 +30,9 @@ async function main() {
   process.exit(0)
 }
 
-main().catch((error) => {
+// `payload run` exits as soon as this module finishes loading (Payload 3.87),
+// so the script has to await its work at the top level.
+await main().catch((error) => {
   console.error(error)
   process.exit(1)
 })
