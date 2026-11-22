@@ -98,7 +98,7 @@ export const Quizzes: CollectionConfig = {
       label: 'Question Pool',
       admin: {
         description:
-          'All questions for this challenge. Every round, each player gets random questions from this pool that they have not answered before, in a different order.',
+          'All questions for this challenge. Each round gives a player the next questions they have not answered yet, in Question Number order (or shuffled, if "Shuffle questions" is ticked below).',
       },
     },
     {
@@ -139,6 +139,16 @@ export const Quizzes: CollectionConfig = {
               },
             },
           ],
+        },
+        {
+          name: 'shuffleQuestions',
+          type: 'checkbox',
+          label: 'Shuffle questions for each player',
+          defaultValue: false,
+          admin: {
+            description:
+              'Off: every player gets the questions in Question Number order (then Display Order). On: each player gets them in a random order. The sponsored question always keeps its slot.',
+          },
         },
         {
           name: 'sponsoredQuestions',

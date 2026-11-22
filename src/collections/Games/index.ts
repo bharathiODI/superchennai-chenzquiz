@@ -218,10 +218,23 @@ export const Questions: CollectionConfig<'questions'> = {
                   ],
                 },
                 {
+                  // Stored as the option's position (Option A = 0); editors pick the answer by its
+                  // text in the admin, so it can't be entered counting from 1 by mistake.
                   name: 'correctOptionIndex',
                   type: 'number',
                   required: true,
-                  label: 'Correct Option Index (0 for Option A, 1 for Option B, etc.)',
+                  label: 'Correct answer',
+                  admin: {
+                    components: { Field: '@/components/admin/CorrectOptionField#CorrectOptionField' },
+                  },
+                  validate: ((value: unknown, { siblingData }: { siblingData?: any }) => {
+                    const count = Array.isArray(siblingData?.options) ? siblingData.options.length : 0
+                    if (value === null || value === undefined || value === '') return 'Choose the correct answer'
+                    const n = Number(value)
+                    if (!Number.isInteger(n) || n < 0 || n >= count)
+                      return `Choose one of the ${count} options as the correct answer`
+                    return true
+                  }) as any,
                 },
               ],
             },

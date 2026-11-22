@@ -23,6 +23,7 @@ import { UserSubmissions } from './collections/Games/UserSubmissions'
 import { QuizAttempts } from './collections/Games/QuizAttempts'
 import { QuizRounds } from './collections/Games/QuizRounds'
 import { QuizSettings } from './globals/QuizSettings'
+import { cmsOnlyWrites } from './plugins/cmsOnlyWrites'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -110,6 +111,8 @@ export default buildConfig({
     // Page builder canvas. The Pages collection adds its own layout field (Page Builder tab);
     // the plugin only registers the element list for the admin canvas.
     builderPlugin({ collections: [], elements: builderElements }),
+    // Keep last: anything still on Payload's default write access becomes CMS-users-only.
+    cmsOnlyWrites,
   ],
   secret: process.env.PAYLOAD_SECRET,
   sharp,

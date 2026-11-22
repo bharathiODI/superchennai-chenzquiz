@@ -1,7 +1,10 @@
 import type { Access } from 'payload'
 
-export const authenticatedOrPublished: Access = ({ req: { user } }) => {
-  if (user) {
+import { isCmsUser } from './isCmsUser'
+
+// CMS users see drafts too; everyone else (players included) sees published documents only.
+export const authenticatedOrPublished: Access = (args) => {
+  if (isCmsUser(args)) {
     return true
   }
 
