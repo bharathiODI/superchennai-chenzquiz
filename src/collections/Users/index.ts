@@ -19,8 +19,11 @@ export const Users: CollectionConfig = {
  access: {
     // Admin & Client user role login panna Admin Panel allow panrom:
     admin: isAdminOrClientAdminAccess,
-    create: () => true,
+    // Only admins add CMS users (this was open to anyone, role included). The very first admin
+    // is still created on /admin/create-first-user, which does not use this rule.
+    create: isAdmin,
     delete: isAdmin,
+    // CMS users only; `authenticated` no longer lets a player's login through.
     read: authenticated,
     update: isAdmin,
   },
