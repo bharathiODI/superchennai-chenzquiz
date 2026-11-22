@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { logoutPlayer } from '@/utilities/logoutPlayer'
 import { useEffect, useState } from 'react'
 import { Trophy, User, LogOut, LogIn } from 'lucide-react'
 
@@ -9,7 +9,6 @@ type QuizHeaderProps = { badge: string; heading: string; description: string }
 
 export default function QuizHeader({ badge, heading, description }: QuizHeaderProps) {
   const [user, setUser] = useState<{ name?: string; email?: string } | null>(null)
-  const router = useRouter()
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user')
@@ -23,10 +22,8 @@ export default function QuizHeader({ badge, heading, description }: QuizHeaderPr
   }, [])
 
   const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
     setUser(null)
-    router.push('/login')
+    void logoutPlayer()
   }
 
   return (

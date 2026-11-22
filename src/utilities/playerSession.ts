@@ -20,13 +20,19 @@ export async function issuePlayerToken(
     .sign(secretKey)
 }
 
+const PLAYER_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax' as const,
+  path: '/',
+}
+
 /** Sets the cookie that server pages use to recognise the logged-in player. */
 export function setPlayerCookie(res: NextResponse, token: string): void {
-  res.cookies.set('payload-token', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: THIRTY_DAYS_SECONDS,
-  })
+  res.cookies.set('payload-token', token, { ...PLAYER_COOKIE_OPTIONS, maxAge: THIRTY_DAYS_SECONDS })
+}
+
+/** Removes the player's login cookie (same name/path/flags as setPlayerCookie, so the browser drops it). */
+export function clearPlayerCookie(res: NextResponse): void {
+  res.cookies.set('payload-token', '', { ...PLAYER_COOKIE_OPTIONS, maxAge: 0, expires: new Date(0) })
 }
