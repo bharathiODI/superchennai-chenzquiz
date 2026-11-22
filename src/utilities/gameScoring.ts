@@ -23,22 +23,65 @@ export function normalizeGameTimers(raw?: Record<string, unknown> | null): GameT
   return out
 }
 
+/* ---------- speed bonus (CMS > Quiz Settings > Game Timers & Scoring) ---------- */
+
+/** A correct answer earns `bonus` when at least `minPercentLeft` % of the time limit is left. */
+export type BonusTier = { minPercentLeft: number; bonus: number }
+export type ScoringSettings = { speedBonus: boolean; tiers: BonusTier[] }
+
+/** For a 20s MCQ: 20-17s left = 5, 16-14 = 4, 13-10 = 3, 9-5 = 2, 4-1 = 1, timeout = 0. */
+export const DEFAULT_BONUS_TIERS: BonusTier[] = [
+  { minPercentLeft: 85, bonus: 5 },
+  { minPercentLeft: 70, bonus: 4 },
+  { minPercentLeft: 50, bonus: 3 },
+  { minPercentLeft: 25, bonus: 2 },
+  { minPercentLeft: 0, bonus: 1 },
+]
+
+export const DEFAULT_SCORING: ScoringSettings = { speedBonus: true, tiers: DEFAULT_BONUS_TIERS }
+
+/** Settings as saved in the CMS -> safe values (falls back to the defaults). */
+export function normalizeScoring(raw?: Record<string, unknown> | null): ScoringSettings {
+  const rows = Array.isArray(raw?.bonusTiers) ? (raw!.bonusTiers as Record<string, unknown>[]) : []
+  const tiers = rows
+    .map((r) => ({ minPercentLeft: Number(r?.minPercentLeft), bonus: Number(r?.bonus) }))
+    .filter((t) => Number.isFinite(t.minPercentLeft) && Number.isFinite(t.bonus))
+    .map((t) => ({
+      minPercentLeft: Math.min(100, Math.max(0, t.minPercentLeft)),
+      bonus: Math.min(100, Math.max(0, Math.round(t.bonus))),
+    }))
+    .sort((a, b) => b.minPercentLeft - a.minPercentLeft)
+  return {
+    speedBonus: raw?.speedBonus !== false,
+    tiers: tiers.length ? tiers : DEFAULT_BONUS_TIERS,
+  }
+}
+
+/** The largest bonus one answer can earn (used to cap submitted scores). */
+export function maxSpeedBonus(scoring: ScoringSettings = DEFAULT_SCORING): number {
+  return scoring.speedBonus ? Math.max(0, ...scoring.tiers.map((t) => t.bonus)) : 0
+}
+
+/** @deprecated use maxSpeedBonus(scoring) */
 export const MAX_SPEED_BONUS = 5
 
 /**
- * Speed bonus for a correct answer, scaled to the game's time limit.
- * For a 20s MCQ: 20-17s left = 5, 16-14 = 4, 13-10 = 3, 9-5 = 2, 4-1 = 1, 0/timeout = 0.
- * Other limits use the same proportions (85% / 70% / 50% / 25% of the time left).
+ * Speed bonus for a correct answer, scaled to the game's time limit: the first tier (highest
+ * percentage first) whose share of the limit is still left. No time left = no bonus.
  */
-export function speedBonus(secondsLeft: number, timeLimit: number): number {
+export function speedBonus(
+  secondsLeft: number,
+  timeLimit: number,
+  scoring: ScoringSettings = DEFAULT_SCORING,
+): number {
+  if (!scoring.speedBonus) return 0
   const limit = Math.max(1, Math.round(Number(timeLimit) || 0))
   const left = Math.min(limit, Math.max(0, Math.floor(Number(secondsLeft) || 0)))
   if (left <= 0) return 0
-  if (left >= Math.round(limit * 0.85)) return 5
-  if (left >= Math.round(limit * 0.7)) return 4
-  if (left >= Math.round(limit * 0.5)) return 3
-  if (left >= Math.round(limit * 0.25)) return 2
-  return 1
+  for (const tier of scoring.tiers) {
+    if (left >= Math.round(limit * (tier.minPercentLeft / 100))) return tier.bonus
+  }
+  return 0
 }
 
 /** Points for one answered question: (question points + speed bonus), doubled for Double Up. */
@@ -49,9 +92,10 @@ export function questionScore(opts: {
   timeLimit: number
   doubleUp?: boolean
   negativePoints?: number
+  scoring?: ScoringSettings
 }): { points: number; bonus: number } {
   if (!opts.isCorrect) return { points: -Math.abs(Number(opts.negativePoints) || 0), bonus: 0 }
-  const bonus = speedBonus(opts.secondsLeft, opts.timeLimit)
+  const bonus = speedBonus(opts.secondsLeft, opts.timeLimit, opts.scoring)
   const points = (Math.max(0, Number(opts.basePoints) || 0) + bonus) * (opts.doubleUp ? 2 : 1)
   return { points, bonus }
 }

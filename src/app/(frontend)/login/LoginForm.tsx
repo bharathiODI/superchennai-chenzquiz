@@ -2,10 +2,11 @@
 'use client'
 import { Building2, Key, Lightbulb, Mail, MessageSquare, Smartphone, User } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import type { LoginSettings } from '@/globals/QuizSiteSettings/defaults'
+import { useCallback, useEffect, useState } from 'react'
+import type { LoginSettings, TermsSettings } from '@/globals/QuizSiteSettings/defaults'
+import TermsModal from './TermsModal'
 
-export default function LoginForm({ settings }: { settings: LoginSettings }) {
+export default function LoginForm({ settings, terms }: { settings: LoginSettings; terms: TermsSettings }) {
   const [isRegister, setIsRegister] = useState(false)
   const [checkingAuth, setCheckingAuth] = useState(true)
   const [phone, setPhone] = useState('')
@@ -14,6 +15,8 @@ export default function LoginForm({ settings }: { settings: LoginSettings }) {
   const [countryCode] = useState('+91')
   const [name, setName] = useState('')
   const [agreeTerms, setAgreeTerms] = useState(false)
+  const [termsOpen, setTermsOpen] = useState(false)
+  const closeTerms = useCallback(() => setTermsOpen(false), [])
   const [otp, setOtp] = useState('')
   const [otpSent, setOtpSent] = useState(false)
   const [sendingOtp, setSendingOtp] = useState(false)
@@ -402,17 +405,32 @@ export default function LoginForm({ settings }: { settings: LoginSettings }) {
                 />
                 <label htmlFor="terms" className="text-xs text-[#74799A] leading-relaxed">
                   I agree to the{' '}
-                  <a href={settings.termsUrl} className="text-[#4B20D8] font-bold hover:underline">
-                    Terms & Conditions
-                  </a>{' '}
-                  and{' '}
-                  <a href={settings.privacyUrl} className="text-[#4B20D8] font-bold hover:underline">
-                    Privacy Policy
-                  </a>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setTermsOpen(true)
+                    }}
+                    className="text-[#4B20D8] font-bold hover:underline cursor-pointer"
+                  >
+                    {terms.title}
+                  </button>
                   . <span className="text-red-500" aria-hidden="true">*</span>
                 </label>
               </div>
             )}
+
+            <TermsModal
+              open={termsOpen}
+              title={terms.title}
+              agreeLabel={terms.agreeButton}
+              content={terms.content}
+              onClose={closeTerms}
+              onAgree={() => {
+                setAgreeTerms(true)
+                setTermsOpen(false)
+              }}
+            />
 
             <button
               type="submit"

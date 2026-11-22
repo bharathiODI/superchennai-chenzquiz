@@ -1,6 +1,7 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { QUIZ_SITE_DEFAULTS, type QuizSiteSettingsData } from './defaults'
+import { hasRichText } from './termsDefault'
 
 type Section = keyof QuizSiteSettingsData
 
@@ -10,7 +11,13 @@ const merge = <T extends Record<string, unknown>>(defaults: T, saved: unknown): 
   if (saved && typeof saved === 'object') {
     for (const key of Object.keys(defaults) as (keyof T)[]) {
       const value = (saved as Record<string, unknown>)[key as string]
-      if (value !== null && value !== undefined && value !== '') result[key] = value as T[keyof T]
+      const empty =
+        value === null ||
+        value === undefined ||
+        value === '' ||
+        // an emptied rich-text editor still saves a blank paragraph
+        (typeof value === 'object' && 'root' in (value as object) && !hasRichText(value))
+      if (!empty) result[key] = value as T[keyof T]
     }
   }
   return result

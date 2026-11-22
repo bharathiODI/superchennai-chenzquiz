@@ -5,6 +5,6 @@ import LoginForm from './LoginForm'
 export const revalidate = 600
 
 export default async function LoginPage() {
-  const { login } = await getQuizSiteSettings()
-  return <LoginForm settings={login} />
+  const { login, terms } = await getQuizSiteSettings()
+  return <LoginForm settings={login} terms={terms} />
 }

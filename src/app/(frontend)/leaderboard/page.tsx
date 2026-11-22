@@ -45,7 +45,6 @@ type Player = Ranked & {
   title: ReturnType<typeof getTitleForXP>
 }
 
-
 function relId(value: unknown): string | null {
   if (value === null || value === undefined) return null
   if (typeof value === 'object') {
@@ -92,11 +91,16 @@ export default async function LeaderboardPage({
   // Text, page size and the first tab come from CMS > Globals > Quiz Site Settings > Leaderboard
   const { leaderboard: settings } = await getQuizSiteSettings()
   const PAGE_SIZE = Math.min(50, Math.max(5, Math.round(Number(settings.rowsPerPage) || 10)))
-  const defaultTab: Tab = TABS.some((t) => t.id === settings.defaultTab) ? (settings.defaultTab as Tab) : 'all'
+  const defaultTab: Tab = TABS.some((t) => t.id === settings.defaultTab)
+    ? (settings.defaultTab as Tab)
+    : 'all'
 
+  // With the period tabs switched off (the default) the leaderboard is All Time only.
+  const showTabs = Boolean(settings.showPeriodTabs)
   const requestedTab = resolvedSearchParams?.tab
-  const tab: Tab =
-    typeof requestedTab === 'string' && TABS.some((t) => t.id === requestedTab)
+  const tab: Tab = !showTabs
+    ? 'all'
+    : typeof requestedTab === 'string' && TABS.some((t) => t.id === requestedTab)
       ? (requestedTab as Tab)
       : defaultTab
 
@@ -245,7 +249,8 @@ export default async function LeaderboardPage({
   const [rank1, rank2, rank3] = podium
   const activeTab = TABS.find((t) => t.id === tab)!
 
-  const pageHref = (page: number) => `/leaderboard?tab=${tab}&page=${page}`
+  const pageHref = (page: number) =>
+    showTabs ? `/leaderboard?tab=${tab}&page=${page}` : `/leaderboard?page=${page}`
 
   return (
     <AuthGuard>
@@ -263,34 +268,34 @@ export default async function LeaderboardPage({
               <h1 className="text-3xl sm:text-5xl font-black text-[#10145C] tracking-tight mb-2">
                 {settings.heading}
               </h1>
-              <p className="text-slate-500 text-sm font-medium">
-                {settings.description}
-              </p>
+              <p className="text-slate-500 text-sm font-medium">{settings.description}</p>
             </div>
 
-            {/* FILTER TABS */}
-            <div className="flex justify-center mb-10">
-              <div className="inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-purple-100 bg-white p-1.5 shadow-md shadow-purple-500/10">
-                {TABS.map((t) => {
-                  const isActive = tab === t.id
-                  const Icon = t.icon
-                  return (
-                    <Link
-                      key={t.id}
-                      href={`/leaderboard?tab=${t.id}`}
-                      className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition sm:px-6 sm:text-sm ${
-                        isActive
-                          ? 'bg-gradient-to-r from-[#6D20FF] to-[#8a4fff] text-white shadow-md shadow-purple-500/30'
-                          : 'text-slate-600 hover:bg-purple-50'
-                      }`}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {t.label}
-                    </Link>
-                  )
-                })}
+            {/* FILTER TABS (CMS > Quiz Site Settings > Leaderboard > Show Daily / Weekly / Monthly tabs) */}
+            {showTabs && (
+              <div className="flex justify-center mb-10">
+                <div className="inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full border border-purple-100 bg-white p-1.5 shadow-md shadow-purple-500/10">
+                  {TABS.map((t) => {
+                    const isActive = tab === t.id
+                    const Icon = t.icon
+                    return (
+                      <Link
+                        key={t.id}
+                        href={`/leaderboard?tab=${t.id}`}
+                        className={`inline-flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition sm:px-6 sm:text-sm ${
+                          isActive
+                            ? 'bg-gradient-to-r from-[#6D20FF] to-[#8a4fff] text-white shadow-md shadow-purple-500/30'
+                            : 'text-slate-600 hover:bg-purple-50'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                        {t.label}
+                      </Link>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {players.length === 0 && podium.length === 0 ? (
               <div className="text-center py-16 text-slate-400 font-medium">
@@ -322,7 +327,8 @@ export default async function LeaderboardPage({
                         className={`grid grid-cols-12 items-center gap-2 px-3 py-3.5 text-sm transition hover:bg-slate-50/80 sm:px-6 ${ROW_HIGHLIGHT[p.rank] ?? ''}`}
                       >
                         <div className="col-span-2 flex items-center gap-1 font-black text-slate-700 sm:col-span-1">
-                          {p.rank <= 3 && <Crown className={`h-4 w-4 ${CROWN_TONE[p.rank]}`} />}#{p.rank}
+                          {p.rank <= 3 && <Crown className={`h-4 w-4 ${CROWN_TONE[p.rank]}`} />}#
+                          {p.rank}
                         </div>
 
                         <div className="col-span-6 flex min-w-0 items-center gap-3 sm:col-span-4">

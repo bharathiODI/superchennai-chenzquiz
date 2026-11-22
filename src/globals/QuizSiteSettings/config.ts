@@ -1,4 +1,17 @@
 import type { Field, GlobalAfterChangeHook, GlobalConfig } from 'payload'
+import {
+  BoldFeature,
+  FixedToolbarFeature,
+  HeadingFeature,
+  InlineToolbarFeature,
+  ItalicFeature,
+  LinkFeature,
+  OrderedListFeature,
+  ParagraphFeature,
+  UnderlineFeature,
+  UnorderedListFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
 import { revalidatePath } from 'next/cache'
 import { isAdmin } from '@/access/isAdmin'
 import { isNotAdmin } from '@/access/checkRole'
@@ -36,7 +49,7 @@ export const QuizSiteSettings: GlobalConfig = {
   },
   admin: {
     hidden: isNotAdmin,
-    description: 'Text and options for the login, quizzes and leaderboard pages.',
+    description: 'Text and options for the login, quizzes and leaderboard pages, and the Terms & Conditions pop-up.',
   },
   hooks: {
     afterChange: [revalidateQuizPages],
@@ -75,13 +88,6 @@ export const QuizSiteSettings: GlobalConfig = {
                 },
               ],
             },
-            {
-              type: 'row',
-              fields: [
-                text('termsUrl', 'Terms & Conditions link', D.login.termsUrl),
-                text('privacyUrl', 'Privacy Policy link', D.login.privacyUrl),
-              ],
-            },
             text('sidePanelBadge', 'Side panel badge', D.login.sidePanelBadge),
             textarea('sidePanelText', 'Side panel text', D.login.sidePanelText),
             text('sidePanelFooter', 'Side panel footer', D.login.sidePanelFooter),
@@ -118,8 +124,15 @@ export const QuizSiteSettings: GlobalConfig = {
                   defaultValue: D.leaderboard.rowsPerPage,
                 },
                 {
+                  name: 'showPeriodTabs',
+                  label: 'Show Daily / Weekly / Monthly tabs',
+                  type: 'checkbox',
+                  defaultValue: D.leaderboard.showPeriodTabs,
+                  admin: { description: 'Off: the leaderboard shows All Time only, with no tabs.' },
+                },
+                {
                   name: 'defaultTab',
-                  label: 'Tab shown first',
+                  label: 'Tab shown first (when tabs are on)',
                   type: 'select',
                   defaultValue: D.leaderboard.defaultTab,
                   options: [
@@ -130,6 +143,42 @@ export const QuizSiteSettings: GlobalConfig = {
                   ],
                 },
               ],
+            },
+          ],
+        },
+        {
+          name: 'terms',
+          label: 'Terms & Conditions',
+          description:
+            'Shown in a pop-up when a player clicks "Terms & Conditions" on the sign-up form. Leave the text empty to show the built-in launch version.',
+          fields: [
+            {
+              type: 'row',
+              fields: [
+                text('title', 'Pop-up title', D.terms.title),
+                text('agreeButton', 'Agree button text', D.terms.agreeButton),
+              ],
+            },
+            {
+              name: 'content',
+              label: 'Terms & Conditions text',
+              type: 'richText',
+              defaultValue: D.terms.content,
+              // Headings and bullet lists, which the site-wide editor doesn't offer
+              editor: lexicalEditor({
+                features: [
+                  ParagraphFeature(),
+                  HeadingFeature({ enabledHeadingSizes: ['h3'] }),
+                  UnorderedListFeature(),
+                  OrderedListFeature(),
+                  BoldFeature(),
+                  ItalicFeature(),
+                  UnderlineFeature(),
+                  LinkFeature(),
+                  FixedToolbarFeature(),
+                  InlineToolbarFeature(),
+                ],
+              }),
             },
           ],
         },

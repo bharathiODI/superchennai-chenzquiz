@@ -1,3 +1,5 @@
+import { DEFAULT_TERMS_CONTENT } from './termsDefault'
+
 /**
  * Default values for the "Quiz Site Settings" global. They are used as the CMS field defaults,
  * by the seed script, and as the fallback whenever the settings can't be read.
@@ -10,8 +12,6 @@ export const QUIZ_SITE_DEFAULTS = {
     signupSubheading: 'Join thousands of quiz fans across Chennai',
     requireEmail: true,
     showMessageField: true,
-    termsUrl: '/terms',
-    privacyUrl: '/privacy',
     sidePanelBadge: 'CHENNAI QUIZ MASTER',
     sidePanelText: 'Test your Chennai knowledge, climb the leaderboards & win daily rewards!',
     sidePanelFooter: 'Chennai Landmark Edition',
@@ -32,11 +32,18 @@ export const QUIZ_SITE_DEFAULTS = {
     emptyText: 'No champions ranked for this period yet. Play a game to claim your spot!',
     rowsPerPage: 10,
     defaultTab: 'all' as 'daily' | 'weekly' | 'monthly' | 'all',
+    showPeriodTabs: false,
   },
   testPlayers: {
     allowTestLogins: true,
+  },
+  terms: {
+    title: 'Terms & Conditions',
+    agreeButton: 'I Agree',
+    content: DEFAULT_TERMS_CONTENT as Record<string, unknown>,
   },
 }
 
 export type QuizSiteSettingsData = typeof QUIZ_SITE_DEFAULTS
 export type LoginSettings = QuizSiteSettingsData['login']
+export type TermsSettings = QuizSiteSettingsData['terms']

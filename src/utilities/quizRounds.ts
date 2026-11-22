@@ -2,9 +2,9 @@
 import type { Payload } from 'payload'
 import { istDateKey } from './quizStreak'
 import { planRound, type Id } from './roundPlanner'
-import { getGameTimers } from './getGameTimers'
+import { getGameTimers, getScoringSettings } from './getGameTimers'
 import { formatQuestion } from './formatQuestion'
-import { MAX_SPEED_BONUS } from './gameScoring'
+import { maxSpeedBonus, type ScoringSettings } from './gameScoring'
 
 export const relId = (v: any): Id | null =>
   v && typeof v === 'object' ? (v.id ?? null) : (v ?? null)
@@ -40,6 +40,7 @@ export type RoundResult =
       roundId: Id
       rounds: RoundSummary[]
       questions: ReturnType<typeof formatQuestion>[]
+      scoring: ScoringSettings
     }
 
 async function findPlayerRounds(payload: Payload, quizId: Id, userId: Id) {
@@ -194,6 +195,7 @@ export async function getTodayRound(
     roundId: current!.id,
     rounds: summaries(),
     questions,
+    scoring: await getScoringSettings(payload),
   }
 }
 
@@ -208,11 +210,12 @@ export async function roundScoreBounds(payload: Payload, round: any) {
     pagination: false,
     overrideAccess: true,
   })
+  const bonusCap = maxSpeedBonus(await getScoringSettings(payload))
   let max = 0
   let min = 0
   for (const q of res.docs as any[]) {
     const mult = q.enableDoubleUp ? 2 : 1
-    max += ((Number(q.points) || 10) + MAX_SPEED_BONUS) * mult
+    max += ((Number(q.points) || 10) + bonusCap) * mult
     min -= Math.abs(Number(q.negativePoints) || 0)
   }
   return { min, max }
