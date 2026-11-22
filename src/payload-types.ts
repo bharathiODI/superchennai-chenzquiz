@@ -5947,7 +5947,7 @@ export interface Footer {
   createdAt?: string | null;
 }
 /**
- * Player titles, per-game timers and the shareable scorecard.
+ * Player titles, per-game timers, the speed bonus and the shareable scorecard.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "quiz-settings".
@@ -5974,6 +5974,19 @@ export interface QuizSetting {
     reorder?: number | null;
     dragDrop?: number | null;
   };
+  scoring?: {
+    speedBonus?: boolean | null;
+    /**
+     * A correct answer gets the bonus of the first tier (highest % first) whose time is still left. % is of the question's time limit, so one set of tiers works for 20s and 60s games. Default for a 20s MCQ: 20-17s left = 5, 16-14s = 4, 13-10s = 3, 9-5s = 2, 4-1s = 1. A 0% row catches any answer with time left; a timeout gets nothing. Empty: the defaults.
+     */
+    bonusTiers?:
+      | {
+          minPercentLeft: number;
+          bonus: number;
+          id?: string | null;
+        }[]
+      | null;
+  };
   scorecard?: {
     /**
      * Use a colour version that shows on white. Empty: "SUPER CHENNAI" text.
@@ -5995,7 +6008,7 @@ export interface QuizSetting {
   createdAt?: string | null;
 }
 /**
- * Text and options for the login, quizzes and leaderboard pages.
+ * Text and options for the login, quizzes and leaderboard pages, and the Terms & Conditions pop-up.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "quiz-site-settings".
@@ -6009,8 +6022,6 @@ export interface QuizSiteSetting {
     signupSubheading?: string | null;
     requireEmail?: boolean | null;
     showMessageField?: boolean | null;
-    termsUrl?: string | null;
-    privacyUrl?: string | null;
     sidePanelBadge?: string | null;
     sidePanelText?: string | null;
     sidePanelFooter?: string | null;
@@ -6028,7 +6039,30 @@ export interface QuizSiteSetting {
     description?: string | null;
     emptyText?: string | null;
     rowsPerPage?: number | null;
+    /**
+     * Off: the leaderboard shows All Time only, with no tabs.
+     */
+    showPeriodTabs?: boolean | null;
     defaultTab?: ('daily' | 'weekly' | 'monthly' | 'all') | null;
+  };
+  terms?: {
+    title?: string | null;
+    agreeButton?: string | null;
+    content?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
   };
   testPlayers?: {
     /**
@@ -6111,6 +6145,18 @@ export interface QuizSettingsSelect<T extends boolean = true> {
         reorder?: T;
         dragDrop?: T;
       };
+  scoring?:
+    | T
+    | {
+        speedBonus?: T;
+        bonusTiers?:
+          | T
+          | {
+              minPercentLeft?: T;
+              bonus?: T;
+              id?: T;
+            };
+      };
   scorecard?:
     | T
     | {
@@ -6139,8 +6185,6 @@ export interface QuizSiteSettingsSelect<T extends boolean = true> {
         signupSubheading?: T;
         requireEmail?: T;
         showMessageField?: T;
-        termsUrl?: T;
-        privacyUrl?: T;
         sidePanelBadge?: T;
         sidePanelText?: T;
         sidePanelFooter?: T;
@@ -6162,7 +6206,15 @@ export interface QuizSiteSettingsSelect<T extends boolean = true> {
         description?: T;
         emptyText?: T;
         rowsPerPage?: T;
+        showPeriodTabs?: T;
         defaultTab?: T;
+      };
+  terms?:
+    | T
+    | {
+        title?: T;
+        agreeButton?: T;
+        content?: T;
       };
   testPlayers?:
     | T

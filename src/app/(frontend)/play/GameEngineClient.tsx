@@ -15,7 +15,7 @@ import { DragDropGame } from './components/games/DragDropGame'
 
 import confetti from 'canvas-confetti'
 import QuizResultCard, { type SubmitTitle } from './components/QuizResultCard'
-import { questionScore, speedBonus } from '@/utilities/gameScoring'
+import { DEFAULT_SCORING, questionScore, speedBonus, type ScoringSettings } from '@/utilities/gameScoring'
 
 export default function GameEngineClient({ quiz }: { quiz: any }) {
   const router = useRouter()
@@ -27,6 +27,8 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
     roundId: string | number | null
   } | null>(null)
   const [roundsDone, setRoundsDone] = useState<{ completed: number; total: number } | null>(null)
+  // Speed bonus tiers from CMS > Quiz Settings > Game Timers & Scoring (sent with the round)
+  const [scoring, setScoring] = useState<ScoringSettings>(DEFAULT_SCORING)
   const [notice, setNotice] = useState<string | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [totalScore, setTotalScore] = useState(0)
@@ -81,6 +83,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
 
           if (data?.state === 'ready') {
             setQuestions(data.questions || [])
+            if (data.scoring?.tiers) setScoring(data.scoring)
             setRoundInfo({ round: data.round, totalRounds: data.totalRounds, roundId: data.roundId })
             startTimeRef.current = Date.now()
           } else if (data?.state === 'done') {
@@ -270,6 +273,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         secondsLeft,
         timeLimit: questionTimeLimit,
         doubleUp: Boolean(currentQ?.enableDoubleUp),
+        scoring,
       })
       pointsToAdd = scored.points
       bonus = scored.bonus
@@ -710,7 +714,8 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
           </span>
         </div>
         <span className="font-extrabold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full text-xs">
-          +{points} XP {currentQ?.enableDoubleUp ? '(2x)' : ''} · ⚡ +{speedBonus(timeLeft, questionTimeLimit)} speed
+          +{points} XP {currentQ?.enableDoubleUp ? '(2x)' : ''}
+          {scoring.speedBonus && <> · ⚡ +{speedBonus(timeLeft, questionTimeLimit, scoring)} speed</>}
         </span>
       </div>
 

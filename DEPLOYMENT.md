@@ -85,6 +85,51 @@ live database with `npm run db:migrate`.
 (`payload migrate` isn't used: on a database that was ever schema-pushed in dev mode it waits for a
 yes/no answer, which an unattended deploy can't give.)
 
+An **empty** database gets the whole schema from `migrations/baseline/schema-after-NNN.sql` first
+(then migrations up to NNN are marked as applied). When a new migration changes the schema,
+regenerate the baseline from the schema (empty snapshot -> current) and bump NNN.
+
+## Setting up another machine
+
+The app never creates tables on its own (`push: false`), so a database that is missing tables shows
+errors like `Failed query: select "pages"."id" ... "pages__blocks_builderSection"`. Fix: run
+`npm run db:migrate` against that database.
+
+With data (recommended, same content as live or as your machine):
+```bash
+# on the machine that has the data (Postgres bin folder on PATH, or use the full path)
+pg_dump -h localhost -U postgres --no-owner --no-privileges -f chenzquiz.sql chenzquiz
+# on the new machine
+createdb -U postgres chenzquiz
+psql -U postgres -d chenzquiz -f chenzquiz.sql
+# .env: DATABASE_URI=postgres://postgres:<password>@localhost:5432/chenzquiz
+npm install
+npm run db:migrate      # brings an older backup up to date; does nothing if already current
+npm run dev
+```
+
+Empty (no content): `createdb chenzquiz`, set `DATABASE_URI`, `npm install`, `npm run db:migrate`
+(creates every table), `npm run dev`, create the first admin at `/admin`, then `npm run seed`.
+Pages (including Home) then have to be created in the CMS.
+
+Never commit a database dump: it contains players' phone numbers. Keep it in `_local/`.
+
+## Launch wipe (one time)
+
+Deletes all player data so the contest starts from zero: players (including test players), quiz
+attempts, daily rounds, scores/XP/streaks, user submissions and form entries. Keeps admin logins,
+pages, media, quizzes, questions and all settings. Player IDs are not reused, so old test logins
+can't turn into new players' accounts.
+
+```bash
+cd /var/www/chenzquiz/current
+set -a; . /var/www/chenzquiz/shared/.env; set +a
+pg_dump "$DATABASE_URI" -Fc -f /root/chenzquiz-before-launch-wipe.dump   # backup first
+npm run launch:reset                 # shows what would be deleted, changes nothing
+npm run launch:reset -- --confirm    # deletes it
+npm run seed                         # re-creates the hidden test players
+```
+
 ## Seed data
 
 ```bash
@@ -98,11 +143,17 @@ Safe to run any number of times; it never changes data that already exists:
 ## CMS settings
 
 Admin > Globals > **Quiz Site Settings** controls:
-- **Login & Sign up**: headings, side panel text, Terms/Privacy links, "Email is required",
-  "Show the Message field"
+- **Login & Sign up**: headings, side panel text, "Email is required", "Show the Message field"
 - **Quizzes page**: badge, heading, description, "no quiz today" text
-- **Leaderboard**: heading, description, empty text, players per page, the tab shown first
+- **Leaderboard**: heading, description, empty text, players per page, "Show Daily / Weekly /
+  Monthly tabs" (off = All Time only), the tab shown first
+- **Terms & Conditions**: the pop-up opened from the sign-up checkbox (title, agree button, text)
 - **Test players**: allow / block test logins
+
+Admin > Globals > **Quiz Settings** controls player titles (XP thresholds), the time limit per game
+type, the speed bonus (on/off and tiers) and the share scorecard. Points per question, negative
+points, difficulty and Double Up are set on each question; rounds per day, questions per round and
+the sponsored question on each quiz.
 
 Saving refreshes `/login`, `/quizzes` and `/leaderboard` immediately. If the settings can't be read,
 the pages fall back to the built-in defaults (`src/globals/QuizSiteSettings/defaults.ts`).

@@ -1,6 +1,6 @@
 import type { Field, GlobalConfig } from 'payload'
 import { isNotAdmin } from '@/access/checkRole'
-import { GAME_TYPES } from '@/utilities/gameScoring'
+import { DEFAULT_BONUS_TIERS, GAME_TYPES } from '@/utilities/gameScoring'
 
 const timerFields: Field[] = GAME_TYPES.map((g) => ({
   name: g.key,
@@ -20,7 +20,7 @@ export const QuizSettings: GlobalConfig = {
   },
   admin: {
     hidden: isNotAdmin,
-    description: 'Player titles, per-game timers and the shareable scorecard.',
+    description: 'Player titles, per-game timers, the speed bonus and the shareable scorecard.',
   },
   fields: [
     {
@@ -57,7 +57,7 @@ export const QuizSettings: GlobalConfig = {
         {
           label: 'Game Timers & Scoring',
           description:
-            'Time limit for each game type. A correct answer scores the question points plus a speed bonus of 5/4/3/2/1 by time left (for a 20s MCQ: 20-17s = 5, 16-14s = 4, 13-10s = 3, 9-5s = 2, 4-1s = 1, timeout = 0). Other limits use the same proportions.',
+            "Points for a correct answer = the question's points (set on each question, 10 by default) + the speed bonus below. Double Up questions count twice. A wrong answer takes off the question's negative points (0 by default). Changes apply to rounds started after saving.",
           fields: [
             {
               name: 'gameTimers',
@@ -66,6 +66,56 @@ export const QuizSettings: GlobalConfig = {
               fields: [
                 { type: 'row', fields: timerFields.slice(0, 4) },
                 { type: 'row', fields: timerFields.slice(4) },
+              ],
+            },
+            {
+              name: 'scoring',
+              type: 'group',
+              label: 'Speed bonus',
+              fields: [
+                {
+                  name: 'speedBonus',
+                  type: 'checkbox',
+                  label: 'Give a speed bonus for fast correct answers',
+                  defaultValue: true,
+                },
+                {
+                  name: 'bonusTiers',
+                  type: 'array',
+                  label: 'Speed bonus tiers',
+                  labels: { singular: 'Tier', plural: 'Tiers' },
+                  defaultValue: DEFAULT_BONUS_TIERS,
+                  admin: {
+                    condition: (_, siblingData) => siblingData?.speedBonus !== false,
+                    description:
+                      "A correct answer gets the bonus of the first tier (highest % first) whose time is still left. % is of the question's time limit, so one set of tiers works for 20s and 60s games. Default for a 20s MCQ: 20-17s left = 5, 16-14s = 4, 13-10s = 3, 9-5s = 2, 4-1s = 1. A 0% row catches any answer with time left; a timeout gets nothing. Empty: the defaults.",
+                  },
+                  fields: [
+                    {
+                      type: 'row',
+                      fields: [
+                        {
+                          name: 'minPercentLeft',
+                          type: 'number',
+                          label: 'Time left at least (%)',
+                          required: true,
+                          min: 0,
+                          max: 100,
+                          admin: { width: '50%' },
+                        },
+                        {
+                          name: 'bonus',
+                          type: 'number',
+                          label: 'Bonus points',
+                          required: true,
+                          min: 0,
+                          max: 100,
+                          admin: { width: '50%' },
+                        },
+                      ],
+                    },
+                  ],
+                },
               ],
             },
           ],
