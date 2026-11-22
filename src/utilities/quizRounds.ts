@@ -43,6 +43,22 @@ export type RoundResult =
       scoring: ScoringSettings
     }
 
+/** Question Number, then Display Order, then position in the quiz's question list. */
+function sortByQuestionNumber<T extends { id: Id; questionNumber?: unknown; order?: unknown }>(
+  docs: T[],
+  quizOrder: (Id | null)[] = [],
+): T[] {
+  const pos = new Map(quizOrder.filter((x) => x !== null).map((id, i) => [String(id), i]))
+  const num = (v: unknown) => (Number.isFinite(Number(v)) && v !== null && v !== '' ? Number(v) : Infinity)
+  return [...docs].sort(
+    (a, b) =>
+      num(a.questionNumber) - num(b.questionNumber) ||
+      num(a.order) - num(b.order) ||
+      (pos.get(String(a.id)) ?? Infinity) - (pos.get(String(b.id)) ?? Infinity) ||
+      String(a.id).localeCompare(String(b.id), undefined, { numeric: true }),
+  )
+}
+
 async function findPlayerRounds(payload: Payload, quizId: Id, userId: Id) {
   const res = await payload.find({
     collection: 'quiz-rounds' as any,
@@ -117,7 +133,7 @@ export async function getTodayRound(
           overrideAccess: true,
         })
       : { docs: [] as any[] }
-    const poolIds = (published.docs as any[]).map((d) => d.id as Id)
+    const poolIds = sortByQuestionNumber(published.docs as any[], poolRaw).map((d) => d.id as Id)
 
     // Sponsored schedule
     const schedule = ((quiz.sponsoredQuestions || []) as any[]).filter((row) => relId(row.question) !== null)
@@ -141,6 +157,7 @@ export async function getTodayRound(
       sponsoredId,
       questionsPerRound: perRound,
       sponsoredPosition,
+      ordered: !quiz.shuffleQuestions,
     })
 
     if (plan.questionIds.length === 0) return { state: 'empty', totalRounds, round: roundNo }
@@ -183,10 +200,21 @@ export async function getTodayRound(
     : { docs: [] as any[] }
   const timers = await getGameTimers(payload)
   const byId = new Map((docs.docs as any[]).map((d) => [String(d.id), d]))
-  const questions = ids
-    .map((id) => byId.get(String(id)))
-    .filter(Boolean)
-    .map((q: any) => formatQuestion(q, timers[q.gameType], same(q.id, current!.sponsoredQuestion)))
+  let roundDocs = ids.map((id) => byId.get(String(id))).filter(Boolean) as any[]
+  if (!quiz.shuffleQuestions) {
+    // Serve in Question Number order (also fixes rounds planned before shuffling was turned off);
+    // the sponsored question stays in the slot it was planned for.
+    const slot = roundDocs.findIndex((q) => same(q.id, current!.sponsoredQuestion))
+    const sponsoredDoc = slot >= 0 ? roundDocs[slot] : null
+    const regular = sortByQuestionNumber(
+      roundDocs.filter((q) => q !== sponsoredDoc),
+      (quiz.questions || []).map(relId),
+    )
+    roundDocs = sponsoredDoc ? [...regular.slice(0, slot), sponsoredDoc, ...regular.slice(slot)] : regular
+  }
+  const questions = roundDocs.map((q: any) =>
+    formatQuestion(q, timers[q.gameType], same(q.id, current!.sponsoredQuestion)),
+  )
 
   return {
     state: 'ready',

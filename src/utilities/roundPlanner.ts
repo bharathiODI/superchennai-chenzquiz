@@ -16,6 +16,8 @@ export type RoundPlanInput = {
   questionsPerRound: number
   /** 1-based slot for the sponsored question (e.g. 3 = third question). */
   sponsoredPosition: number
+  /** true: take questions in poolIds order (pass the pool sorted by question number). */
+  ordered?: boolean
   random?: () => number
 }
 
@@ -45,7 +47,8 @@ export function planRound(input: RoundPlanInput): RoundPlan {
 
   const regularPool = input.poolIds.filter((id) => !sponsored.has(key(id)) && !today.has(key(id)))
   const fresh = regularPool.filter((id) => !answered.has(key(id)))
-  let picks = shuffle(fresh, random).slice(0, regularNeeded)
+  const arrange = <T,>(list: T[]) => (input.ordered ? [...list] : shuffle(list, random))
+  let picks = arrange(fresh).slice(0, regularNeeded)
 
   // Pool exhausted for this player: reuse their oldest answered questions rather than serve a short round.
   let recycled = 0
@@ -54,7 +57,7 @@ export function planRound(input: RoundPlanInput): RoundPlan {
     const oldestFirst = input.answeredIds.filter((id, i, arr) => inPool.has(key(id)) && arr.findIndex((x) => key(x) === key(id)) === i)
     const extra = oldestFirst.slice(0, regularNeeded - picks.length)
     recycled = extra.length
-    picks = shuffle([...picks, ...extra], random)
+    picks = input.ordered ? [...picks, ...extra] : shuffle([...picks, ...extra], random)
   }
 
   const questionIds: Id[] = [...picks]

@@ -6,6 +6,13 @@ export const UserSubmissions: CollectionConfig = {
     useAsTitle: 'id',
     defaultColumns: ['user', 'quiz', 'score', 'createdAt'],
   },
+  // Admin only over the REST API (players are logged in to the same API)
+  access: {
+    create: ({ req: { user } }) => (user as any)?.collection === 'users' && (user as any)?.role === 'admin',
+    read: ({ req: { user } }) => (user as any)?.collection === 'users' && (user as any)?.role === 'admin',
+    update: ({ req: { user } }) => (user as any)?.collection === 'users' && (user as any)?.role === 'admin',
+    delete: ({ req: { user } }) => (user as any)?.collection === 'users' && (user as any)?.role === 'admin',
+  },
   fields: [
     {
       name: 'user',

@@ -2673,7 +2673,7 @@ export interface Quiz {
    */
   quizEndDate: string;
   /**
-   * All questions for this challenge. Every round, each player gets random questions from this pool that they have not answered before, in a different order.
+   * All questions for this challenge. Each round gives a player the next questions they have not answered yet, in Question Number order (or shuffled, if "Shuffle questions" is ticked below).
    */
   questions: (number | Question)[];
   roundsPerDay?: number | null;
@@ -2682,6 +2682,10 @@ export interface Quiz {
    * Which question in each round is sponsored (3 = third). 0 = no sponsored slot.
    */
   sponsoredPosition?: number | null;
+  /**
+   * Off: every player gets the questions in Question Number order (then Display Order). On: each player gets them in a random order. The sponsored question always keeps its slot.
+   */
+  shuffleQuestions?: boolean | null;
   /**
    * Sponsored question per day (same for every player). Leave "Round" empty to use it in all rounds that day. Days without one get a regular question in that slot. Sponsored questions are never served as regular questions.
    */
@@ -5413,6 +5417,7 @@ export interface QuizzesSelect<T extends boolean = true> {
   roundsPerDay?: T;
   questionsPerRound?: T;
   sponsoredPosition?: T;
+  shuffleQuestions?: T;
   sponsoredQuestions?:
     | T
     | {

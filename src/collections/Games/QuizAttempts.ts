@@ -10,7 +10,7 @@ export const QuizAttempts: CollectionConfig = {
   },
   access: {
     read: ({ req: { user } }) => {
-      if (!user) return true
+      if (!user) return false
 
       const userRole = (user as any)?.role
       if (Array.isArray(userRole) ? userRole.includes('admin') : userRole === 'admin') {
@@ -23,7 +23,8 @@ export const QuizAttempts: CollectionConfig = {
         },
       }
     },
-    create: () => true,
+    // Attempts are written only by /api/quiz-submit (server side)
+    create: ({ req: { user } }) => (user as any)?.collection === 'users' && (user as any)?.role === 'admin',
     update: ({ req: { user } }) => {
       const userRole = (user as any)?.role
       return Array.isArray(userRole) ? userRole.includes('admin') : userRole === 'admin'

@@ -1,5 +1,22 @@
 import { isNotAdmin } from '@/access/checkRole'
-import type { CollectionConfig } from 'payload'
+import type { Access, CollectionBeforeDeleteHook, CollectionConfig } from 'payload'
+
+// Admins are CMS users with the admin role. Players (quiz-users) are logged in to the same API
+// with their own token, so every rule below has to keep them out of each other's records.
+const isCmsAdmin: Access = ({ req: { user } }) =>
+  Boolean(user && (user as any).collection === 'users' && (user as any).role === 'admin')
+
+// Deleting a player in the CMS also deletes everything recorded for them.
+const deletePlayerData: CollectionBeforeDeleteHook = async ({ id, req }) => {
+  for (const collection of ['quiz-rounds', 'quiz-attempts', 'user-submissions'] as const) {
+    await req.payload.delete({
+      collection: collection as any,
+      where: { user: { equals: id } },
+      overrideAccess: true,
+      req,
+    })
+  }
+}
 
 export const QuizUsers: CollectionConfig = {
   slug: 'quiz-users',
@@ -16,11 +33,20 @@ export const QuizUsers: CollectionConfig = {
     defaultColumns: ['name', 'email', 'totalXP', 'createdAt'],
      hidden: isNotAdmin,
   },
+  // Sign-up, login and scoring go through the app's own API routes (server side), so the REST API
+  // only needs: admins manage players; a player can read their own record.
   access: {
-    create: () => true,
-    read: ({ req: { user } }) => Boolean(user),
-    update: ({ req: { user } }) => Boolean(user),
-    // delete: ({ req: { user } }) => user?.role === 'admin',
+    create: isCmsAdmin,
+    read: (args) => {
+      if (isCmsAdmin(args)) return true
+      const user = args.req.user as any
+      return user?.collection === 'quiz-users' ? { id: { equals: user.id } } : false
+    },
+    update: isCmsAdmin,
+    delete: isCmsAdmin,
+  },
+  hooks: {
+    beforeDelete: [deletePlayerData],
   },
   fields: [
     {
