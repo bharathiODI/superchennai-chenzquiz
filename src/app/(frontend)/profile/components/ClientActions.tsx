@@ -3,22 +3,13 @@
 import { Check, LogOut, User, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { logoutPlayer } from '@/utilities/logoutPlayer'
 
 export function LogoutButton() {
-  const router = useRouter()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const handleLogout = async () => {
     setIsLoggingOut(true)
-    try {
-      localStorage.removeItem('user')
-      localStorage.removeItem('token')
-      await fetch('/api/users/logout', { method: 'POST' })
-      router.push('/login')
-      router.refresh()
-    } catch (err) {
-      console.error('Logout error:', err)
-      setIsLoggingOut(false)
-    }
+    await logoutPlayer()
   }
   return (
     <div className="mt-12 text-center">
