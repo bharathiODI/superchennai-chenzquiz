@@ -14,7 +14,7 @@ function keyToDayNumber(key: string): number {
   return Math.round(new Date(`${key}T00:00:00Z`).getTime() / DAY_MS)
 }
 
-/** dayKey: which day an instant counts for - pass the game-day key so streaks follow the 8 AM day. */
+/** dayKey: which day an instant counts for - pass the game-day key so streaks follow the game day (Quiz Settings). */
 export function computeStreaks(
   dates: Array<string | number | Date | null | undefined>,
   now: Date = new Date(),

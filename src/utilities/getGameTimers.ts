@@ -21,7 +21,7 @@ export async function getGameTimers(payload: Payload): Promise<GameTimers> {
   return normalizeGameTimers(settings?.gameTimers)
 }
 
-/** When the game day starts and the break before it (falls back to 8:00 AM, 60 min). */
+/** When the game day starts and the break before it (falls back to 12:30 AM, 60 min). */
 export async function getGameDaySettings(payload: Payload): Promise<GameDaySettings> {
   const settings = await readQuizSettings(payload)
   return normalizeGameDay(settings?.gameDay)

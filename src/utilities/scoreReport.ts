@@ -98,7 +98,7 @@ export async function buildScoreReport(
   const dayLabels = Object.fromEntries(days.map((d) => [d, quiz ? `Day ${dayNo(d)} (${fmtDay(d)})` : fmtDay(d)]))
 
   // ---- All rounds (detailed rows)
-  type Agg = { player: any; quizId: string; byDay: Record<string, { score: number; time: number }> }
+  type Agg = { player: any; quizId: string; byDay: Record<string, { score: number; time: number; at: string[] }> }
   const agg = new Map<string, Agg>()
   const roundsRows: Row[] = kept.map((r) => {
     const p = playerById.get(String(relId(r.user)))!
@@ -110,9 +110,10 @@ export async function buildScoreReport(
     if (done) {
       const k = `${p.id}|${relId(r.quiz)}`
       if (!agg.has(k)) agg.set(k, { player: p, quizId: String(relId(r.quiz)), byDay: {} })
-      const day = (agg.get(k)!.byDay[r.day] ||= { score: 0, time: 0 })
+      const day = (agg.get(k)!.byDay[r.day] ||= { score: 0, time: 0, at: [] })
       day.score += score
       day.time += time
+      day.at.push(r.completedAt)
     }
     return {
       'Game day': fmtDay(String(r.day)),
@@ -153,6 +154,8 @@ export async function buildScoreReport(
         const label = dayLabels[d] ?? d
         row[`${label} score`] = byDay[d]?.score ?? ''
         row[`${label} time (s)`] = byDay[d]?.time ?? ''
+        // when they played that day (finished the round), India time
+        row[`${label} played at`] = byDay[d] ? byDay[d].at.map((t) => fmtTime(t)).join(', ') : ''
       }
       row['Days played'] = Object.keys(byDay).length
       row['Total score'] = total
@@ -169,9 +172,9 @@ export async function buildScoreReport(
   for (const d of days) {
     const dayRows = Array.from(agg.values())
       .filter((x) => x.byDay[d])
-      .map((x) => ({ x, score: x.byDay[d]?.score ?? 0, time: x.byDay[d]?.time ?? 0 }))
+      .map((x) => ({ x, score: x.byDay[d]?.score ?? 0, time: x.byDay[d]?.time ?? 0, at: x.byDay[d]?.at ?? [] }))
       .sort((a, b) => b.score - a.score || a.time - b.time)
-    dayRows.forEach(({ x, score, time }, i) =>
+    dayRows.forEach(({ x, score, time, at }, i) =>
       daily.push({
         'Game day': dayLabels[d] ?? d,
         Rank: i + 1,
@@ -181,6 +184,7 @@ export async function buildScoreReport(
         ...(opts.quizId ? {} : { Quiz: quizById.get(x.quizId)?.quizTitle || `#${x.quizId}` }),
         Score: score,
         'Time (s)': time,
+        'Played at': at.map((t) => fmtTime(t)).join(', '),
         'Player ID': x.player.id,
       }),
     )

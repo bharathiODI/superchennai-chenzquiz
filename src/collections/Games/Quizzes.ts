@@ -98,7 +98,7 @@ export const Quizzes: CollectionConfig = {
       label: 'Question Pool',
       admin: {
         description:
-          'Questions players can get. Each round gives a player the next questions they have not answered yet, in Question Number order (or shuffled, if "Shuffle questions" is ticked below). Nobody gets a question twice - a question edited after a player answered it counts as new. Swap in each day\'s questions before the day starts (Quiz Settings > Game day, 8 AM by default).',
+          'Questions players can get. Each round gives a player the next questions they have not answered yet, in Question Number order (or shuffled, if "Shuffle questions" is ticked below). Nobody gets a question twice - a question edited after a player answered it counts as new. Swap in each day\'s questions before the day starts (Quiz Settings > Game day, 12:30 AM by default).',
       },
     },
     {

@@ -103,7 +103,7 @@ export async function getTodayRound(
   if (quiz.quizDate && now < new Date(quiz.quizDate)) return { state: 'not_started', totalRounds }
   if (quiz.quizEndDate && now > new Date(quiz.quizEndDate)) return { state: 'closed', totalRounds }
 
-  // The game day runs from the start hour (default 8 AM IST) to the next day's start hour; no new
+  // The game day runs from the start time (default 12:30 AM IST) to the next day's start; no new
   // rounds during the break before it. A round already on screen can still be submitted.
   const gameDay = await getGameDaySettings(payload)
   const opensAt = formatStartHour(gameDay)

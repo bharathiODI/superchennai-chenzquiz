@@ -39,7 +39,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true)
   const [alreadyPlayedToday, setAlreadyPlayedToday] = useState(false)
   const [lastAttemptScore, setLastAttemptScore] = useState<number | null>(null)
-  // When the next game day starts, e.g. "8:00 AM" (from the server, set in Quiz Settings)
+  // When the next game day starts, e.g. "12:30 AM" (from the server, set in Quiz Settings)
   const [opensAt, setOpensAt] = useState<string | null>(null)
   const [resultTitle, setResultTitle] = useState<SubmitTitle | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -103,10 +103,10 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
             setNotice(data.message || 'Chenz Quiz is being updated. Please try again in a few minutes.')
           } else if (data?.state === 'cooloff') {
             setNoticeTitle("Today's round has closed")
-            setNotice(`Today's round has closed. New questions open at ${data.opensAt || '8:00 AM'}.`)
+            setNotice(`Today's round has closed. New questions open at ${data.opensAt || '12:30 AM'}.`)
           } else if (data?.state === 'empty') {
             setNotice(
-              `You've played all the questions available right now. New questions open at ${data.opensAt || '8:00 AM'}.`,
+              `You've played all the questions available right now. New questions open at ${data.opensAt || '12:30 AM'}.`,
             )
           } else {
             setNotice('We could not load your questions. Please reload the page.')

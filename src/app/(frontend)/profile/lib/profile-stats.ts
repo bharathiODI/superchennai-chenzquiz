@@ -49,7 +49,7 @@ export function calculateUserStats(
   const bestScore = `${Math.max(...attempts.map((a) => Number(a.score || 0)))} XP`
   const averageScore = `${Math.round(attemptsScoreSum / totalPlayed)} XP`
 
-  // Streaks: consecutive game days (they start at the Quiz Settings hour, 8 AM by default)
+  // Streaks: consecutive game days (they start at the Quiz Settings time, 12:30 AM by default)
   const { current: currentStreak, best: bestStreak } = computeStreaks(
     attempts.map((a) => a.completedAt).filter(Boolean),
     new Date(),
