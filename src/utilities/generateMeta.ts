@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { isDemoSite } from './siteEnv'
 import type { Media, Page, Post, Config } from '../payload-types'
 import { mergeOpenGraph } from './mergeOpenGraph'
 import { getServerSideURL } from './getURL'
@@ -56,10 +57,8 @@ export const generateMeta = async (args: {
 
     publisher: 'Super Chennai',
 
-    robots: {
-      index: true,
-      follow: true,
-    },
+    // The demo site (internal testing) is never indexed
+    robots: isDemoSite() ? { index: false, follow: false } : { index: true, follow: true },
 
     alternates: {
       canonical: canonicalUrl,

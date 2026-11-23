@@ -1,15 +1,17 @@
-name: Deploy to production
+name: Deploy
 
-# Runs on every push to main (including merged pull requests); can also be run by hand
-# from the Actions tab. Code is uploaded to the VPS and built there (the build needs the
-# production database), then switched live by scripts/deploy.sh. See DEPLOYMENT.md.
+# push to main -> LIVE  https://chenzquiz.superchennai.com
+# push to demo -> DEMO  https://chenzquiz-demo.superchennai.com (internal testing, test users)
+# Code is uploaded to the VPS and built there (the build needs that site's database), then
+# switched over by scripts/deploy.sh. Both sites build on the same server; deploy.sh queues
+# them so only one builds at a time. See DEPLOYMENT.md ("Demo first").
 on:
   push:
-    branches: [main]
+    branches: [main, demo]
   workflow_dispatch:
 
 concurrency:
-  group: production-deploy
+  group: deploy-${{ github.ref_name }}
   cancel-in-progress: false
 
 permissions:
@@ -17,14 +19,19 @@ permissions:
 
 jobs:
   deploy:
-    name: Deploy chenzquiz.superchennai.com
+    name: Deploy ${{ github.ref_name == 'main' && 'LIVE' || 'DEMO' }}
+    if: github.ref_name == 'main' || github.ref_name == 'demo'
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
     env:
       DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
       DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
       DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
-      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '/var/www/chenzquiz' }}
+      # Where the site lives on the server, its PM2 name and port, and its address
+      DEPLOY_PATH: ${{ github.ref_name == 'main' && (secrets.DEPLOY_PATH || '/var/www/chenzquiz') || (vars.DEMO_PATH || '/var/www/chenzquiz-demo') }}
+      APP_NAME: ${{ github.ref_name == 'main' && 'chenzquiz-superchennai' || 'chenzquiz-demo' }}
+      APP_PORT: ${{ github.ref_name == 'main' && '3007' || (vars.DEMO_PORT || '3017') }}
+      SITE_URL: ${{ github.ref_name == 'main' && 'https://chenzquiz.superchennai.com' || (vars.DEMO_URL || 'https://chenzquiz-demo.superchennai.com') }}
 
     steps:
       - name: Check deploy secrets
@@ -63,6 +70,14 @@ jobs:
           printf 'Host prod\n  HostName %s\n  User %s\n  Port %s\n  IdentityFile ~/.ssh/deploy_key\n  IdentitiesOnly yes\n  ServerAliveInterval 30\n' \
             "$DEPLOY_HOST" "$DEPLOY_USER" "$DEPLOY_PORT" > ~/.ssh/config
 
+      - name: Check the site is set up on the server
+        run: |
+          # shellcheck disable=SC2029  # paths are meant to expand here, on the runner
+          if ! ssh prod "test -f '$DEPLOY_PATH/shared/.env'"; then
+            echo "::error::$DEPLOY_PATH/shared/.env not found on the server. For the demo site run scripts/demo-setup.sh on the server once (see DEPLOYMENT.md)."
+            exit 1
+          fi
+
       - name: Upload release
         env:
           RELEASE: ${{ steps.release.outputs.name }}
@@ -80,12 +95,12 @@ jobs:
           RELEASE: ${{ steps.release.outputs.name }}
         run: |
           # shellcheck disable=SC2029  # paths are meant to expand here, on the runner
-          ssh prod "APP_ROOT='$DEPLOY_PATH' bash '$DEPLOY_PATH/releases/$RELEASE/scripts/deploy.sh' '$RELEASE' '$GITHUB_SHA'"
+          ssh prod "APP_ROOT='$DEPLOY_PATH' APP_NAME='$APP_NAME' APP_PORT='$APP_PORT' bash '$DEPLOY_PATH/releases/$RELEASE/scripts/deploy.sh' '$RELEASE' '$GITHUB_SHA'"
 
       - name: Summary
         if: success()
         env:
           RELEASE: ${{ steps.release.outputs.name }}
         run: |
-          echo "### Deployed \`$RELEASE\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "Live at https://chenzquiz.superchennai.com (check /version.json)" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Deployed \`$RELEASE\` to ${{ github.ref_name == 'main' && 'LIVE' || 'DEMO' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "$SITE_URL (check $SITE_URL/version.json)" >> "$GITHUB_STEP_SUMMARY"

@@ -1,6 +1,7 @@
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { getPayload } from 'payload'
+import { getGameDaySettings } from '@/utilities/getGameTimers'
 import configPromise from '@payload-config'
 import {
   ProfileHeaderCard,
@@ -56,7 +57,7 @@ export default async function ProfilePage() {
   // Rank = Higher XP Users + 1
   const currentRank = higherXPUsers.totalDocs + 1
   const attempts = attemptsRes.docs as any[]
-  const userStats = calculateUserStats(attempts, userXP)
+  const userStats = calculateUserStats(attempts, userXP, await getGameDaySettings(payload))
 
   // Title (tier) from total XP - tiers are editable in admin (Globals > Quiz Titles)
   const titles = await getQuizTitles(payload)

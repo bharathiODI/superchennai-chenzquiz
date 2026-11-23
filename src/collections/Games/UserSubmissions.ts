@@ -8,10 +8,12 @@ export const UserSubmissions: CollectionConfig = {
   },
   // Admin only over the REST API (players are logged in to the same API)
   access: {
-    create: ({ req: { user } }) => (user as any)?.collection === 'users' && (user as any)?.role === 'admin',
+    // Read-only in the CMS: scores and players are written only by the game itself, so nobody can
+    // change them by mistake here. (Server code uses overrideAccess and is not affected.)
+    create: () => false,
     read: ({ req: { user } }) => (user as any)?.collection === 'users' && (user as any)?.role === 'admin',
-    update: ({ req: { user } }) => (user as any)?.collection === 'users' && (user as any)?.role === 'admin',
-    delete: ({ req: { user } }) => (user as any)?.collection === 'users' && (user as any)?.role === 'admin',
+    update: () => false,
+    delete: () => false,
   },
   fields: [
     {

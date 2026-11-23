@@ -8,9 +8,15 @@ import {
 } from '@/utilities/otpSession'
 import { getTestOtp, isTestPhone } from '@/utilities/testPlayers'
 import { getQuizSiteSettings } from '@/globals/QuizSiteSettings/getQuizSiteSettings'
+import { readSiteFlags } from '@/utilities/siteFlags'
 
 export async function POST(req: NextRequest) {
   try {
+    const flags = readSiteFlags()
+    if (flags.maintenance) {
+      return NextResponse.json({ success: false, maintenance: true, message: flags.message }, { status: 503 })
+    }
+
     const body = await req.json()
     const { mobile, otp } = body ?? {}
 

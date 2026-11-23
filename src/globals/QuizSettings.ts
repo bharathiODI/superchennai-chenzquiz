@@ -60,6 +60,49 @@ export const QuizSettings: GlobalConfig = {
             "Points for a correct answer = the question's points (set on each question, 10 by default) + the speed bonus below. Double Up questions count twice. A wrong answer takes off the question's negative points (0 by default). Changes apply to rounds started after saving.",
           fields: [
             {
+              name: 'gameDay',
+              type: 'group',
+              label: 'Game day (India time)',
+              admin: {
+                description:
+                  "Each day's rounds run from the start hour until the same hour the next day. Nobody can start a round during the break just before it. Players never get a question they have already answered - unless it was edited after they answered it. Put each day's questions in the quiz's Question Pool before the start hour (new questions, or the same ones rewritten).",
+              },
+              fields: [
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'startHour',
+                      type: 'number',
+                      label: 'New day starts at - hour (0-23)',
+                      defaultValue: 0,
+                      min: 0,
+                      max: 23,
+                      admin: { width: '33%', step: 1, description: '0 = midnight, 8 = 8 AM, 20 = 8 PM' },
+                    },
+                    {
+                      name: 'startMinute',
+                      type: 'number',
+                      label: 'minute (0-59)',
+                      defaultValue: 30,
+                      min: 0,
+                      max: 59,
+                      admin: { width: '33%', step: 5, description: 'hour 0 + minute 30 = 12:30 AM' },
+                    },
+                    {
+                      name: 'coolOffMinutes',
+                      type: 'number',
+                      label: 'Break before it (minutes)',
+                      defaultValue: 60,
+                      min: 0,
+                      max: 720,
+                      admin: { width: '33%', step: 5, description: '60 with a 12:30 AM start = no play 11:30 PM-12:30 AM. 0 = no break.' },
+                    },
+                  ],
+                },
+              ],
+            },
+            {
               name: 'gameTimers',
               type: 'group',
               label: 'Time limit per game',

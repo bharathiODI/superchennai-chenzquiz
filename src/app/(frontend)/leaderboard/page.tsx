@@ -11,6 +11,8 @@ import { isTestPhone, realPlayersWhere } from '@/utilities/testPlayers'
 import { getQuizSiteSettings } from '@/globals/QuizSiteSettings/getQuizSiteSettings'
 import { getTitleForXP, type QuizTitle } from '@/utilities/quizTitles'
 import { computeStreaks } from '@/utilities/quizStreak'
+import { gameDayKey } from '@/utilities/gameDay'
+import { getGameDaySettings } from '@/utilities/getGameTimers'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -22,6 +24,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 type Tab = 'daily' | 'weekly' | 'monthly' | 'all'
+
+/** The leaderboard is public: it lists only this many players, on every tab. */
+const TOP_PLAYERS = 50
 
 const TABS: { id: Tab; label: string; icon: typeof Sun; xpLabel: string }[] = [
   { id: 'daily', label: 'Daily', icon: Sun, xpLabel: 'XP (Today)' },
@@ -105,31 +110,26 @@ export default async function LeaderboardPage({
       : defaultTab
 
   const requestedPage = Number(resolvedSearchParams?.page)
-  const pageParam = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
+  const askedPage = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
   const now = new Date()
 
   // ---------------------------------------------------------------
-  // 1. Ranking for the selected period
+  // 1. Ranking for the selected period - only the top TOP_PLAYERS are shown publicly
+  //    (a player outside them still sees their own rank on their profile)
   // ---------------------------------------------------------------
-  let pageRows: Ranked[] = []
-  let podiumRows: Ranked[] = []
-  let totalPages = 1
+  let ranked: Ranked[] = []
   const usersById = new Map<string, any>()
 
   if (tab === 'all') {
-    const findPage = (page: number, limit: number) =>
-      payload.find({
-        collection: 'quiz-users',
-        where: realPlayersWhere, // test players are never ranked
-        sort: ['-totalXP', 'totalTimeTaken', 'createdAt'],
-        limit,
-        page,
-        depth: 1,
-        overrideAccess: true,
-      })
-
-    const result = await findPage(pageParam, PAGE_SIZE)
-    const podium = pageParam === 1 ? result : await findPage(1, 3)
+    const result = await payload.find({
+      collection: 'quiz-users',
+      where: realPlayersWhere, // test players are never ranked
+      sort: ['-totalXP', 'totalTimeTaken', 'createdAt'],
+      limit: TOP_PLAYERS,
+      page: 1,
+      depth: 1,
+      overrideAccess: true,
+    })
 
     const toRanked = (u: any): Ranked => {
       usersById.set(String(u.id), u)
@@ -141,9 +141,7 @@ export default async function LeaderboardPage({
       }
     }
 
-    pageRows = result.docs.map(toRanked)
-    podiumRows = podium.docs.slice(0, 3).map(toRanked)
-    totalPages = Math.max(1, result.totalPages || 1)
+    ranked = result.docs.map(toRanked)
   } else {
     const startDate = getIndiaPeriodStart(tab, now)
     const stats = new Map<string, Ranked>()
@@ -196,15 +194,17 @@ export default async function LeaderboardPage({
       }
     }
 
-    const ranked = Array.from(stats.values())
+    ranked = Array.from(stats.values())
       .filter((r) => !isTestPhone(usersById.get(r.id)?.phone)) // test players are never ranked
       .map((r) => ({ ...r, name: r.name || 'Anonymous' }))
       .sort(byRank)
-
-    totalPages = Math.max(1, Math.ceil(ranked.length / PAGE_SIZE))
-    pageRows = ranked.slice((pageParam - 1) * PAGE_SIZE, pageParam * PAGE_SIZE)
-    podiumRows = ranked.slice(0, 3)
+      .slice(0, TOP_PLAYERS)
   }
+
+  const totalPages = Math.max(1, Math.ceil(ranked.length / PAGE_SIZE))
+  const pageParam = Math.min(askedPage, totalPages)
+  const pageRows = ranked.slice((pageParam - 1) * PAGE_SIZE, pageParam * PAGE_SIZE)
+  const podiumRows = ranked.slice(0, 3)
 
   // ---------------------------------------------------------------
   // 2. Streaks + titles for the players on screen
@@ -230,6 +230,7 @@ export default async function LeaderboardPage({
   }
 
   const titles: QuizTitle[] = await getQuizTitles(payload)
+  const gameDay = await getGameDaySettings(payload)
 
   const enrich = (row: Ranked, rank: number): Player => {
     const user = usersById.get(row.id)
@@ -239,7 +240,7 @@ export default async function LeaderboardPage({
       rank,
       avatarUrl: avatarOf(user),
       overallXP,
-      streak: computeStreaks(playDates.get(row.id) ?? [], now).current,
+      streak: computeStreaks(playDates.get(row.id) ?? [], now, (d) => gameDayKey(d, gameDay)).current,
       title: getTitleForXP(overallXP, titles),
     }
   }
@@ -379,6 +380,13 @@ export default async function LeaderboardPage({
                     ))}
                   </div>
                 </div>
+                <p className="mt-3 text-center text-xs font-medium text-slate-400">
+                  Top {TOP_PLAYERS} players. Your own rank is on your{' '}
+                  <Link href="/profile" className="font-bold text-purple-600 hover:underline">
+                    profile
+                  </Link>
+                  .
+                </p>
 
                 {/* PAGINATION CONTROLS */}
                 <div className="flex items-center justify-center gap-2 mt-8">

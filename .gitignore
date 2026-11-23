@@ -15,3 +15,6 @@ public/sitemap*.xml
 # Local database dumps and scratch files
 /db/
 /_local/
+
+# per-site switches (maintenance) - kept on the server in shared/
+site-flags.json

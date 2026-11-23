@@ -11,7 +11,7 @@ const SECTIONS: { heading: string; points: string[] }[] = [
   {
     heading: '1. Contest Format',
     points: [
-      'Three trivia questions will be published every day at 8:00 AM.',
+      'Three trivia questions will be published every day at 12:30 AM.',
       'Each question will have a time limit of 20 seconds.',
       'Participants must submit their answers within the allotted time.',
       'The quiz will be conducted through the ChenZ – Daily Trivia platform on the Super Chennai website or other designated digital platforms.',

@@ -1,4 +1,5 @@
 import { computeStreaks } from '@/utilities/quizStreak'
+import { DEFAULT_GAME_DAY, gameDayKey, type GameDaySettings } from '@/utilities/gameDay'
 
 export interface QuizAttempt {
   id: number | string
@@ -18,7 +19,11 @@ export function formatTimeTaken(seconds: number): string {
 }
 
 /** Profile numbers. Total score is the player's saved XP when given, else the sum of attempts. */
-export function calculateUserStats(attempts: QuizAttempt[], userTotalXP?: number) {
+export function calculateUserStats(
+  attempts: QuizAttempt[],
+  userTotalXP?: number,
+  gameDay: GameDaySettings = DEFAULT_GAME_DAY,
+) {
   const totalPlayed = attempts.length
   if (totalPlayed === 0) {
     return {
@@ -44,9 +49,11 @@ export function calculateUserStats(attempts: QuizAttempt[], userTotalXP?: number
   const bestScore = `${Math.max(...attempts.map((a) => Number(a.score || 0)))} XP`
   const averageScore = `${Math.round(attemptsScoreSum / totalPlayed)} XP`
 
-  // Streaks: consecutive play days in India time
+  // Streaks: consecutive game days (they start at the Quiz Settings time, 12:30 AM by default)
   const { current: currentStreak, best: bestStreak } = computeStreaks(
     attempts.map((a) => a.completedAt).filter(Boolean),
+    new Date(),
+    (d) => gameDayKey(d, gameDay),
   )
 
   return {

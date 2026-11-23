@@ -1,8 +1,87 @@
 # Deployment
 
-Every push to `main` (including a merged pull request) deploys to
-**chenzquiz.superchennai.com** via GitHub Actions (`.github/workflows/deploy.yml`).
-You can also redeploy by hand: **Actions > Deploy to production > Run workflow**.
+Two sites, deployed automatically by GitHub Actions (`.github/workflows/deploy.yml`):
+
+| Branch | Site | Server folder | PM2 app / port | Database |
+|---|---|---|---|---|
+| `main` | **LIVE** https://chenzquiz.superchennai.com | `/var/www/chenzquiz` | `chenzquiz-superchennai` / 3007 | live |
+| `demo` | **DEMO** https://chenzquiz-demo.superchennai.com | `/var/www/chenzquiz-demo` | `chenzquiz-demo` / 3017 | `chenzquiz_demo` |
+
+Every push to a branch (including a merged pull request) deploys that branch's site. Redeploy by
+hand: **Actions > Deploy > Run workflow** and pick `main` or `demo`. Both build on the same VPS,
+so if both deploy at once the second waits for the first.
+
+## Demo first
+
+**Every change goes to DEMO, is tested there, and only then goes LIVE.**
+
+1. Make the change on a new branch from `demo`:
+   `git checkout demo && git pull && git checkout -b fix-something`
+2. Push it and open a pull request **into `demo`**. Merge it: the demo site updates in a few minutes
+   (watch **Actions**; check https://chenzquiz-demo.superchennai.com/version.json).
+3. Test on the demo site with the test players (below) and the CMS. Database changes (migrations)
+   run on the demo database first, so they are tested too.
+4. When it's right: open a pull request **from `demo` into `main`**, merge it, and the live site updates.
+   Around a live deploy run `bash chenzquiz-deploy.sh before` / `after` on the server.
+
+**Urgent live fix:** branch from `main`, pull request into `main`; afterwards merge `main` into `demo`
+(`git checkout demo && git merge main && git push`) so demo doesn't fall behind.
+
+Recommended in GitHub (**Settings > Branches > Add rule**) for `main` and for `demo`:
+*Require a pull request before merging*, so nothing reaches either site without a pull request.
+
+**Demo site facts**
+- Content (pages, quizzes, questions, settings, media) and CMS logins are a copy of live from the day
+  it was set up. Players, rounds, scores and form entries are not copied. Editing content on demo
+  does not change live - make content changes in the live CMS.
+- Test players: +91 00000 00001 ... 00005, OTP = `TEST_OTP` in `/var/www/chenzquiz-demo/shared/.env`.
+  Real numbers get a real SMS OTP, as on live.
+- Hidden from search engines (`X-Robots-Tag: noindex`).
+- Fresh copy of live content (removes demo players/scores): on the server
+  `bash /var/www/chenzquiz-demo/current/scripts/demo-setup.sh --refresh-data`
+
+## Site controls (maintenance, playing now, demo database, demo access)
+
+**In the CMS** (dashboard and Quiz Rounds): the **Site status** box shows who is mid-round right now
+(refreshes every 15 s) and has the **maintenance** switch. Maintenance ON: no new games or logins,
+players see the message; a round already on screen can still be finished. Kept across deploys.
+
+**On the server** (`scripts/chenzquiz-site.sh`, copy in `/root`; add `demo` for the demo site):
+
+```bash
+bash chenzquiz-site.sh status [demo]                      # maintenance, players mid-round, database
+bash chenzquiz-site.sh playing [demo]                     # who is mid-round right now
+bash chenzquiz-site.sh maintenance on|off [demo] ["msg"]  # same switch as the CMS (no restart)
+bash chenzquiz-site.sh demo-db live                       # demo app on the LIVE database (exports)
+bash chenzquiz-site.sh demo-db demo                       # demo back on its own database
+bash chenzquiz-site.sh demo-ips "1.2.3.4 5.6.7.0/24"      # only these IPs can open the demo
+bash chenzquiz-site.sh demo-ips open                      # anyone with the link (still not indexed)
+```
+
+**Safe live deploy:** maintenance on -> wait until Playing now is 0 -> merge -> `chenzquiz-deploy.sh after`
+-> maintenance off.
+
+**Demo on live data** (`demo-db live`): the demo CMS reads and writes the LIVE database (orange
+"live data" strip/tag), games and logins on the demo are off, and deploys to the demo are refused
+until `demo-db demo`. Use it for exports/reading only.
+
+**Demo is never indexed:** `noindex` header (Apache) and meta tags, robots.txt `Disallow: /`, no
+Google Analytics/Tag Manager. Every page shows a DEMO tag; the CMS shows a DEMO strip.
+
+**Player data is read-only in the CMS** (players, rounds, scores, submissions): only the game
+writes it. Admins can still delete a player (with their rounds and scores).
+
+### Setting up the demo site (once)
+
+1. DNS: an **A record** `chenzquiz-demo.superchennai.com` -> the VPS IP (89.116.21.132).
+2. On the server, as root, from any copy of this repo's `scripts/demo-setup.sh`:
+   `bash demo-setup.sh`
+   It creates the folder, the demo database (live content, no player data), `.env` (demo database,
+   demo address, its own secret, a test OTP), copies media, adds the Apache site and SSL.
+   It only reads the live site and database. Safe to run again.
+3. Push the `demo` branch (or re-run its failed deploy in **Actions**). The first deploy starts the
+   PM2 app.
+4. Once: `cd /var/www/chenzquiz-demo/current && npm run seed` to create the test players.
 
 ## How it works
 
@@ -61,7 +140,8 @@ The old folder is left in place; delete it once you're happy.
 
 ## Rolling back
 
-Re-run an older successful run from the Actions tab, or on the server:
+Quickest: on the server `bash scripts/chenzquiz-deploy.sh rollback` from the live `current` folder
+(add `demo` for the demo site). Or re-run an older successful run from the Actions tab, or by hand:
 
 ```bash
 cd /var/www/chenzquiz && ls -1t releases          # pick a release

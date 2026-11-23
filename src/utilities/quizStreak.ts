@@ -14,15 +14,17 @@ function keyToDayNumber(key: string): number {
   return Math.round(new Date(`${key}T00:00:00Z`).getTime() / DAY_MS)
 }
 
+/** dayKey: which day an instant counts for - pass the game-day key so streaks follow the game day (Quiz Settings). */
 export function computeStreaks(
   dates: Array<string | number | Date | null | undefined>,
   now: Date = new Date(),
+  dayKey: (value: string | number | Date) => string | null = istDateKey,
 ): { current: number; best: number } {
   const days = Array.from(
     new Set(
       dates
         .filter((d): d is string | number | Date => d !== null && d !== undefined)
-        .map((d) => istDateKey(d))
+        .map((d) => dayKey(d))
         .filter((k): k is string => Boolean(k)),
     ),
   )
@@ -38,7 +40,7 @@ export function computeStreaks(
     best = Math.max(best, run)
   }
 
-  const today = keyToDayNumber(istDateKey(now)!)
+  const today = keyToDayNumber(dayKey(now)!)
   const last = days[days.length - 1]!
   let current = 0
   if (today - last <= 1) {

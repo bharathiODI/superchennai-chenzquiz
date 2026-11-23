@@ -63,21 +63,21 @@ export type SupportedTimezones =
 
 export interface Config {
   auth: {
-    users: UserAuthOperations;
     'quiz-users': QuizUserAuthOperations;
+    users: UserAuthOperations;
   };
   blocks: {};
   collections: {
+    quizzes: Quiz;
+    questions: Question;
+    'quiz-users': QuizUser;
+    'quiz-rounds': QuizRound;
+    'quiz-attempts': QuizAttempt;
+    'user-submissions': UserSubmission;
     pages: Page;
     posts: Post;
     media: Media;
     users: User;
-    'quiz-users': QuizUser;
-    quizzes: Quiz;
-    questions: Question;
-    'user-submissions': UserSubmission;
-    'quiz-attempts': QuizAttempt;
-    'quiz-rounds': QuizRound;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -90,16 +90,16 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    quizzes: QuizzesSelect<false> | QuizzesSelect<true>;
+    questions: QuestionsSelect<false> | QuestionsSelect<true>;
+    'quiz-users': QuizUsersSelect<false> | QuizUsersSelect<true>;
+    'quiz-rounds': QuizRoundsSelect<false> | QuizRoundsSelect<true>;
+    'quiz-attempts': QuizAttemptsSelect<false> | QuizAttemptsSelect<true>;
+    'user-submissions': UserSubmissionsSelect<false> | UserSubmissionsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    'quiz-users': QuizUsersSelect<false> | QuizUsersSelect<true>;
-    quizzes: QuizzesSelect<false> | QuizzesSelect<true>;
-    questions: QuestionsSelect<false> | QuestionsSelect<true>;
-    'user-submissions': UserSubmissionsSelect<false> | UserSubmissionsSelect<true>;
-    'quiz-attempts': QuizAttemptsSelect<false> | QuizAttemptsSelect<true>;
-    'quiz-rounds': QuizRoundsSelect<false> | QuizRoundsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -115,22 +115,22 @@ export interface Config {
   };
   fallbackLocale: null;
   globals: {
-    header: Header;
-    footer: Footer;
     'quiz-settings': QuizSetting;
     'quiz-site-settings': QuizSiteSetting;
+    header: Header;
+    footer: Footer;
   };
   globalsSelect: {
-    header: HeaderSelect<false> | HeaderSelect<true>;
-    footer: FooterSelect<false> | FooterSelect<true>;
     'quiz-settings': QuizSettingsSelect<false> | QuizSettingsSelect<true>;
     'quiz-site-settings': QuizSiteSettingsSelect<false> | QuizSiteSettingsSelect<true>;
+    header: HeaderSelect<false> | HeaderSelect<true>;
+    footer: FooterSelect<false> | FooterSelect<true>;
   };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User | QuizUser;
+  user: QuizUser | User;
   jobs: {
     tasks: {
       schedulePublish: TaskSchedulePublish;
@@ -140,6 +140,24 @@ export interface Config {
       };
     };
     workflows: unknown;
+  };
+}
+export interface QuizUserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
   };
 }
 export interface UserAuthOperations {
@@ -160,23 +178,421 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-export interface QuizUserAuthOperations {
-  forgotPassword: {
-    email: string;
-    password: string;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quizzes".
+ */
+export interface Quiz {
+  id: number;
+  quizTitle: string;
+  /**
+   * Auto-generated unique URL slug
+   */
+  slug: string;
+  quizDate: string;
+  /**
+   * Set when this quiz should automatically conclude
+   */
+  quizEndDate: string;
+  /**
+   * Questions players can get. Each round gives a player the next questions they have not answered yet, in Question Number order (or shuffled, if "Shuffle questions" is ticked below). Nobody gets a question twice - a question edited after a player answered it counts as new. Swap in each day's questions before the day starts (Quiz Settings > Game day, 12:30 AM by default).
+   */
+  questions: (number | Question)[];
+  roundsPerDay?: number | null;
+  questionsPerRound?: number | null;
+  /**
+   * Which question in each round is sponsored (3 = third). 0 = no sponsored slot.
+   */
+  sponsoredPosition?: number | null;
+  /**
+   * Off: every player gets the questions in Question Number order (then Display Order). On: each player gets them in a random order. The sponsored question always keeps its slot.
+   */
+  shuffleQuestions?: boolean | null;
+  /**
+   * Sponsored question per day (same for every player). Leave "Round" empty to use it in all rounds that day. Days without one get a regular question in that slot. Sponsored questions are never served as regular questions.
+   */
+  sponsoredQuestions?:
+    | {
+        date: string;
+        round?: number | null;
+        question: number | Question;
+        id?: string | null;
+      }[]
+    | null;
+  status?: ('draft' | 'active' | 'completed') | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+    /**
+     * Paste valid JSON-LD schema for this quiz
+     */
+    schema?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
   };
-  login: {
-    email: string;
-    password: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "questions".
+ */
+export interface Question {
+  id: number;
+  title: string;
+  heroImage?: (number | null) | Media;
+  mobileImage?: (number | null) | Media;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  quiz: number | Quiz;
+  questionNumber: number;
+  gameType: 'mcq' | 'dropdown' | 'wordle' | 'word_finder' | 'match_following' | 'spot_lie' | 'reorder' | 'drag_drop';
+  questionTitle: string;
+  category?: ('chennai' | 'gk' | 'science' | 'geography') | null;
+  mcqGroup?: {
+    questionText: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+    questionImage?: (number | null) | Media;
+    options: {
+      optionText: string;
+      optionImage?: (number | null) | Media;
+      id?: string | null;
+    }[];
+    correctOptionIndex: number;
   };
-  registerFirstUser: {
-    email: string;
-    password: string;
+  dropdownGroup?: {
+    sentenceText: string;
+    dropdownLabel?: string | null;
+    options: {
+      optionText: string;
+      id?: string | null;
+    }[];
+    correctAnswer: string;
   };
-  unlock: {
-    email: string;
-    password: string;
+  wordleGroup?: {
+    clueText: string;
+    answerWord: string;
+    attempts?: number | null;
+    hint?: string | null;
+    hintImage?: (number | null) | Media;
   };
+  wordFinderGroup?: {
+    instruction?: string | null;
+    gridRows: {
+      rowString: string;
+      id?: string | null;
+    }[];
+    wordsToFind: {
+      word: string;
+      id?: string | null;
+    }[];
+  };
+  matchGroup?: {
+    instruction?: string | null;
+    pairs: {
+      leftItem: string;
+      rightItem: string;
+      id?: string | null;
+    }[];
+  };
+  spotLieGroup?: {
+    statements: {
+      statementText: string;
+      isLie?: boolean | null;
+      id?: string | null;
+    }[];
+  };
+  reorderGroup?: {
+    instruction: string;
+    itemsInCorrectOrder: {
+      itemText: string;
+      id?: string | null;
+    }[];
+  };
+  dragDropGroup?: {
+    instruction: string;
+    dragMode?: ('categories' | 'sentence') | null;
+    sentenceWordsOrder?:
+      | {
+          word: string;
+          id?: string | null;
+        }[]
+      | null;
+    dropZones?:
+      | {
+          zoneTitle: string;
+          zoneItems?:
+            | {
+                itemText: string;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  timeLimit?: number | null;
+  points?: number | null;
+  negativePoints?: number | null;
+  difficulty?: ('Easy' | 'Medium' | 'Hard') | null;
+  enableDoubleUp?: boolean | null;
+  explanation?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+  };
+  publishedAt?: string | null;
+  /**
+   * குறைந்த எண் (1, 2, 3) முதலில் தோன்றும்.
+   */
+  order?: number | null;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  alt?: string | null;
+  caption?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    square?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    small?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    medium?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    large?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    xlarge?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    og?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * Players. Read-only here (changed only by the game). Search by name, phone or email.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-users".
+ */
+export interface QuizUser {
+  id: number;
+  name: string;
+  phone?: string | null;
+  email?: string | null;
+  message?: string | null;
+  /**
+   * Total XP earned by playing daily quizzes
+   */
+  totalXP?: number | null;
+  /**
+   * Total time taken in seconds across all quizzes
+   */
+  totalTimeTaken?: number | null;
+  avatar?: (number | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+  collection: 'quiz-users';
+}
+/**
+ * Questions given to each player per game day and round. Read-only here (written only by the game). Search: player name, phone or game day (e.g. 2026-11-23).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-rounds".
+ */
+export interface QuizRound {
+  id: number;
+  user: number | QuizUser;
+  quiz: number | Quiz;
+  /**
+   * India date (YYYY-MM-DD)
+   */
+  day: string;
+  round: number;
+  status: 'assigned' | 'completed';
+  questions?: (number | Question)[] | null;
+  sponsoredQuestion?: (number | null) | Question;
+  score?: number | null;
+  completedAt?: string | null;
+  /**
+   * Questions reused because the pool ran out (only rounds before 23 Nov 2026 - questions are no longer repeated)
+   */
+  recycled?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * One entry per finished round. Read-only here (written only by the game). Search: player name or phone.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-attempts".
+ */
+export interface QuizAttempt {
+  id: number;
+  user: number | QuizUser;
+  quiz: number | Quiz;
+  score: number;
+  totalQuestions: number;
+  correctAnswers: number;
+  timeTaken: number;
+  completedAt: string;
+  rankAtCompletion?: number | null;
+  /**
+   * Round of the day (1, 2, 3...)
+   */
+  round?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "user-submissions".
+ */
+export interface UserSubmission {
+  id: number;
+  user: number | QuizUser;
+  quiz: number | Quiz;
+  score: number;
+  answers?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -288,98 +704,6 @@ export interface Page {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  alt?: string | null;
-  caption?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    square?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    small?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    medium?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    large?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    xlarge?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    og?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2635,326 +2959,6 @@ export interface PBChenzCreativeHeroBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "quiz-users".
- */
-export interface QuizUser {
-  id: number;
-  name: string;
-  phone?: string | null;
-  email?: string | null;
-  message?: string | null;
-  /**
-   * Total XP earned by playing daily quizzes
-   */
-  totalXP?: number | null;
-  /**
-   * Total time taken in seconds across all quizzes
-   */
-  totalTimeTaken?: number | null;
-  avatar?: (number | null) | Media;
-  updatedAt: string;
-  createdAt: string;
-  collection: 'quiz-users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "quizzes".
- */
-export interface Quiz {
-  id: number;
-  quizTitle: string;
-  /**
-   * Auto-generated unique URL slug
-   */
-  slug: string;
-  quizDate: string;
-  /**
-   * Set when this quiz should automatically conclude
-   */
-  quizEndDate: string;
-  /**
-   * All questions for this challenge. Each round gives a player the next questions they have not answered yet, in Question Number order (or shuffled, if "Shuffle questions" is ticked below).
-   */
-  questions: (number | Question)[];
-  roundsPerDay?: number | null;
-  questionsPerRound?: number | null;
-  /**
-   * Which question in each round is sponsored (3 = third). 0 = no sponsored slot.
-   */
-  sponsoredPosition?: number | null;
-  /**
-   * Off: every player gets the questions in Question Number order (then Display Order). On: each player gets them in a random order. The sponsored question always keeps its slot.
-   */
-  shuffleQuestions?: boolean | null;
-  /**
-   * Sponsored question per day (same for every player). Leave "Round" empty to use it in all rounds that day. Days without one get a regular question in that slot. Sponsored questions are never served as regular questions.
-   */
-  sponsoredQuestions?:
-    | {
-        date: string;
-        round?: number | null;
-        question: number | Question;
-        id?: string | null;
-      }[]
-    | null;
-  status?: ('draft' | 'active' | 'completed') | null;
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (number | null) | Media;
-    description?: string | null;
-    /**
-     * Paste valid JSON-LD schema for this quiz
-     */
-    schema?:
-      | {
-          [k: string]: unknown;
-        }
-      | unknown[]
-      | string
-      | number
-      | boolean
-      | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "questions".
- */
-export interface Question {
-  id: number;
-  title: string;
-  heroImage?: (number | null) | Media;
-  mobileImage?: (number | null) | Media;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  quiz: number | Quiz;
-  questionNumber: number;
-  gameType: 'mcq' | 'dropdown' | 'wordle' | 'word_finder' | 'match_following' | 'spot_lie' | 'reorder' | 'drag_drop';
-  questionTitle: string;
-  category?: ('chennai' | 'gk' | 'science' | 'geography') | null;
-  mcqGroup?: {
-    questionText: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    };
-    questionImage?: (number | null) | Media;
-    options: {
-      optionText: string;
-      optionImage?: (number | null) | Media;
-      id?: string | null;
-    }[];
-    correctOptionIndex: number;
-  };
-  dropdownGroup?: {
-    sentenceText: string;
-    dropdownLabel?: string | null;
-    options: {
-      optionText: string;
-      id?: string | null;
-    }[];
-    correctAnswer: string;
-  };
-  wordleGroup?: {
-    clueText: string;
-    answerWord: string;
-    attempts?: number | null;
-    hint?: string | null;
-    hintImage?: (number | null) | Media;
-  };
-  wordFinderGroup?: {
-    instruction?: string | null;
-    gridRows: {
-      rowString: string;
-      id?: string | null;
-    }[];
-    wordsToFind: {
-      word: string;
-      id?: string | null;
-    }[];
-  };
-  matchGroup?: {
-    instruction?: string | null;
-    pairs: {
-      leftItem: string;
-      rightItem: string;
-      id?: string | null;
-    }[];
-  };
-  spotLieGroup?: {
-    statements: {
-      statementText: string;
-      isLie?: boolean | null;
-      id?: string | null;
-    }[];
-  };
-  reorderGroup?: {
-    instruction: string;
-    itemsInCorrectOrder: {
-      itemText: string;
-      id?: string | null;
-    }[];
-  };
-  dragDropGroup?: {
-    instruction: string;
-    dragMode?: ('categories' | 'sentence') | null;
-    sentenceWordsOrder?:
-      | {
-          word: string;
-          id?: string | null;
-        }[]
-      | null;
-    dropZones?:
-      | {
-          zoneTitle: string;
-          zoneItems?:
-            | {
-                itemText: string;
-                id?: string | null;
-              }[]
-            | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  timeLimit?: number | null;
-  points?: number | null;
-  negativePoints?: number | null;
-  difficulty?: ('Easy' | 'Medium' | 'Hard') | null;
-  enableDoubleUp?: boolean | null;
-  explanation?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (number | null) | Media;
-  };
-  publishedAt?: string | null;
-  /**
-   * குறைந்த எண் (1, 2, 3) முதலில் தோன்றும்.
-   */
-  order?: number | null;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "user-submissions".
- */
-export interface UserSubmission {
-  id: number;
-  user: number | QuizUser;
-  quiz: number | Quiz;
-  score: number;
-  answers?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "quiz-attempts".
- */
-export interface QuizAttempt {
-  id: number;
-  user: number | QuizUser;
-  quiz: number | Quiz;
-  score: number;
-  totalQuestions: number;
-  correctAnswers: number;
-  timeTaken: number;
-  completedAt: string;
-  rankAtCompletion?: number | null;
-  /**
-   * Round of the day (1, 2, 3...)
-   */
-  round?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Questions given to each player per day and round (created automatically).
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "quiz-rounds".
- */
-export interface QuizRound {
-  id: number;
-  user: number | QuizUser;
-  quiz: number | Quiz;
-  /**
-   * India date (YYYY-MM-DD)
-   */
-  day: string;
-  round: number;
-  status: 'assigned' | 'completed';
-  questions?: (number | Question)[] | null;
-  sponsoredQuestion?: (number | null) | Question;
-  score?: number | null;
-  completedAt?: string | null;
-  /**
-   * Questions reused because the pool ran out
-   */
-  recycled?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -3308,6 +3312,30 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
+        relationTo: 'quizzes';
+        value: number | Quiz;
+      } | null)
+    | ({
+        relationTo: 'questions';
+        value: number | Question;
+      } | null)
+    | ({
+        relationTo: 'quiz-users';
+        value: number | QuizUser;
+      } | null)
+    | ({
+        relationTo: 'quiz-rounds';
+        value: number | QuizRound;
+      } | null)
+    | ({
+        relationTo: 'quiz-attempts';
+        value: number | QuizAttempt;
+      } | null)
+    | ({
+        relationTo: 'user-submissions';
+        value: number | UserSubmission;
+      } | null)
+    | ({
         relationTo: 'pages';
         value: number | Page;
       } | null)
@@ -3322,30 +3350,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: number | User;
-      } | null)
-    | ({
-        relationTo: 'quiz-users';
-        value: number | QuizUser;
-      } | null)
-    | ({
-        relationTo: 'quizzes';
-        value: number | Quiz;
-      } | null)
-    | ({
-        relationTo: 'questions';
-        value: number | Question;
-      } | null)
-    | ({
-        relationTo: 'user-submissions';
-        value: number | UserSubmission;
-      } | null)
-    | ({
-        relationTo: 'quiz-attempts';
-        value: number | QuizAttempt;
-      } | null)
-    | ({
-        relationTo: 'quiz-rounds';
-        value: number | QuizRound;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -3366,12 +3370,12 @@ export interface PayloadLockedDocument {
   globalSlug?: string | null;
   user:
     | {
-        relationTo: 'users';
-        value: number | User;
-      }
-    | {
         relationTo: 'quiz-users';
         value: number | QuizUser;
+      }
+    | {
+        relationTo: 'users';
+        value: number | User;
       };
   updatedAt: string;
   createdAt: string;
@@ -3384,12 +3388,12 @@ export interface PayloadPreference {
   id: number;
   user:
     | {
-        relationTo: 'users';
-        value: number | User;
-      }
-    | {
         relationTo: 'quiz-users';
         value: number | QuizUser;
+      }
+    | {
+        relationTo: 'users';
+        value: number | User;
       };
   key?: string | null;
   value?:
@@ -3414,6 +3418,248 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quizzes_select".
+ */
+export interface QuizzesSelect<T extends boolean = true> {
+  quizTitle?: T;
+  slug?: T;
+  quizDate?: T;
+  quizEndDate?: T;
+  questions?: T;
+  roundsPerDay?: T;
+  questionsPerRound?: T;
+  sponsoredPosition?: T;
+  shuffleQuestions?: T;
+  sponsoredQuestions?:
+    | T
+    | {
+        date?: T;
+        round?: T;
+        question?: T;
+        id?: T;
+      };
+  status?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+        schema?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "questions_select".
+ */
+export interface QuestionsSelect<T extends boolean = true> {
+  title?: T;
+  heroImage?: T;
+  mobileImage?: T;
+  content?: T;
+  quiz?: T;
+  questionNumber?: T;
+  gameType?: T;
+  questionTitle?: T;
+  category?: T;
+  mcqGroup?:
+    | T
+    | {
+        questionText?: T;
+        questionImage?: T;
+        options?:
+          | T
+          | {
+              optionText?: T;
+              optionImage?: T;
+              id?: T;
+            };
+        correctOptionIndex?: T;
+      };
+  dropdownGroup?:
+    | T
+    | {
+        sentenceText?: T;
+        dropdownLabel?: T;
+        options?:
+          | T
+          | {
+              optionText?: T;
+              id?: T;
+            };
+        correctAnswer?: T;
+      };
+  wordleGroup?:
+    | T
+    | {
+        clueText?: T;
+        answerWord?: T;
+        attempts?: T;
+        hint?: T;
+        hintImage?: T;
+      };
+  wordFinderGroup?:
+    | T
+    | {
+        instruction?: T;
+        gridRows?:
+          | T
+          | {
+              rowString?: T;
+              id?: T;
+            };
+        wordsToFind?:
+          | T
+          | {
+              word?: T;
+              id?: T;
+            };
+      };
+  matchGroup?:
+    | T
+    | {
+        instruction?: T;
+        pairs?:
+          | T
+          | {
+              leftItem?: T;
+              rightItem?: T;
+              id?: T;
+            };
+      };
+  spotLieGroup?:
+    | T
+    | {
+        statements?:
+          | T
+          | {
+              statementText?: T;
+              isLie?: T;
+              id?: T;
+            };
+      };
+  reorderGroup?:
+    | T
+    | {
+        instruction?: T;
+        itemsInCorrectOrder?:
+          | T
+          | {
+              itemText?: T;
+              id?: T;
+            };
+      };
+  dragDropGroup?:
+    | T
+    | {
+        instruction?: T;
+        dragMode?: T;
+        sentenceWordsOrder?:
+          | T
+          | {
+              word?: T;
+              id?: T;
+            };
+        dropZones?:
+          | T
+          | {
+              zoneTitle?: T;
+              zoneItems?:
+                | T
+                | {
+                    itemText?: T;
+                    id?: T;
+                  };
+              id?: T;
+            };
+      };
+  timeLimit?: T;
+  points?: T;
+  negativePoints?: T;
+  difficulty?: T;
+  enableDoubleUp?: T;
+  explanation?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  publishedAt?: T;
+  order?: T;
+  slug?: T;
+  slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-users_select".
+ */
+export interface QuizUsersSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
+  email?: T;
+  message?: T;
+  totalXP?: T;
+  totalTimeTaken?: T;
+  avatar?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-rounds_select".
+ */
+export interface QuizRoundsSelect<T extends boolean = true> {
+  user?: T;
+  quiz?: T;
+  day?: T;
+  round?: T;
+  status?: T;
+  questions?: T;
+  sponsoredQuestion?: T;
+  score?: T;
+  completedAt?: T;
+  recycled?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-attempts_select".
+ */
+export interface QuizAttemptsSelect<T extends boolean = true> {
+  user?: T;
+  quiz?: T;
+  score?: T;
+  totalQuestions?: T;
+  correctAnswers?: T;
+  timeTaken?: T;
+  completedAt?: T;
+  rankAtCompletion?: T;
+  round?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "user-submissions_select".
+ */
+export interface UserSubmissionsSelect<T extends boolean = true> {
+  user?: T;
+  quiz?: T;
+  score?: T;
+  answers?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -5391,248 +5637,6 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "quiz-users_select".
- */
-export interface QuizUsersSelect<T extends boolean = true> {
-  name?: T;
-  phone?: T;
-  email?: T;
-  message?: T;
-  totalXP?: T;
-  totalTimeTaken?: T;
-  avatar?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "quizzes_select".
- */
-export interface QuizzesSelect<T extends boolean = true> {
-  quizTitle?: T;
-  slug?: T;
-  quizDate?: T;
-  quizEndDate?: T;
-  questions?: T;
-  roundsPerDay?: T;
-  questionsPerRound?: T;
-  sponsoredPosition?: T;
-  shuffleQuestions?: T;
-  sponsoredQuestions?:
-    | T
-    | {
-        date?: T;
-        round?: T;
-        question?: T;
-        id?: T;
-      };
-  status?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        image?: T;
-        description?: T;
-        schema?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "questions_select".
- */
-export interface QuestionsSelect<T extends boolean = true> {
-  title?: T;
-  heroImage?: T;
-  mobileImage?: T;
-  content?: T;
-  quiz?: T;
-  questionNumber?: T;
-  gameType?: T;
-  questionTitle?: T;
-  category?: T;
-  mcqGroup?:
-    | T
-    | {
-        questionText?: T;
-        questionImage?: T;
-        options?:
-          | T
-          | {
-              optionText?: T;
-              optionImage?: T;
-              id?: T;
-            };
-        correctOptionIndex?: T;
-      };
-  dropdownGroup?:
-    | T
-    | {
-        sentenceText?: T;
-        dropdownLabel?: T;
-        options?:
-          | T
-          | {
-              optionText?: T;
-              id?: T;
-            };
-        correctAnswer?: T;
-      };
-  wordleGroup?:
-    | T
-    | {
-        clueText?: T;
-        answerWord?: T;
-        attempts?: T;
-        hint?: T;
-        hintImage?: T;
-      };
-  wordFinderGroup?:
-    | T
-    | {
-        instruction?: T;
-        gridRows?:
-          | T
-          | {
-              rowString?: T;
-              id?: T;
-            };
-        wordsToFind?:
-          | T
-          | {
-              word?: T;
-              id?: T;
-            };
-      };
-  matchGroup?:
-    | T
-    | {
-        instruction?: T;
-        pairs?:
-          | T
-          | {
-              leftItem?: T;
-              rightItem?: T;
-              id?: T;
-            };
-      };
-  spotLieGroup?:
-    | T
-    | {
-        statements?:
-          | T
-          | {
-              statementText?: T;
-              isLie?: T;
-              id?: T;
-            };
-      };
-  reorderGroup?:
-    | T
-    | {
-        instruction?: T;
-        itemsInCorrectOrder?:
-          | T
-          | {
-              itemText?: T;
-              id?: T;
-            };
-      };
-  dragDropGroup?:
-    | T
-    | {
-        instruction?: T;
-        dragMode?: T;
-        sentenceWordsOrder?:
-          | T
-          | {
-              word?: T;
-              id?: T;
-            };
-        dropZones?:
-          | T
-          | {
-              zoneTitle?: T;
-              zoneItems?:
-                | T
-                | {
-                    itemText?: T;
-                    id?: T;
-                  };
-              id?: T;
-            };
-      };
-  timeLimit?: T;
-  points?: T;
-  negativePoints?: T;
-  difficulty?: T;
-  enableDoubleUp?: T;
-  explanation?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        image?: T;
-      };
-  publishedAt?: T;
-  order?: T;
-  slug?: T;
-  slugLock?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "user-submissions_select".
- */
-export interface UserSubmissionsSelect<T extends boolean = true> {
-  user?: T;
-  quiz?: T;
-  score?: T;
-  answers?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "quiz-attempts_select".
- */
-export interface QuizAttemptsSelect<T extends boolean = true> {
-  user?: T;
-  quiz?: T;
-  score?: T;
-  totalQuestions?: T;
-  correctAnswers?: T;
-  timeTaken?: T;
-  completedAt?: T;
-  rankAtCompletion?: T;
-  round?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "quiz-rounds_select".
- */
-export interface QuizRoundsSelect<T extends boolean = true> {
-  user?: T;
-  quiz?: T;
-  day?: T;
-  round?: T;
-  status?: T;
-  questions?: T;
-  sponsoredQuestion?: T;
-  score?: T;
-  completedAt?: T;
-  recycled?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects_select".
  */
 export interface RedirectsSelect<T extends boolean = true> {
@@ -5894,64 +5898,6 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "header".
- */
-export interface Header {
-  id: number;
-  /**
-   * Upload the logo for the header.
-   */
-  logo?: (number | null) | Media;
-  /**
-   * Upload the logo for the header right side.
-   */
-  secondarylogo?: (number | null) | Media;
-  navItems?:
-    | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'pages';
-                value: number | Page;
-              } | null)
-            | ({
-                relationTo: 'posts';
-                value: number | Post;
-              } | null);
-          url?: string | null;
-          label: string;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "footer".
- */
-export interface Footer {
-  id: number;
-  copyright?: string | null;
-  companyInfo?: {
-    supportEmail?: string | null;
-  };
-  socialMedia?:
-    | {
-        platform: string;
-        url: string;
-        icon?: (number | null) | Media;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
  * Player titles, per-game timers, the speed bonus and the shareable scorecard.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -5969,6 +5915,23 @@ export interface QuizSetting {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Each day's rounds run from the start hour until the same hour the next day. Nobody can start a round during the break just before it. Players never get a question they have already answered - unless it was edited after they answered it. Put each day's questions in the quiz's Question Pool before the start hour (new questions, or the same ones rewritten).
+   */
+  gameDay?: {
+    /**
+     * 0 = midnight, 8 = 8 AM, 20 = 8 PM
+     */
+    startHour?: number | null;
+    /**
+     * hour 0 + minute 30 = 12:30 AM
+     */
+    startMinute?: number | null;
+    /**
+     * 60 with a 12:30 AM start = no play 11:30 PM-12:30 AM. 0 = no break.
+     */
+    coolOffMinutes?: number | null;
+  };
   gameTimers?: {
     mcq?: number | null;
     dropdown?: number | null;
@@ -6080,51 +6043,61 @@ export interface QuizSiteSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "header_select".
+ * via the `definition` "header".
  */
-export interface HeaderSelect<T extends boolean = true> {
-  logo?: T;
-  secondarylogo?: T;
+export interface Header {
+  id: number;
+  /**
+   * Upload the logo for the header.
+   */
+  logo?: (number | null) | Media;
+  /**
+   * Upload the logo for the header right side.
+   */
+  secondarylogo?: (number | null) | Media;
   navItems?:
-    | T
     | {
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-            };
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: number | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: number | Post;
+              } | null);
+          url?: string | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "footer_select".
+ * via the `definition` "footer".
  */
-export interface FooterSelect<T extends boolean = true> {
-  copyright?: T;
-  companyInfo?:
-    | T
-    | {
-        supportEmail?: T;
-      };
+export interface Footer {
+  id: number;
+  copyright?: string | null;
+  companyInfo?: {
+    supportEmail?: string | null;
+  };
   socialMedia?:
-    | T
     | {
-        platform?: T;
-        url?: T;
-        icon?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
+        platform: string;
+        url: string;
+        icon?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -6137,6 +6110,13 @@ export interface QuizSettingsSelect<T extends boolean = true> {
         name?: T;
         minXP?: T;
         id?: T;
+      };
+  gameDay?:
+    | T
+    | {
+        startHour?: T;
+        startMinute?: T;
+        coolOffMinutes?: T;
       };
   gameTimers?:
     | T
@@ -6232,6 +6212,54 @@ export interface QuizSiteSettingsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header_select".
+ */
+export interface HeaderSelect<T extends boolean = true> {
+  logo?: T;
+  secondarylogo?: T;
+  navItems?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer_select".
+ */
+export interface FooterSelect<T extends boolean = true> {
+  copyright?: T;
+  companyInfo?:
+    | T
+    | {
+        supportEmail?: T;
+      };
+  socialMedia?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        icon?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -6250,16 +6278,16 @@ export interface TaskSchedulePublish {
     locale?: string | null;
     doc?:
       | ({
+          relationTo: 'questions';
+          value: number | Question;
+        } | null)
+      | ({
           relationTo: 'pages';
           value: number | Page;
         } | null)
       | ({
           relationTo: 'posts';
           value: number | Post;
-        } | null)
-      | ({
-          relationTo: 'questions';
-          value: number | Question;
         } | null);
     global?: string | null;
     user?: (number | null) | User;

@@ -30,6 +30,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
   // Speed bonus tiers from CMS > Quiz Settings > Game Timers & Scoring (sent with the round)
   const [scoring, setScoring] = useState<ScoringSettings>(DEFAULT_SCORING)
   const [notice, setNotice] = useState<string | null>(null)
+  const [noticeTitle, setNoticeTitle] = useState<string | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [totalScore, setTotalScore] = useState(0)
   const [isCompleted, setIsCompleted] = useState(false)
@@ -38,6 +39,8 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true)
   const [alreadyPlayedToday, setAlreadyPlayedToday] = useState(false)
   const [lastAttemptScore, setLastAttemptScore] = useState<number | null>(null)
+  // When the next game day starts, e.g. "12:30 AM" (from the server, set in Quiz Settings)
+  const [opensAt, setOpensAt] = useState<string | null>(null)
   const [resultTitle, setResultTitle] = useState<SubmitTitle | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -89,13 +92,22 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
           } else if (data?.state === 'done') {
             setAlreadyPlayedToday(true)
             setLastAttemptScore(data?.todayScore ?? 0)
+            setOpensAt(data?.opensAt ?? null)
             setRoundInfo({ round: data.totalRounds, totalRounds: data.totalRounds, roundId: null })
           } else if (data?.state === 'not_started') {
             setNotice('This challenge has not started yet. Check back soon!')
           } else if (data?.state === 'closed') {
             setNotice('This challenge has ended. Thanks for playing!')
+          } else if (data?.state === 'maintenance') {
+            setNoticeTitle('Back in a few minutes')
+            setNotice(data.message || 'Chenz Quiz is being updated. Please try again in a few minutes.')
+          } else if (data?.state === 'cooloff') {
+            setNoticeTitle("Today's round has closed")
+            setNotice(`Today's round has closed. New questions open at ${data.opensAt || '12:30 AM'}.`)
           } else if (data?.state === 'empty') {
-            setNotice('No new questions are available for you right now. Please check back later.')
+            setNotice(
+              `You've played all the questions available right now. New questions open at ${data.opensAt || '12:30 AM'}.`,
+            )
           } else {
             setNotice('We could not load your questions. Please reload the page.')
           }
@@ -503,7 +515,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         </h2>
 
         <p className="text-slate-600 text-sm leading-relaxed mb-6">
-          Come back tomorrow for a fresh set of questions.
+          {opensAt ? `New questions open at ${opensAt}.` : 'Come back tomorrow for a fresh set of questions.'}
         </p>
 
         {lastAttemptScore !== null && (
@@ -585,7 +597,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         </div>
 
         <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">
-          No Questions Available
+          {noticeTitle || 'No Questions Available'}
         </h3>
         <p className="text-slate-500 text-sm md:text-base leading-relaxed mb-8 max-w-sm mx-auto">
           {notice ||

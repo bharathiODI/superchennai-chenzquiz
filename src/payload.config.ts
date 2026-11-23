@@ -24,6 +24,12 @@ import { QuizAttempts } from './collections/Games/QuizAttempts'
 import { QuizRounds } from './collections/Games/QuizRounds'
 import { QuizSettings } from './globals/QuizSettings'
 import { cmsOnlyWrites } from './plugins/cmsOnlyWrites'
+import { isDemoSite } from './utilities/siteEnv'
+
+// Put a collection or global under a heading in the CMS menu
+function inGroup<T extends { admin?: Record<string, any> }>(entity: T, group: string): T {
+  return { ...entity, admin: { ...(entity.admin || {}), group } }
+}
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -32,7 +38,10 @@ export default buildConfig({
   admin: {
     components: {
       beforeLogin: ['@/components/BeforeLogin'],
-      beforeDashboard: ['@/components/BeforeDashboard'],
+      // Site status (playing now + maintenance switch) first on the dashboard
+      beforeDashboard: ['@/components/admin/SiteStatus#SiteStatus', '@/components/BeforeDashboard'],
+      // "DEMO CMS" strip on the demo site (renders nothing on live)
+      header: ['@/components/admin/SiteEnvBanner#SiteEnvBanner'],
       views: {},
       graphics: {
         Logo: '@/components/admin/AdminLogo',
@@ -43,6 +52,7 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    ...(isDemoSite() ? { meta: { titleSuffix: ' - DEMO' } } : {}),
     user: Users.slug,
     livePreview: {
       breakpoints: [
@@ -80,17 +90,18 @@ export default buildConfig({
     push: false,
   }),
 
+  // CMS menu: grouped and in this order (groups appear in the order they first occur).
   collections: [
-    Pages,
-    Posts,
-    Media,
-    Users,
-    QuizUsers,
-    Quizzes,
-    Questions,
-    UserSubmissions,
-    QuizAttempts,
-    QuizRounds,
+    inGroup(Quizzes, 'Quiz'),
+    inGroup(Questions, 'Quiz'),
+    inGroup(QuizUsers, 'Players & Scores'),
+    inGroup(QuizRounds, 'Players & Scores'),
+    inGroup(QuizAttempts, 'Players & Scores'),
+    inGroup(UserSubmissions, 'Players & Scores'),
+    inGroup(Pages, 'Website'),
+    inGroup(Posts, 'Website'),
+    inGroup(Media, 'Website'),
+    inGroup(Users, 'Admin'),
   ],
 
   // #################################################################################
@@ -104,7 +115,12 @@ export default buildConfig({
     getServerSideURL(),
   ].filter(Boolean),
 
-  globals: [Header, Footer, QuizSettings, QuizSiteSettings],
+  globals: [
+    inGroup(QuizSettings, 'Quiz'),
+    inGroup(QuizSiteSettings, 'Quiz'),
+    inGroup(Header, 'Website'),
+    inGroup(Footer, 'Website'),
+  ],
   blocks: [],
   plugins: [
     ...plugins,

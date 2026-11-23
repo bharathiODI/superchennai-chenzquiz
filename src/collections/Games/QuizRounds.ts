@@ -13,15 +13,20 @@ export const QuizRounds: CollectionConfig = {
   labels: { singular: 'Quiz Round', plural: 'Quiz Rounds' },
   admin: {
     useAsTitle: 'day',
-    defaultColumns: ['user', 'quiz', 'day', 'round', 'status', 'score'],
+    // Search box: player name, phone or game day (e.g. 2026-11-23)
+    listSearchableFields: ['user.name', 'user.phone', 'day'],
+    defaultColumns: ['user', 'quiz', 'day', 'round', 'status', 'score', 'completedAt'],
     hidden: isNotAdmin,
-    description: 'Questions given to each player per day and round (created automatically).',
+    description: 'Questions given to each player per game day and round. Read-only here (written only by the game). Search: player name, phone or game day (e.g. 2026-11-23).',
+    components: { beforeListTable: ['@/components/admin/SiteStatus#SiteStatus', '@/components/admin/ScoreExport#ScoreExport'] },
   },
   access: {
     read: isAdminUser,
+    // Read-only in the CMS: scores and players are written only by the game itself, so nobody can
+    // change them by mistake here. (Server code uses overrideAccess and is not affected.)
     create: () => false,
-    update: isAdminUser,
-    delete: isAdminUser,
+    update: () => false,
+    delete: () => false,
   },
   indexes: [{ fields: ['user', 'quiz', 'day', 'round'], unique: true }],
   fields: [
@@ -51,7 +56,7 @@ export const QuizRounds: CollectionConfig = {
       fields: [
         { name: 'score', type: 'number' },
         { name: 'completedAt', type: 'date' },
-        { name: 'recycled', type: 'number', defaultValue: 0, admin: { description: 'Questions reused because the pool ran out' } },
+        { name: 'recycled', type: 'number', defaultValue: 0, admin: { description: 'Questions reused because the pool ran out (only rounds before 23 Nov 2026 - questions are no longer repeated)' } },
       ],
     },
   ],
