@@ -16,6 +16,7 @@ export const QuizRounds: CollectionConfig = {
     defaultColumns: ['user', 'quiz', 'day', 'round', 'status', 'score'],
     hidden: isNotAdmin,
     description: 'Questions given to each player per day and round (created automatically).',
+    components: { beforeListTable: ['@/components/admin/ScoreExport#ScoreExport'] },
   },
   access: {
     read: isAdminUser,

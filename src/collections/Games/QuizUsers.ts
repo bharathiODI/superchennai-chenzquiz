@@ -32,6 +32,7 @@ export const QuizUsers: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'email', 'totalXP', 'createdAt'],
      hidden: isNotAdmin,
+    components: { beforeListTable: ['@/components/admin/ScoreExport#ScoreExport'] },
   },
   // Sign-up, login and scoring go through the app's own API routes (server side), so the REST API
   // only needs: admins manage players; a player can read their own record.
