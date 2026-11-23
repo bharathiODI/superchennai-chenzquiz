@@ -6,6 +6,8 @@
 #   bash chenzquiz-site.sh maintenance on|off [demo] ["msg"] no new games or logins while on (no restart)
 #   bash chenzquiz-site.sh demo-db live                      DEMO app uses the LIVE database (e.g. exports)
 #   bash chenzquiz-site.sh demo-db demo                      DEMO back on its own database
+#   bash chenzquiz-site.sh demo-db copy-live                 copy ALL live data (players, scores, content,
+#                                                            media) into the DEMO's own database for testing
 #   bash chenzquiz-site.sh demo-ips "1.2.3.4 5.6.7.0/24"     only these IPs can open the demo site
 #   bash chenzquiz-site.sh demo-ips open                     anyone with the link can open the demo
 #
@@ -110,9 +112,54 @@ maintenance)
   ;;
 
 demo-db)
-  target="${2:-}"; [ "$target" = live ] || [ "$target" = demo ] || fail "use: demo-db live|demo"
+  target="${2:-}"; [[ "$target" =~ ^(live|demo|copy-live)$ ]] || fail "use: demo-db live|demo|copy-live"
   ENV_FILE="$DEMO_ROOT/shared/.env"; SAVED="$DEMO_ROOT/shared/.env.demo-database"; MARK="$DEMO_ROOT/shared/USING_LIVE_DB"
   [ -f "$ENV_FILE" ] || fail "$ENV_FILE not found - set up the demo first (demo-setup.sh)"
+  if [ "$target" = copy-live ]; then
+    # Live is only READ (pg_dump). The demo's own database is replaced by a full copy.
+    [ ! -f "$MARK" ] || fail "the demo is switched to the live database - first: bash $0 demo-db demo"
+    live_uri="$(db_uri "$LIVE_ROOT")"; demo_uri="$(db_uri "$DEMO_ROOT")"
+    [ -n "$live_uri" ] && [ -n "$demo_uri" ] || fail "DATABASE_URI not found in a site's .env"
+    live_db="$(db_name "$live_uri")"; demo_db="$(db_name "$demo_uri")"
+    [ "$live_db" != "$demo_db" ] || fail "the demo .env points at the live database ($live_db) - stopped"
+    role="$(node -e 'process.stdout.write(decodeURIComponent(new URL(process.argv[1]).username))' "$demo_uri")"
+    say "Copying ALL live data ($live_db) into the DEMO database ($demo_db)"
+    echo "The live site and its database are only read. The demo's current data is backed up first."
+    if [ -t 0 ]; then
+      read -r -p "Replace the demo data with a copy of live? Type yes: " answer
+      [ "$answer" = yes ] || fail "cancelled - nothing changed"
+    fi
+    mkdir -p /root/_local; chmod 700 /root/_local
+    backup="/root/_local/${demo_db}-before-copy-$(date +%Y%m%d-%H%M).sql.gz"
+    pg_dump "$demo_uri" --no-owner --no-privileges | gzip > "$backup"; chmod 600 "$backup"
+    echo "  demo backup: $backup"
+    was="$(flags_state "$DEMO_ROOT")"
+    write_flags "$DEMO_ROOT" on "The demo is being refreshed with live data - back in a minute."
+    pm2 stop "$DEMO_APP" >/dev/null 2>&1 || true
+    pg_admin() { sudo -u postgres psql -X -q -v ON_ERROR_STOP=1 "$@"; }
+    pg_admin -c "DROP DATABASE \"$demo_db\" WITH (FORCE)"
+    pg_admin -c "CREATE DATABASE \"$demo_db\" OWNER \"$role\""
+    echo "  copying live data..."
+    pg_dump "$live_uri" --no-owner --no-privileges | psql "$demo_uri" -X -q -v ON_ERROR_STOP=1 >/dev/null
+    echo "  database changes the demo code has and live hasn't had yet:"
+    (cd /tmp && DATABASE_URI="$demo_uri" node "$DEMO_ROOT/current/scripts/db-migrate.mjs") | sed 's/^/    /'
+    psql "$demo_uri" -X -q -c "UPDATE quiz_site_settings SET test_players_allow_test_logins = true" &&
+      echo "  test player logins: on (demo only)"
+    rsync -a "$LIVE_ROOT/shared/media/" "$DEMO_ROOT/shared/media/" && echo "  media copied"
+    write_flags "$DEMO_ROOT" "$was" ""
+    pm2 restart "$DEMO_APP" --update-env >/dev/null
+    wait_up "$DEMO_PORT" || fail "demo app did not come back - check: pm2 logs $DEMO_APP"
+    pm2 save >/dev/null 2>&1 || true
+    counts="$(psql "$demo_uri" -X -At -F ' / ' -c "SELECT (SELECT count(*) FROM quiz_users), (SELECT count(*) FROM quiz_rounds), (SELECT count(*) FROM quiz_attempts)")"
+    cat <<MSG
+Done. The demo now has its own copy of live data as of $(date '+%d %b %H:%M') (players / rounds / finished rounds: $counts).
+  - Games, logins and CMS edits on the demo change only the demo copy - live is untouched.
+  - Test with test players (0000000001-0000000010 + TEST_OTP). Typing a real player's number
+    sends that person a real OTP SMS - don't.
+  - Run this again any time for fresher data. Old demo data, if ever needed: $backup
+MSG
+    exit 0
+  fi
   if [ "$target" = live ]; then
     [ -f "$MARK" ] && { echo "The demo already uses the live database."; exit 0; }
     live_uri="$(db_uri "$LIVE_ROOT")"; demo_uri="$(db_uri "$DEMO_ROOT")"
