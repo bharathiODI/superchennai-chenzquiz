@@ -62,6 +62,7 @@ for cmd in node npm pm2 curl rsync ss; do
 done
 [ -d "$RELEASE_DIR" ] || fail "release folder $RELEASE_DIR not found"
 [ -f "$SHARED/.env" ] || fail "$SHARED/.env missing - run scripts/server-setup.sh first"
+[ ! -f "$SHARED/USING_LIVE_DB" ] || fail "this site is using the LIVE database (chenzquiz-site.sh demo-db live). Switch back first: bash chenzquiz-site.sh demo-db demo"
 
 # Live and demo build on this one server: run one deploy at a time (the other waits here).
 # A lock folder (not an open file, which PM2 could inherit) holding the deploy's pid;
@@ -139,6 +140,8 @@ cd "$RELEASE_DIR"
 
 log "Linking shared .env and media"
 ln -sfn "$SHARED/.env" "$RELEASE_DIR/.env"
+# Per-site switches (maintenance mode) - kept across deploys; the app writes through this link
+ln -sfn "$SHARED/site-flags.json" "$RELEASE_DIR/site-flags.json"
 mkdir -p "$SHARED/media" "$RELEASE_DIR/public"
 rm -rf "$RELEASE_DIR/public/media"
 ln -sfn "$SHARED/media" "$RELEASE_DIR/public/media"

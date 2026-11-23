@@ -2634,6 +2634,8 @@ export interface PBChenzCreativeHeroBlock {
   blockType: 'chenzCreativeHero';
 }
 /**
+ * Players. Read-only here (changed only by the game). Search by name, phone or email.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "quiz-users".
  */
@@ -2906,6 +2908,8 @@ export interface UserSubmission {
   createdAt: string;
 }
 /**
+ * One entry per finished round. Read-only here (written only by the game).
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "quiz-attempts".
  */
@@ -2927,7 +2931,7 @@ export interface QuizAttempt {
   createdAt: string;
 }
 /**
- * Questions given to each player per day and round (created automatically).
+ * Questions given to each player per game day and round. Read-only here (written only by the game).
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "quiz-rounds".

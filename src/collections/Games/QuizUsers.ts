@@ -30,20 +30,25 @@ export const QuizUsers: CollectionConfig = {
   },
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'email', 'totalXP', 'createdAt'],
+    defaultColumns: ['name', 'phone', 'email', 'totalXP', 'totalTimeTaken', 'createdAt'],
+    listSearchableFields: ['name', 'phone', 'email'],
+    description: 'Players. Read-only here (changed only by the game). Search by name, phone or email.',
      hidden: isNotAdmin,
     components: { beforeListTable: ['@/components/admin/ScoreExport#ScoreExport'] },
   },
   // Sign-up, login and scoring go through the app's own API routes (server side), so the REST API
   // only needs: admins manage players; a player can read their own record.
   access: {
-    create: isCmsAdmin,
+    // Read-only in the CMS: scores and players are written only by the game itself, so nobody can
+  // change them by mistake here. (Server code uses overrideAccess and is not affected.)
+    create: () => false,
     read: (args) => {
       if (isCmsAdmin(args)) return true
       const user = args.req.user as any
       return user?.collection === 'quiz-users' ? { id: { equals: user.id } } : false
     },
-    update: isCmsAdmin,
+    update: () => false,
+    // Admins can still delete a player (with their rounds and scores - see the hook below).
     delete: isCmsAdmin,
   },
   hooks: {
@@ -96,6 +101,12 @@ export const QuizUsers: CollectionConfig = {
       name: 'avatar',
       type: 'upload',
       relationTo: 'media',
+    },
+    {
+      // Display only: the player's rounds and scores (no database column)
+      name: 'gameHistory',
+      type: 'ui',
+      admin: { components: { Field: '@/components/admin/PlayerHistory#PlayerHistory' } },
     },
   ],
 }

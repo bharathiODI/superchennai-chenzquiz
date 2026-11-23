@@ -13,16 +13,18 @@ export const QuizRounds: CollectionConfig = {
   labels: { singular: 'Quiz Round', plural: 'Quiz Rounds' },
   admin: {
     useAsTitle: 'day',
-    defaultColumns: ['user', 'quiz', 'day', 'round', 'status', 'score'],
+    defaultColumns: ['user', 'quiz', 'day', 'round', 'status', 'score', 'completedAt'],
     hidden: isNotAdmin,
-    description: 'Questions given to each player per day and round (created automatically).',
-    components: { beforeListTable: ['@/components/admin/ScoreExport#ScoreExport'] },
+    description: 'Questions given to each player per game day and round. Read-only here (written only by the game).',
+    components: { beforeListTable: ['@/components/admin/SiteStatus#SiteStatus', '@/components/admin/ScoreExport#ScoreExport'] },
   },
   access: {
     read: isAdminUser,
+    // Read-only in the CMS: scores and players are written only by the game itself, so nobody can
+    // change them by mistake here. (Server code uses overrideAccess and is not affected.)
     create: () => false,
-    update: isAdminUser,
-    delete: isAdminUser,
+    update: () => false,
+    delete: () => false,
   },
   indexes: [{ fields: ['user', 'quiz', 'day', 'round'], unique: true }],
   fields: [

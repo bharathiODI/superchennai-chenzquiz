@@ -40,6 +40,37 @@ Recommended in GitHub (**Settings > Branches > Add rule**) for `main` and for `d
 - Fresh copy of live content (removes demo players/scores): on the server
   `bash /var/www/chenzquiz-demo/current/scripts/demo-setup.sh --refresh-data`
 
+## Site controls (maintenance, playing now, demo database, demo access)
+
+**In the CMS** (dashboard and Quiz Rounds): the **Site status** box shows who is mid-round right now
+(refreshes every 15 s) and has the **maintenance** switch. Maintenance ON: no new games or logins,
+players see the message; a round already on screen can still be finished. Kept across deploys.
+
+**On the server** (`scripts/chenzquiz-site.sh`, copy in `/root`; add `demo` for the demo site):
+
+```bash
+bash chenzquiz-site.sh status [demo]                      # maintenance, players mid-round, database
+bash chenzquiz-site.sh playing [demo]                     # who is mid-round right now
+bash chenzquiz-site.sh maintenance on|off [demo] ["msg"]  # same switch as the CMS (no restart)
+bash chenzquiz-site.sh demo-db live                       # demo app on the LIVE database (exports)
+bash chenzquiz-site.sh demo-db demo                       # demo back on its own database
+bash chenzquiz-site.sh demo-ips "1.2.3.4 5.6.7.0/24"      # only these IPs can open the demo
+bash chenzquiz-site.sh demo-ips open                      # anyone with the link (still not indexed)
+```
+
+**Safe live deploy:** maintenance on -> wait until Playing now is 0 -> merge -> `chenzquiz-deploy.sh after`
+-> maintenance off.
+
+**Demo on live data** (`demo-db live`): the demo CMS reads and writes the LIVE database (orange
+"live data" strip/tag), games and logins on the demo are off, and deploys to the demo are refused
+until `demo-db demo`. Use it for exports/reading only.
+
+**Demo is never indexed:** `noindex` header (Apache) and meta tags, robots.txt `Disallow: /`, no
+Google Analytics/Tag Manager. Every page shows a DEMO tag; the CMS shows a DEMO strip.
+
+**Player data is read-only in the CMS** (players, rounds, scores, submissions): only the game
+writes it. Admins can still delete a player (with their rounds and scores).
+
 ### Setting up the demo site (once)
 
 1. DNS: an **A record** `chenzquiz-demo.superchennai.com` -> the VPS IP (89.116.21.132).

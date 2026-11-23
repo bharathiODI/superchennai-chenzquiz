@@ -3,6 +3,7 @@ import { headers as getHeaders } from 'next/headers'
 import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { getTodayRound } from '@/utilities/quizRounds'
+import { readSiteFlags } from '@/utilities/siteFlags'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,6 +14,12 @@ export async function GET(req: Request) {
     const quizId = searchParams.get('quizId')
     let userId: string | number | null = searchParams.get('userId')
     if (!quizId) return NextResponse.json({ error: 'quizId is required' }, { status: 400 })
+
+    // Maintenance mode: no new rounds (a round already on screen can still be submitted)
+    const flags = readSiteFlags()
+    if (flags.maintenance) {
+      return NextResponse.json({ state: 'maintenance', message: flags.message }, { headers: { 'Cache-Control': 'no-store' } })
+    }
 
     const payload = await getPayload({ config: configPromise })
 

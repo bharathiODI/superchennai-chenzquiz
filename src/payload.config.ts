@@ -24,6 +24,7 @@ import { QuizAttempts } from './collections/Games/QuizAttempts'
 import { QuizRounds } from './collections/Games/QuizRounds'
 import { QuizSettings } from './globals/QuizSettings'
 import { cmsOnlyWrites } from './plugins/cmsOnlyWrites'
+import { isDemoSite } from './utilities/siteEnv'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -32,7 +33,10 @@ export default buildConfig({
   admin: {
     components: {
       beforeLogin: ['@/components/BeforeLogin'],
-      beforeDashboard: ['@/components/BeforeDashboard'],
+      // Site status (playing now + maintenance switch) first on the dashboard
+      beforeDashboard: ['@/components/admin/SiteStatus#SiteStatus', '@/components/BeforeDashboard'],
+      // "DEMO CMS" strip on the demo site (renders nothing on live)
+      header: ['@/components/admin/SiteEnvBanner#SiteEnvBanner'],
       views: {},
       graphics: {
         Logo: '@/components/admin/AdminLogo',
@@ -43,6 +47,7 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    ...(isDemoSite() ? { meta: { titleSuffix: ' - DEMO' } } : {}),
     user: Users.slug,
     livePreview: {
       breakpoints: [

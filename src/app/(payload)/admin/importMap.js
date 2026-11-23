@@ -18,13 +18,16 @@ import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c08
 import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { SlugComponent as SlugComponent_92cc057d0a2abb4f6cf0307edf59f986 } from '@/fields/slug/SlugComponent'
+import { PlayerHistory as PlayerHistory_18e7a35b2b98331a4206ebaf71d41619 } from '@/components/admin/PlayerHistory'
 import { ScoreExport as ScoreExport_87061e8cd8b931dbef9ada3b9007abeb } from '@/components/admin/ScoreExport'
 import { CorrectOptionField as CorrectOptionField_e63b0b8d3235c8d0609b1523bcdd4997 } from '@/components/admin/CorrectOptionField'
+import { SiteStatus as SiteStatus_f3500aa0fc195dd4e33325e14c4d5642 } from '@/components/admin/SiteStatus'
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { RowLabel as RowLabel_ec255a65fa6fa8d1faeb09cf35284224 } from '@/Header/RowLabel'
 import { OrderedListFeatureClient as OrderedListFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { UnorderedListFeatureClient as UnorderedListFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
+import { SiteEnvBanner as SiteEnvBanner_6bc324b089251776c0380f59f9549c90 } from '@/components/admin/SiteEnvBanner'
 import { default as default_d500ae2ad98a0a33d640ae0ac1a3417c } from '@/components/admin/AdminIcon'
 import { default as default_b80a86fce1072afc84cd6a430a965697 } from '@/components/admin/AdminLogo'
 import { default as default_1a7510af427896d367a49dbf838d2de6 } from '@/components/BeforeDashboard'
@@ -53,13 +56,16 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaDescriptionComponent": MetaDescriptionComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@/fields/slug/SlugComponent#SlugComponent": SlugComponent_92cc057d0a2abb4f6cf0307edf59f986,
+  "@/components/admin/PlayerHistory#PlayerHistory": PlayerHistory_18e7a35b2b98331a4206ebaf71d41619,
   "@/components/admin/ScoreExport#ScoreExport": ScoreExport_87061e8cd8b931dbef9ada3b9007abeb,
   "@/components/admin/CorrectOptionField#CorrectOptionField": CorrectOptionField_e63b0b8d3235c8d0609b1523bcdd4997,
+  "@/components/admin/SiteStatus#SiteStatus": SiteStatus_f3500aa0fc195dd4e33325e14c4d5642,
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,
   "@/Header/RowLabel#RowLabel": RowLabel_ec255a65fa6fa8d1faeb09cf35284224,
   "@payloadcms/richtext-lexical/client#OrderedListFeatureClient": OrderedListFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#UnorderedListFeatureClient": UnorderedListFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
+  "@/components/admin/SiteEnvBanner#SiteEnvBanner": SiteEnvBanner_6bc324b089251776c0380f59f9549c90,
   "@/components/admin/AdminIcon#default": default_d500ae2ad98a0a33d640ae0ac1a3417c,
   "@/components/admin/AdminLogo#default": default_b80a86fce1072afc84cd6a430a965697,
   "@/components/BeforeDashboard#default": default_1a7510af427896d367a49dbf838d2de6,

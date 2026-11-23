@@ -103,7 +103,7 @@ else
   node - "$LIVE_ROOT/shared/.env" "$ENV_FILE" "$DEMO_URI" "https://$DEMO_DOMAIN" "$(openssl rand -hex 32)" "$(shuf -i 100000-999999 -n 1)" <<'NODE'
 const fs = require('fs')
 const [src, dest, uri, url, secret, otp] = process.argv.slice(2)
-const set = { DATABASE_URI: uri, NEXT_PUBLIC_SERVER_URL: url, PAYLOAD_SECRET: secret }
+const set = { DATABASE_URI: uri, NEXT_PUBLIC_SERVER_URL: url, PAYLOAD_SECRET: secret, SITE_ENV: 'demo' }
 const seen = new Set()
 const lines = fs.readFileSync(src, 'utf8').split(/\r?\n/).map((line) => {
   const m = line.match(/^(\s*(?:export\s+)?)([A-Za-z_][A-Za-z0-9_]*)(\s*=\s*)(.*)$/)

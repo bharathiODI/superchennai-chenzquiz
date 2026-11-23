@@ -20,9 +20,14 @@ import '@/assets/Css/style.css'
 import Link from 'next/link'
 import LeaderboardComponent from '@/blocks/Leaderboard/Leaderboard'
 import StickyNavigation from '@/blocks/StickyNavigation/StickyNavigation'
+import { SiteEnvBadge } from '@/components/SiteEnvBadge'
+import { MaintenanceBanner } from '@/components/MaintenanceBanner'
+import { isDemoSite } from '@/utilities/siteEnv'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
+  // The demo site (internal testing) must not send visits to the live analytics
+  const demo = isDemoSite()
 
   return (
     <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
@@ -32,19 +37,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link href="/favicon.ico" rel="icon" type="image/svg+xml" />
       </head>
       <body>
-        <GoogleTagManager gtmId="GTM-53P93R9G" />
-        <GoogleAnalytics gaId="G-ZEMVJH3G2E" />
+        {!demo && <GoogleTagManager gtmId="GTM-53P93R9G" />}
+        {!demo && <GoogleAnalytics gaId="G-ZEMVJH3G2E" />}
         <Providers>
           <AdminBar
             adminBarProps={{
               preview: isEnabled,
             }}
           />
+          <MaintenanceBanner />
           <Header />
           {children}
           <Footer />
           <LeaderboardComponent />
           <StickyNavigation />
+          <SiteEnvBadge />
         </Providers>
       </body>
     </html>
@@ -61,4 +68,6 @@ export const metadata: Metadata = {
   verification: {
     google: 'TV8yLsjwGYJA-dPtmW_ruGvrLxa9c6Hpx1sNSMoxm2w',
   },
+  // Demo site: keep it out of search engines
+  ...(isDemoSite() ? { robots: { index: false, follow: false } } : {}),
 }

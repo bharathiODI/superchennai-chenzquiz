@@ -5,7 +5,8 @@ export const QuizAttempts: CollectionConfig = {
   slug: 'quiz-attempts',
   admin: {
     useAsTitle: 'id',
-    defaultColumns: ['user', 'quiz', 'score', 'completedAt'],
+    defaultColumns: ['user', 'quiz', 'score', 'correctAnswers', 'timeTaken', 'round', 'completedAt'],
+    description: 'One entry per finished round. Read-only here (written only by the game).',
      hidden: isNotAdmin,
   },
   access: {
@@ -23,16 +24,11 @@ export const QuizAttempts: CollectionConfig = {
         },
       }
     },
-    // Attempts are written only by /api/quiz-submit (server side)
-    create: ({ req: { user } }) => (user as any)?.collection === 'users' && (user as any)?.role === 'admin',
-    update: ({ req: { user } }) => {
-      const userRole = (user as any)?.role
-      return Array.isArray(userRole) ? userRole.includes('admin') : userRole === 'admin'
-    },
-    delete: ({ req: { user } }) => {
-      const userRole = (user as any)?.role
-      return Array.isArray(userRole) ? userRole.includes('admin') : userRole === 'admin'
-    },
+    // Read-only in the CMS: scores and players are written only by the game itself, so nobody can
+    // change them by mistake here. (Server code uses overrideAccess and is not affected.)
+    create: () => false,
+    update: () => false,
+    delete: () => false,
   },
   fields: [
     {
