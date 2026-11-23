@@ -88,10 +88,12 @@ export async function buildScoreReport(
   }
   const kept = rounds.filter(keep).sort((a, b) => String(a.day).localeCompare(String(b.day)) || Date.parse(a.createdAt) - Date.parse(b.createdAt))
 
-  // Day numbers count from the quiz's first game day (or the first day with rounds).
+  // Day numbers count from the first game day anyone played (or the quiz's start date if that is
+  // earlier) - so a start date edited later can't produce "Day 0".
   const quiz = opts.quizId ? quizById.get(String(opts.quizId)) : null
   const days = Array.from(new Set(kept.map((r) => String(r.day)))).sort()
-  const firstDay = (quiz?.quizDate && gameDayKey(quiz.quizDate, gameDay)) || days[0]
+  const startDay = quiz?.quizDate ? gameDayKey(quiz.quizDate, gameDay) : null
+  const firstDay = [startDay, days[0]].filter((d): d is string => Boolean(d)).sort()[0]
   const dayNo = (key: string) => (firstDay ? daysBetween(firstDay, key) + 1 : 0)
   const dayLabels = Object.fromEntries(days.map((d) => [d, quiz ? `Day ${dayNo(d)} (${fmtDay(d)})` : fmtDay(d)]))
 
@@ -146,7 +148,12 @@ export async function buildScoreReport(
         Email: player.email || '',
         ...(opts.quizId ? {} : { Quiz: q?.quizTitle || q?.title || `#${quizId}` }),
       }
-      for (const d of days) row[dayLabels[d] ?? d] = byDay[d]?.score ?? ''
+      // Per day: score and time side by side
+      for (const d of days) {
+        const label = dayLabels[d] ?? d
+        row[`${label} score`] = byDay[d]?.score ?? ''
+        row[`${label} time (s)`] = byDay[d]?.time ?? ''
+      }
       row['Days played'] = Object.keys(byDay).length
       row['Total score'] = total
       row['Total time (s)'] = time

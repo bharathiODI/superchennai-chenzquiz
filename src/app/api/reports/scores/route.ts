@@ -51,7 +51,7 @@ export async function GET(req: Request) {
       ['Game day', `Starts at ${formatStartHour(gameDay)} India time and runs to the next day's start (Quiz Settings > Game day)`],
       ['Test players', includeTestPlayers ? 'Included' : 'Left out (numbers +91 00000 000xx)'],
       [],
-      ['Day-wise scores', 'One row per player: score for each game day, total, and total time (less time ranks higher on a tie).'],
+      ['Day-wise scores', 'One row per player: score and time for each game day, then total score and total time (less time ranks higher on a tie).'],
       ['Daily ranking', "Each game day's players, best score first (ties: less time first)."],
       ['All rounds', 'Every round with its score, correct answers, time, start/finish and the questions asked.'],
     ]),
