@@ -13,9 +13,11 @@ export const QuizRounds: CollectionConfig = {
   labels: { singular: 'Quiz Round', plural: 'Quiz Rounds' },
   admin: {
     useAsTitle: 'day',
+    // Search box: player name, phone or game day (e.g. 2026-11-23)
+    listSearchableFields: ['user.name', 'user.phone', 'day'],
     defaultColumns: ['user', 'quiz', 'day', 'round', 'status', 'score', 'completedAt'],
     hidden: isNotAdmin,
-    description: 'Questions given to each player per game day and round. Read-only here (written only by the game).',
+    description: 'Questions given to each player per game day and round. Read-only here (written only by the game). Search: player name, phone or game day (e.g. 2026-11-23).',
     components: { beforeListTable: ['@/components/admin/SiteStatus#SiteStatus', '@/components/admin/ScoreExport#ScoreExport'] },
   },
   access: {
