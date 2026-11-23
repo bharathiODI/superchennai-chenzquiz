@@ -12,6 +12,7 @@
 # Safe deploy: maintenance on -> wait until "playing" shows 0 -> merge/deploy -> maintenance off.
 # The same switch is in the CMS dashboard (Site status).
 set -Eeuo pipefail
+cd /  # start somewhere that always exists: a deploy deletes old release folders, and pm2 fails if the shell was inside one
 
 LIVE_ROOT=/var/www/chenzquiz
 DEMO_ROOT=/var/www/chenzquiz-demo

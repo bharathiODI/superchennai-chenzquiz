@@ -15,6 +15,7 @@
 #
 # Settings (override like: DEMO_DOMAIN=quiz-demo.superchennai.com bash demo-setup.sh)
 set -Eeuo pipefail
+cd /  # start somewhere that always exists: a deploy deletes old release folders, and pm2 fails if the shell was inside one
 
 DEMO_DOMAIN="${DEMO_DOMAIN:-chenzquiz-demo.superchennai.com}"
 DEMO_ROOT="${DEMO_ROOT:-/var/www/chenzquiz-demo}"

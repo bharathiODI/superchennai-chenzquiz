@@ -9,6 +9,7 @@
 # Read-only except: "before" writes a backup file, "rollback" switches the live release.
 # It never posts anything to the site.
 set -Eeuo pipefail
+cd /  # start somewhere that always exists: a deploy deletes old release folders, and pm2 fails if the shell was inside one
 
 case "${2:-live}" in
   live) SITE=live APP_ROOT=/var/www/chenzquiz APP_NAME=chenzquiz-superchennai PORT=3007 ;;
