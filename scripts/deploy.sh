@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-# Production deploy - runs ON THE SERVER, called by .github/workflows/deploy.yml.
+# Deploy - runs ON THE SERVER, called by .github/workflows/deploy.yml for both sites:
+#   live: APP_ROOT=/var/www/chenzquiz       APP_NAME=chenzquiz-superchennai APP_PORT=3007
+#   demo: APP_ROOT=/var/www/chenzquiz-demo  APP_NAME=chenzquiz-demo         APP_PORT=3017
 #
 #   bash scripts/deploy.sh <release-name> [git-sha]
 #
@@ -29,6 +31,8 @@ RELEASE_DIR="$APP_ROOT/releases/$RELEASE"
 CURRENT="$APP_ROOT/current"
 SHARED="$APP_ROOT/shared"
 SWITCHED=0
+LOCK_DIR=/tmp/chenzquiz-deploy.lock
+LOCKED=0
 
 log() { printf '\n\033[1;36m==> %s\033[0m\n' "$*"; }
 fail() { printf '\n\033[1;31mERROR: %s\033[0m\n' "$*" >&2; exit 1; }
@@ -43,6 +47,7 @@ on_exit() {
     echo "Deploy failed before going live - the site was not changed."
     rm -rf "$RELEASE_DIR"
   fi
+  if [ "$LOCKED" = 1 ]; then rm -rf "$LOCK_DIR"; fi
 }
 trap on_exit EXIT
 
@@ -57,6 +62,21 @@ for cmd in node npm pm2 curl rsync ss; do
 done
 [ -d "$RELEASE_DIR" ] || fail "release folder $RELEASE_DIR not found"
 [ -f "$SHARED/.env" ] || fail "$SHARED/.env missing - run scripts/server-setup.sh first"
+
+# Live and demo build on this one server: run one deploy at a time (the other waits here).
+# A lock folder (not an open file, which PM2 could inherit) holding the deploy's pid;
+# a lock left by a deploy that died is taken over.
+waited=0
+until mkdir "$LOCK_DIR" 2>/dev/null; do
+  holder="$(cat "$LOCK_DIR/pid" 2>/dev/null || true)"
+  if [ -n "$holder" ] && ! kill -0 "$holder" 2>/dev/null; then rm -rf "$LOCK_DIR"; continue; fi
+  [ "$waited" = 0 ] && echo "Another chenzquiz deploy is running on this server (pid ${holder:-?}) - waiting for it to finish..."
+  sleep 10
+  waited=$((waited + 10))
+  [ "$waited" -lt 2700 ] || fail "gave up waiting for the other deploy (45 min)"
+done
+echo $$ > "$LOCK_DIR/pid"
+LOCKED=1
 
 port_busy() { [ -n "$(ss -ltnH "sport = :$APP_PORT" 2>/dev/null)" ]; }
 
