@@ -48,17 +48,11 @@ export function planRound(input: RoundPlanInput): RoundPlan {
   const regularPool = input.poolIds.filter((id) => !sponsored.has(key(id)) && !today.has(key(id)))
   const fresh = regularPool.filter((id) => !answered.has(key(id)))
   const arrange = <T,>(list: T[]) => (input.ordered ? [...list] : shuffle(list, random))
-  let picks = arrange(fresh).slice(0, regularNeeded)
-
-  // Pool exhausted for this player: reuse their oldest answered questions rather than serve a short round.
-  let recycled = 0
-  if (picks.length < regularNeeded) {
-    const inPool = new Set(regularPool.map(key))
-    const oldestFirst = input.answeredIds.filter((id, i, arr) => inPool.has(key(id)) && arr.findIndex((x) => key(x) === key(id)) === i)
-    const extra = oldestFirst.slice(0, regularNeeded - picks.length)
-    recycled = extra.length
-    picks = input.ordered ? [...picks, ...extra] : shuffle([...picks, ...extra], random)
-  }
+  // Never repeat a question the player has already answered. If the pool has fewer new questions
+  // than a round needs, the round is shorter; with none left the caller tells the player to come
+  // back when new questions are added. (Repeating old questions let players score twice.)
+  const picks = arrange(fresh).slice(0, regularNeeded)
+  const recycled = 0
 
   const questionIds: Id[] = [...picks]
   if (hasSponsor) {

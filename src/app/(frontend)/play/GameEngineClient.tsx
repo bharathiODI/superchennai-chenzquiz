@@ -38,6 +38,8 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true)
   const [alreadyPlayedToday, setAlreadyPlayedToday] = useState(false)
   const [lastAttemptScore, setLastAttemptScore] = useState<number | null>(null)
+  // When the next game day starts, e.g. "8:00 AM" (from the server, set in Quiz Settings)
+  const [opensAt, setOpensAt] = useState<string | null>(null)
   const [resultTitle, setResultTitle] = useState<SubmitTitle | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -89,13 +91,18 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
           } else if (data?.state === 'done') {
             setAlreadyPlayedToday(true)
             setLastAttemptScore(data?.todayScore ?? 0)
+            setOpensAt(data?.opensAt ?? null)
             setRoundInfo({ round: data.totalRounds, totalRounds: data.totalRounds, roundId: null })
           } else if (data?.state === 'not_started') {
             setNotice('This challenge has not started yet. Check back soon!')
           } else if (data?.state === 'closed') {
             setNotice('This challenge has ended. Thanks for playing!')
+          } else if (data?.state === 'cooloff') {
+            setNotice(`Today's round has closed. New questions open at ${data.opensAt || '8:00 AM'}.`)
           } else if (data?.state === 'empty') {
-            setNotice('No new questions are available for you right now. Please check back later.')
+            setNotice(
+              `You've played all the questions available right now. New questions open at ${data.opensAt || '8:00 AM'}.`,
+            )
           } else {
             setNotice('We could not load your questions. Please reload the page.')
           }
@@ -503,7 +510,7 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         </h2>
 
         <p className="text-slate-600 text-sm leading-relaxed mb-6">
-          Come back tomorrow for a fresh set of questions.
+          {opensAt ? `New questions open at ${opensAt}.` : 'Come back tomorrow for a fresh set of questions.'}
         </p>
 
         {lastAttemptScore !== null && (

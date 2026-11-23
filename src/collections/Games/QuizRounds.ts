@@ -51,7 +51,7 @@ export const QuizRounds: CollectionConfig = {
       fields: [
         { name: 'score', type: 'number' },
         { name: 'completedAt', type: 'date' },
-        { name: 'recycled', type: 'number', defaultValue: 0, admin: { description: 'Questions reused because the pool ran out' } },
+        { name: 'recycled', type: 'number', defaultValue: 0, admin: { description: 'Questions reused because the pool ran out (only rounds before 23 Nov 2026 - questions are no longer repeated)' } },
       ],
     },
   ],

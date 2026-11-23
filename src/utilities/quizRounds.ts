@@ -2,7 +2,8 @@
 import type { Payload } from 'payload'
 import { istDateKey } from './quizStreak'
 import { planRound, type Id } from './roundPlanner'
-import { getGameTimers, getScoringSettings } from './getGameTimers'
+import { getGameDaySettings, getGameTimers, getScoringSettings } from './getGameTimers'
+import { formatStartHour, gameDayKey, isCoolOff } from './gameDay'
 import { formatQuestion } from './formatQuestion'
 import { maxSpeedBonus, type ScoringSettings } from './gameScoring'
 
@@ -31,8 +32,9 @@ export type RoundSummary = { round: number; status: string; score: number | null
 
 export type RoundResult =
   | { state: 'not_started' | 'closed'; totalRounds: number }
-  | { state: 'done'; totalRounds: number; rounds: RoundSummary[]; todayScore: number }
-  | { state: 'empty'; totalRounds: number; round: number }
+  | { state: 'cooloff'; totalRounds: number; opensAt: string }
+  | { state: 'done'; totalRounds: number; rounds: RoundSummary[]; todayScore: number; opensAt: string }
+  | { state: 'empty'; totalRounds: number; round: number; opensAt: string }
   | {
       state: 'ready'
       totalRounds: number
@@ -75,7 +77,7 @@ async function findPlayerRounds(payload: Payload, quizId: Id, userId: Id) {
 export async function getTodayStatus(payload: Payload, quizId: Id, userId: Id, now = new Date()) {
   const quiz: any = await payload.findByID({ collection: 'quizzes', id: quizId, depth: 0, overrideAccess: true })
   const { totalRounds } = roundSettings(quiz)
-  const day = istDateKey(now)!
+  const day = gameDayKey(now, await getGameDaySettings(payload))!
   const today = (await findPlayerRounds(payload, quizId, userId)).filter((r) => r.day === day)
   const completed = today.filter((r) => r.status === 'completed')
   return {
@@ -101,7 +103,12 @@ export async function getTodayRound(
   if (quiz.quizDate && now < new Date(quiz.quizDate)) return { state: 'not_started', totalRounds }
   if (quiz.quizEndDate && now > new Date(quiz.quizEndDate)) return { state: 'closed', totalRounds }
 
-  const day = istDateKey(now)!
+  // The game day runs from the start hour (default 8 AM IST) to the next day's start hour; no new
+  // rounds during the break before it. A round already on screen can still be submitted.
+  const gameDay = await getGameDaySettings(payload)
+  const opensAt = formatStartHour(gameDay)
+  if (isCoolOff(now, gameDay)) return { state: 'cooloff', totalRounds, opensAt }
+  const day = gameDayKey(now, gameDay)!
   const all = await findPlayerRounds(payload, quizId, userId)
   const today = all.filter((r) => r.day === day).sort((a, b) => a.round - b.round)
   const summaries = (): RoundSummary[] =>
@@ -114,6 +121,7 @@ export async function getTodayRound(
       totalRounds,
       rounds: summaries(),
       todayScore: completedToday.reduce((a, r) => a + (Number(r.score) || 0), 0),
+      opensAt,
     }
   }
 
@@ -143,10 +151,21 @@ export async function getTodayRound(
       todaysRows.find((row) => Number(row.round) === roundNo) || todaysRows.find((row) => !row.round)
     const sponsoredId = sponsoredPosition > 0 && sponsorRow ? (relId(sponsorRow.question) as Id) : null
 
-    // Already answered in this challenge (completed rounds, oldest first) and given today
+    // Already answered in this challenge (completed rounds, oldest first) and given today.
+    // A question edited (published again) after the player answered it counts as new for them -
+    // the team sometimes rewrites the same question records for the next day.
+    const changedAt = new Map(
+      (published.docs as any[]).map((d) => [String(d.id), new Date(d.updatedAt).getTime() || 0]),
+    )
     const answeredIds = all
       .filter((r) => r.status === 'completed')
-      .flatMap((r) => (r.questions || []).map(relId).filter((q: any) => q !== null && !same(q, r.sponsoredQuestion)))
+      .flatMap((r) => {
+        const answeredAt = new Date(r.completedAt || r.updatedAt || r.createdAt).getTime() || 0
+        return (r.questions || [])
+          .map(relId)
+          .filter((q: any) => q !== null && !same(q, r.sponsoredQuestion))
+          .filter((q: any) => !((changedAt.get(String(q)) ?? 0) > answeredAt))
+      })
     const todayIds = today.flatMap((r) => (r.questions || []).map(relId))
 
     const plan = planRound({
@@ -160,7 +179,7 @@ export async function getTodayRound(
       ordered: !quiz.shuffleQuestions,
     })
 
-    if (plan.questionIds.length === 0) return { state: 'empty', totalRounds, round: roundNo }
+    if (plan.questionIds.length === 0) return { state: 'empty', totalRounds, round: roundNo, opensAt }
 
     try {
       current = await payload.create({

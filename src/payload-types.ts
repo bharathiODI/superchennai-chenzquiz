@@ -2673,7 +2673,7 @@ export interface Quiz {
    */
   quizEndDate: string;
   /**
-   * All questions for this challenge. Each round gives a player the next questions they have not answered yet, in Question Number order (or shuffled, if "Shuffle questions" is ticked below).
+   * Questions players can get. Each round gives a player the next questions they have not answered yet, in Question Number order (or shuffled, if "Shuffle questions" is ticked below). Nobody gets a question twice - a question edited after a player answered it counts as new. Swap in each day's questions before the day starts (Quiz Settings > Game day, 8 AM by default).
    */
   questions: (number | Question)[];
   roundsPerDay?: number | null;
@@ -2947,7 +2947,7 @@ export interface QuizRound {
   score?: number | null;
   completedAt?: string | null;
   /**
-   * Questions reused because the pool ran out
+   * Questions reused because the pool ran out (only rounds before 23 Nov 2026 - questions are no longer repeated)
    */
   recycled?: number | null;
   updatedAt: string;
@@ -5969,6 +5969,19 @@ export interface QuizSetting {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Each day's rounds run from the start hour until the same hour the next day. Nobody can start a round during the break just before it. Players never get a question they have already answered - unless it was edited after they answered it. Put each day's questions in the quiz's Question Pool before the start hour (new questions, or the same ones rewritten).
+   */
+  gameDay?: {
+    /**
+     * 8 = 8:00 AM, 20 = 8:00 PM
+     */
+    startHour?: number | null;
+    /**
+     * 60 with an 8 AM start = no play 7:00-8:00 AM. 0 = no break.
+     */
+    coolOffMinutes?: number | null;
+  };
   gameTimers?: {
     mcq?: number | null;
     dropdown?: number | null;
@@ -6137,6 +6150,12 @@ export interface QuizSettingsSelect<T extends boolean = true> {
         name?: T;
         minXP?: T;
         id?: T;
+      };
+  gameDay?:
+    | T
+    | {
+        startHour?: T;
+        coolOffMinutes?: T;
       };
   gameTimers?:
     | T

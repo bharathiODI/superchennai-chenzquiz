@@ -5,6 +5,7 @@ import {
   type GameTimers,
   type ScoringSettings,
 } from './gameScoring'
+import { normalizeGameDay, type GameDaySettings } from './gameDay'
 
 async function readQuizSettings(payload: Payload): Promise<any> {
   try {
@@ -18,6 +19,12 @@ async function readQuizSettings(payload: Payload): Promise<any> {
 export async function getGameTimers(payload: Payload): Promise<GameTimers> {
   const settings = await readQuizSettings(payload)
   return normalizeGameTimers(settings?.gameTimers)
+}
+
+/** When the game day starts and the break before it (falls back to 8:00 AM, 60 min). */
+export async function getGameDaySettings(payload: Payload): Promise<GameDaySettings> {
+  const settings = await readQuizSettings(payload)
+  return normalizeGameDay(settings?.gameDay)
 }
 
 /** Speed bonus settings from the quiz-settings global (falls back to defaults). */

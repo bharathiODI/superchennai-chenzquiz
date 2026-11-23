@@ -11,6 +11,8 @@ import { isTestPhone, realPlayersWhere } from '@/utilities/testPlayers'
 import { getQuizSiteSettings } from '@/globals/QuizSiteSettings/getQuizSiteSettings'
 import { getTitleForXP, type QuizTitle } from '@/utilities/quizTitles'
 import { computeStreaks } from '@/utilities/quizStreak'
+import { gameDayKey } from '@/utilities/gameDay'
+import { getGameDaySettings } from '@/utilities/getGameTimers'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -230,6 +232,7 @@ export default async function LeaderboardPage({
   }
 
   const titles: QuizTitle[] = await getQuizTitles(payload)
+  const gameDay = await getGameDaySettings(payload)
 
   const enrich = (row: Ranked, rank: number): Player => {
     const user = usersById.get(row.id)
@@ -239,7 +242,7 @@ export default async function LeaderboardPage({
       rank,
       avatarUrl: avatarOf(user),
       overallXP,
-      streak: computeStreaks(playDates.get(row.id) ?? [], now).current,
+      streak: computeStreaks(playDates.get(row.id) ?? [], now, (d) => gameDayKey(d, gameDay)).current,
       title: getTitleForXP(overallXP, titles),
     }
   }
