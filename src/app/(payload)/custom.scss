@@ -336,27 +336,27 @@
 }
 
 /* =====================================================================================
-   WordPress-style admin (payload-builder playbook): light theme, dark #1d2327 menu,
-   WordPress blue #2271b1, #f0f0f1 page background, white boxes with #c3c4c7 borders.
+   WordPress-style admin (payload-builder playbook) in the Super Chennai website colours:
+   navy #11145a menu, violet #5b2eff, brand gradient #03045e > #7000ff > #ff007a, #f8f8fc page.
    The menu itself is components/admin/WpMenu; Payload's grouped list is hidden here.
    ===================================================================================== */
 :root,
 html[data-theme='light'] {
-  --wp-blue: #2271b1;
-  --wp-blue-hover: #135e96;
-  --wp-blue-dark: #0a4b78;
-  --wp-menu: #1d2327;
-  --wp-menu-sub: #2c3338;
-  --wp-menu-text: #f0f0f1;
-  --wp-menu-hover: #72aee6;
-  --wp-bg: #f0f0f1;
+  --wp-blue: #5b2eff;
+  --wp-blue-hover: #4b20d8;
+  --wp-blue-dark: #3215a8;
+  --wp-menu: #11145a;
+  --wp-menu-sub: #24204a;
+  --wp-menu-text: #f8f8fc;
+  --wp-menu-hover: #ff7ab8;
+  --wp-bg: #f8f8fc;
   --wp-box: #fff;
-  --wp-border: #c3c4c7;
-  --wp-border-input: #8c8f94;
-  --wp-text: #3c434a;
-  --wp-heading: #1d2327;
-  --wp-muted: #646970;
-  --wp-stripe: #f6f7f7;
+  --wp-border: #dfe2ef;
+  --wp-border-input: #cfd3e6;
+  --wp-text: #24204a;
+  --wp-heading: #11145a;
+  --wp-muted: #74799a;
+  --wp-stripe: #f6f5fd;
 
   --nav-width: 220px;
   --theme-bg: var(--wp-bg);
@@ -381,7 +381,7 @@ html[data-theme='light'] {
 .template-default .nav .nav__controls {
   padding: 12px;
   color: var(--wp-menu-text);
-  border-top: 1px solid #3c434a;
+  border-top: 1px solid #24204a;
   width: 100%;
 }
 .template-default .nav .nav__controls a,
@@ -422,7 +422,7 @@ html[data-theme='light'] {
   width: 20px;
   height: 20px;
   flex: none;
-  color: #a7aaad;
+  color: #a5a8d6;
 }
 .wpm-top:hover,
 .wpm-top:focus-visible {
@@ -581,7 +581,7 @@ html[data-theme='light'] {
 }
 .template-default .btn--style-subtle {
   --bg-color: var(--wp-stripe);
-  --color: #2c3338;
+  --color: #24204a;
   --btn-border: 1px solid var(--wp-border-input);
   --hover-bg: var(--wp-bg);
   --hover-btn-border: 1px solid var(--wp-blue);
@@ -622,7 +622,7 @@ html[data-theme='light'] {
   border: 1px solid var(--wp-border-input);
   border-radius: 4px;
   box-shadow: 0 0 0 transparent;
-  color: #2c3338;
+  color: #24204a;
 }
 .template-default .field-type input:focus,
 .template-default .field-type textarea:focus,
@@ -648,7 +648,7 @@ html[data-theme='light'] {
 }
 .template-default .table thead th {
   background: var(--wp-box);
-  color: #2c3338;
+  color: #24204a;
   font-weight: 400;
   border-bottom: 1px solid var(--wp-border);
 }
@@ -689,12 +689,12 @@ html[data-theme='light'] {
   border-bottom: 1px solid var(--wp-border);
 }
 .template-default .tabs-field__tab-button {
-  background: #dcdcde;
+  background: #e6e3f7;
   border: 1px solid var(--wp-border);
   border-bottom: 0;
   margin-right: 4px;
   padding: 5px 10px;
-  color: #50575e;
+  color: #4a4870;
   font-weight: 600;
 }
 .template-default .tabs-field__tab-button--active {
@@ -742,7 +742,7 @@ html[data-theme='light'] {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #d63638;
+  color: #ff007a;
 }
 .qd-title {
   margin: 2px 0 2px;
@@ -768,7 +768,7 @@ html[data-theme='light'] {
   gap: 8px;
   padding: 8px 14px;
   min-width: 140px;
-  border: 1px solid #dcdcde;
+  border: 1px solid #e6e3f7;
   border-radius: 6px;
   background: #fff;
 }
@@ -818,7 +818,7 @@ html[data-theme='light'] {
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  border: 1px solid #dcdcde;
+  border: 1px solid #e6e3f7;
   border-radius: 999px;
   background: #fff;
   color: var(--wp-heading) !important;
@@ -835,15 +835,15 @@ html[data-theme='light'] {
   border-color: var(--wp-blue);
 }
 .qd-pill.is-active {
-  background: linear-gradient(135deg, #135e96, #2271b1);
-  border-color: #135e96;
+  background: linear-gradient(135deg, #4b20d8, #5b2eff);
+  border-color: #4b20d8;
   color: #fff !important;
 }
 .qd-count {
   min-width: 22px;
   padding: 1px 7px;
   border-radius: 999px;
-  background: #f0f6fc;
+  background: #eeeaff;
   color: var(--wp-blue);
   font-size: 12px;
   text-align: center;
@@ -865,7 +865,7 @@ html[data-theme='light'] {
   border: 1px solid var(--wp-border-input);
   border-radius: 4px;
   background: #fff;
-  color: #2c3338;
+  color: #24204a;
   font-size: 13px;
 }
 .qd-filters input[type='search'] {
@@ -908,7 +908,7 @@ html[data-theme='light'] {
 .qd-table thead th {
   position: sticky;
   top: 0;
-  background: #1e4b8f;
+  background: #11145a;
   color: #fff;
   font-size: 11.5px;
   font-weight: 700;
@@ -920,15 +920,15 @@ html[data-theme='light'] {
 }
 .qd-table td {
   padding: 12px 14px;
-  border-top: 1px solid #f0f0f1;
+  border-top: 1px solid #f8f8fc;
   white-space: nowrap;
-  color: #2c3338;
+  color: #24204a;
 }
 .qd-table tbody tr:nth-child(even) td {
-  background: #fafafa;
+  background: #fbfaff;
 }
 .qd-table tbody tr:hover td {
-  background: #f0f6fc;
+  background: #eeeaff;
 }
 .qd-table .r {
   text-align: right;
@@ -952,8 +952,8 @@ html[data-theme='light'] {
   font-size: 11px;
   font-weight: 600;
   text-transform: capitalize;
-  background: #f0f0f1;
-  color: #50575e;
+  background: #f8f8fc;
+  color: #4a4870;
 }
 .qd-badge--active,
 .qd-badge--scheduled {
@@ -961,7 +961,7 @@ html[data-theme='light'] {
   color: #008a20;
 }
 .qd-badge--completed {
-  background: #f0f6fc;
+  background: #eeeaff;
   color: var(--wp-blue);
 }
 .qd-pager {
@@ -979,7 +979,7 @@ html[data-theme='light'] {
   gap: 14px;
 }
 .qd-pager .off {
-  color: #a7aaad;
+  color: #a5a8d6;
 }
 
 /* ---------- login / forgot password: WordPress login screen (logo kept) ---------- */
@@ -1061,4 +1061,156 @@ html body .forgot-password.template-minimal .form-submit .btn:hover {
 .template-default .hamburger {
   background: transparent !important;
   color: var(--wp-menu-text);
+}
+
+
+/* ---------- Super Chennai finish: brand gradient, softer boxes ---------- */
+:root,
+html[data-theme='light'] {
+  --brand-gradient: linear-gradient(90deg, #03045e 0%, #7000ff 55%, #ff007a 100%);
+  --brand-shadow: 0 1px 2px rgba(17, 20, 90, 0.06), 0 4px 14px rgba(17, 20, 90, 0.05);
+  --wp-menu-sub: #0b0d45;
+}
+/* menu: active item in brand violet with a pink edge */
+.wpm-item.is-open > .wpm-top {
+  background: linear-gradient(90deg, #5b2eff, #7000ff);
+  border-left-color: #ff007a;
+}
+.wpm-top:hover,
+.wpm-top:focus-visible {
+  background: rgba(255, 255, 255, 0.06);
+}
+.template-default .nav .nav__controls {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+/* top bar: navy with the brand gradient line under it */
+.template-default .app-header {
+  border-bottom: 3px solid transparent;
+  border-image: var(--brand-gradient) 1;
+}
+/* boxes */
+.template-default .table,
+.template-default .card,
+.template-default .collapsible,
+.qd-card,
+.dashboard .before-dashboard__welcome {
+  border-radius: 12px;
+  box-shadow: var(--brand-shadow);
+  overflow: hidden;
+}
+.template-default .card:hover {
+  border-color: #b9a8ff;
+}
+.template-default .table thead th {
+  background: #f4f2ff;
+  color: var(--wp-heading);
+  font-weight: 600;
+}
+.template-default .table tbody tr:hover td {
+  background: #f1edff;
+}
+/* buttons and inputs a little rounder */
+.template-default .btn--style-primary,
+.template-default .btn--style-secondary,
+.template-default .btn--style-pill,
+.wp-button,
+.qd-btn {
+  border-radius: 8px;
+}
+.template-default .btn--style-pill,
+.template-default .btn--style-secondary {
+  --bg-color: #eeeaff;
+  --hover-bg: #e2dbff;
+}
+.template-default .btn--style-pill {
+  box-shadow: inset 0 0 0 1px #d6ccff;
+}
+.template-default .field-type input:not([type='checkbox']):not([type='radio']),
+.template-default .field-type textarea,
+.template-default .rs__control,
+.template-default .search-filter__input,
+.qd-input {
+  border-radius: 8px;
+}
+.template-default .field-type input:focus,
+.template-default .field-type textarea:focus,
+.template-default .rs__control--is-focused,
+.template-default .search-filter__input:focus,
+.qd-input:focus {
+  border-color: #5b2eff;
+  box-shadow: 0 0 0 3px rgba(91, 46, 255, 0.15);
+}
+/* tabs: active tab gets a violet top edge */
+.template-default .tabs-field__tab-button {
+  border-radius: 8px 8px 0 0;
+  background: #eeeaff;
+  color: #4a4870;
+}
+.template-default .tabs-field__tab-button--active {
+  background: var(--wp-bg);
+  color: var(--wp-heading);
+  box-shadow: inset 0 3px 0 #5b2eff;
+}
+/* dashboard welcome panel: brand line on top */
+.dashboard .before-dashboard__welcome {
+  border-top: 0;
+  position: relative;
+}
+.dashboard .before-dashboard__welcome::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 4px;
+  background: var(--brand-gradient);
+}
+/* Quiz Dashboard: brand table header and pills */
+.qd-table thead tr {
+  background: linear-gradient(90deg, #11145a, #3215a8);
+}
+.qd-table thead th {
+  background: transparent;
+}
+.qd-table-wrap {
+  border-radius: 12px;
+}
+.qd-pill.is-active {
+  background: linear-gradient(135deg, #5b2eff 0%, #7000ff 60%, #ff007a 100%);
+  border-color: transparent;
+}
+.qd-pill:hover {
+  border-color: #b9a8ff;
+}
+.qd-stat {
+  border-color: #e6e3f7;
+  border-radius: 10px;
+}
+.qd-stat b {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* login: brand button and soft brand glow */
+html body .login.template-minimal,
+html body .forgot-password.template-minimal {
+  background:
+    radial-gradient(circle at top left, rgba(112, 0, 255, 0.07), transparent 35%),
+    radial-gradient(circle at bottom right, rgba(255, 0, 122, 0.07), transparent 35%),
+    #f8f8fc !important;
+}
+html body .login.template-minimal .template-minimal__wrap,
+html body .forgot-password.template-minimal .template-minimal__wrap {
+  border-radius: 16px;
+  box-shadow: var(--brand-shadow);
+}
+html body .login.template-minimal .form-submit .btn,
+html body .forgot-password.template-minimal .form-submit .btn {
+  background: linear-gradient(90deg, #5b2eff, #7000ff 60%, #ff007a) !important;
+  border-radius: 10px !important;
+  font-weight: 600;
+}
+html body .login.template-minimal .form-submit .btn:hover,
+html body .forgot-password.template-minimal .form-submit .btn:hover {
+  filter: brightness(0.95);
+  background: linear-gradient(90deg, #4b20d8, #6000dd 60%, #e6006e) !important;
 }

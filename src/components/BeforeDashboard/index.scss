@@ -4,7 +4,7 @@
 
   &__welcome {
     background: #fff;
-    border: 1px solid #c3c4c7;
+    border: 1px solid #dfe2ef;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
     padding: 23px 24px 20px;
   }
@@ -14,13 +14,13 @@
     font-size: 21px;
     font-weight: 400;
     line-height: 1.2;
-    color: #1d2327;
+    color: #11145a;
   }
 
   &__intro p {
     margin: 0 0 18px;
     font-size: 16px;
-    color: #50575e;
+    color: #4a4870;
   }
 
   &__columns {
@@ -36,7 +36,7 @@
       margin: 0 0 10px;
       font-size: 16px;
       font-weight: 600;
-      color: #1d2327;
+      color: #11145a;
     }
 
     ul {
@@ -51,11 +51,11 @@
     }
 
     a:not(.wp-button) {
-      color: #2271b1;
+      color: #5b2eff;
       text-decoration: none;
 
       &:hover {
-        color: #135e96;
+        color: #4b20d8;
         text-decoration: underline;
       }
     }
@@ -63,11 +63,11 @@
 
   &__note {
     margin: 8px 0 0;
-    color: #646970;
+    color: #74799a;
     font-size: 13px;
   }
 
   &__ok {
-    color: #00a32a;
+    color: #0e9f6e;
   }
 }
