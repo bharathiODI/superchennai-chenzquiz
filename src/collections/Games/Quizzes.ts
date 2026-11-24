@@ -1,8 +1,7 @@
 import type { CollectionConfig } from 'payload'
 import { revalidateQuiz, revalidateQuizDelete } from './hooks/revalidatePage'
-import { isAdmin, isAdminAdminAccess } from '@/access/isAdmin'
+import { EDITORS, allow, hiddenUnless } from '@/access/roles'
 import { authenticatedOrPublished } from '@/access/authenticatedOrPublished'
-import { isNotAdmin } from '@/access/checkRole'
 import { SEOFieldSchema } from '@/fields/seo'
 import {
   MetaDescriptionField,
@@ -23,15 +22,14 @@ export const Quizzes: CollectionConfig = {
   admin: {
     useAsTitle: 'quizTitle',
     defaultColumns: ['quizTitle', 'slug', 'quizDate', 'status'],
-    hidden: isNotAdmin,
+    hidden: hiddenUnless(EDITORS),
   },
+  // Question pool and sponsor schedule: editors and up (WordPress roles).
   access: {
-    // read: () => true,
-    admin: isAdminAdminAccess,
-    create: isAdmin,
-    delete: isAdmin,
+    create: allow(EDITORS),
+    delete: allow(EDITORS),
     read: authenticatedOrPublished,
-    update: isAdmin,
+    update: allow(EDITORS),
   },
   fields: [
     {

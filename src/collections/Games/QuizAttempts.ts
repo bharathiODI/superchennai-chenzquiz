@@ -1,4 +1,4 @@
-import { isNotAdmin } from '@/access/checkRole'
+import { ADMINS, hiddenUnless, userHas } from '@/access/roles'
 import type { CollectionConfig } from 'payload'
 
 export const QuizAttempts: CollectionConfig = {
@@ -9,22 +9,14 @@ export const QuizAttempts: CollectionConfig = {
     listSearchableFields: ['user.name', 'user.phone'],
     defaultColumns: ['user', 'quiz', 'score', 'correctAnswers', 'timeTaken', 'round', 'completedAt'],
     description: 'One entry per finished round. Read-only here (written only by the game). Search: player name or phone.',
-     hidden: isNotAdmin,
+    hidden: hiddenUnless(ADMINS),
   },
   access: {
+    // CMS admins: all. A player: their own. Other CMS roles: none (a CMS user's id is not a player id).
     read: ({ req: { user } }) => {
-      if (!user) return false
-
-      const userRole = (user as any)?.role
-      if (Array.isArray(userRole) ? userRole.includes('admin') : userRole === 'admin') {
-        return true
-      }
-
-      return {
-        user: {
-          equals: user.id,
-        },
-      }
+      if (userHas(user, ADMINS)) return true
+      if ((user as any)?.collection === 'quiz-users') return { user: { equals: user!.id } }
+      return false
     },
     // Read-only in the CMS: scores and players are written only by the game itself, so nobody can
     // change them by mistake here. (Server code uses overrideAccess and is not affected.)

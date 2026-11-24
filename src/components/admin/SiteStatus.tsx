@@ -3,6 +3,7 @@
 // Safe deploy: switch maintenance ON -> wait until "Playing now" is 0 -> deploy -> switch OFF.
 import { useAuth } from '@payloadcms/ui'
 import { useCallback, useEffect, useState } from 'react'
+import { ADMINS, userHas } from '@/access/roles'
 
 type Playing = { player: string; phone: string; quiz: string; startedAt: string; minutesAgo: number }
 type Status = {
@@ -47,7 +48,7 @@ export function SiteStatus() {
     return () => clearInterval(t)
   }, [load])
 
-  if (user?.role !== 'admin' || !s) return null
+  if (!userHas(user, ADMINS) || !s) return null
 
   const toggle = async () => {
     const on = !s.maintenance

@@ -1,15 +1,17 @@
 import type { GlobalConfig } from 'payload'
 import { link } from '@/fields/link'
 import { revalidateHeader } from './hooks/revalidateHeader'
-import { isNotAdmin } from '@/access/checkRole'
+import { ADMINS, allow, hiddenUnless } from '@/access/roles'
 
 export const Header: GlobalConfig = {
   slug: 'header',
+  // Appearance and quiz settings: Super Admins and Administrators (WordPress manage_options).
   access: {
     read: () => true,
+    update: allow(ADMINS),
   },
   admin: {
-    hidden: isNotAdmin,
+    hidden: hiddenUnless(ADMINS),
   },
   fields: [
     // #################### LOGO FIELD #######################

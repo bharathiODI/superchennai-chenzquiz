@@ -6,16 +6,17 @@ import * as XLSX from 'xlsx'
 import { buildScoreReport } from '@/utilities/scoreReport'
 import { formatStartHour } from '@/utilities/gameDay'
 import { getGameDaySettings } from '@/utilities/getGameTimers'
+import { REPORT_READERS, userHas } from '@/access/roles'
 
 export const dynamic = 'force-dynamic'
 
 // GET /api/reports/scores?quiz=19[&test=1] -> Excel file with the day-wise scores.
-// CMS admins only (the file has players' phone numbers and emails).
+// CMS Super Admins, Administrators, Editors and Viewers (the file has players' phone numbers and emails).
 export async function GET(req: Request) {
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers: await getHeaders() })
-  if (!user || (user as any).collection !== 'users' || (user as any).role !== 'admin') {
-    return NextResponse.json({ error: 'Only CMS admins can download scores.' }, { status: 403 })
+  if (!userHas(user, REPORT_READERS)) {
+    return NextResponse.json({ error: 'Only CMS admins, editors and viewers can download scores.' }, { status: 403 })
   }
 
   const params = new URL(req.url).searchParams

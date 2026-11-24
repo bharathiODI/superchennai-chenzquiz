@@ -1,17 +1,19 @@
 import type { CollectionConfig } from 'payload'
+import { ADMINS, allow, hiddenUnless } from '@/access/roles'
 
 export const UserSubmissions: CollectionConfig = {
   slug: 'user-submissions',
   admin: {
     useAsTitle: 'id',
     defaultColumns: ['user', 'quiz', 'score', 'createdAt'],
+    hidden: hiddenUnless(ADMINS),
   },
   // Admin only over the REST API (players are logged in to the same API)
   access: {
     // Read-only in the CMS: scores and players are written only by the game itself, so nobody can
     // change them by mistake here. (Server code uses overrideAccess and is not affected.)
     create: () => false,
-    read: ({ req: { user } }) => (user as any)?.collection === 'users' && (user as any)?.role === 'admin',
+    read: allow(ADMINS),
     update: () => false,
     delete: () => false,
   },

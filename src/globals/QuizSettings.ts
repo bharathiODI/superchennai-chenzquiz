@@ -1,5 +1,5 @@
 import type { Field, GlobalConfig } from 'payload'
-import { isNotAdmin } from '@/access/checkRole'
+import { ADMINS, allow, hiddenUnless } from '@/access/roles'
 import { DEFAULT_BONUS_TIERS, GAME_TYPES } from '@/utilities/gameScoring'
 
 const timerFields: Field[] = GAME_TYPES.map((g) => ({
@@ -15,11 +15,13 @@ const timerFields: Field[] = GAME_TYPES.map((g) => ({
 export const QuizSettings: GlobalConfig = {
   slug: 'quiz-settings',
   label: 'Quiz Settings',
+  // Appearance and quiz settings: Super Admins and Administrators (WordPress manage_options).
   access: {
     read: () => true,
+    update: allow(ADMINS),
   },
   admin: {
-    hidden: isNotAdmin,
+    hidden: hiddenUnless(ADMINS),
     description: 'Player titles, per-game timers, the speed bonus and the shareable scorecard.',
   },
   fields: [

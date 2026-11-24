@@ -13,8 +13,7 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 import { revalidatePath } from 'next/cache'
-import { isAdmin } from '@/access/isAdmin'
-import { isNotAdmin } from '@/access/checkRole'
+import { ADMINS, allow, hiddenUnless } from '@/access/roles'
 import { QUIZ_SITE_DEFAULTS as D } from './defaults'
 
 const text = (name: string, label: string, defaultValue: string, description?: string): Field => ({
@@ -45,10 +44,10 @@ export const QuizSiteSettings: GlobalConfig = {
   label: 'Quiz Site Settings',
   access: {
     read: () => true,
-    update: isAdmin,
+    update: allow(ADMINS),
   },
   admin: {
-    hidden: isNotAdmin,
+    hidden: hiddenUnless(ADMINS),
     description: 'Text and options for the login, quizzes and leaderboard pages, and the Terms & Conditions pop-up.',
   },
   hooks: {

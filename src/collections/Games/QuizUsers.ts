@@ -1,10 +1,10 @@
-import { isNotAdmin } from '@/access/checkRole'
+import { ADMINS, hiddenUnless, userHas } from '@/access/roles'
 import type { Access, CollectionBeforeDeleteHook, CollectionConfig } from 'payload'
 
-// Admins are CMS users with the admin role. Players (quiz-users) are logged in to the same API
+// Admins are CMS Super Admins / Administrators. Players (quiz-users) are logged in to the same API
 // with their own token, so every rule below has to keep them out of each other's records.
-const isCmsAdmin: Access = ({ req: { user } }) =>
-  Boolean(user && (user as any).collection === 'users' && (user as any).role === 'admin')
+// (Viewers and editors see players only through the Quiz Dashboard.)
+const isCmsAdmin: Access = ({ req: { user } }) => userHas(user, ADMINS)
 
 // Deleting a player in the CMS also deletes everything recorded for them.
 const deletePlayerData: CollectionBeforeDeleteHook = async ({ id, req }) => {
@@ -33,7 +33,7 @@ export const QuizUsers: CollectionConfig = {
     defaultColumns: ['name', 'phone', 'email', 'totalXP', 'totalTimeTaken', 'createdAt'],
     listSearchableFields: ['name', 'phone', 'email'],
     description: 'Players. Read-only here (changed only by the game). Search by name, phone or email.',
-     hidden: isNotAdmin,
+    hidden: hiddenUnless(ADMINS),
     components: { beforeListTable: ['@/components/admin/ScoreExport#ScoreExport'] },
   },
   // Sign-up, login and scoring go through the app's own API routes (server side), so the REST API

@@ -4,6 +4,7 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { readSiteFlags, writeSiteFlags } from '@/utilities/siteFlags'
 import { demoUsesLiveData } from '@/utilities/siteEnv'
+import { ADMINS, userHas } from '@/access/roles'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,7 +15,7 @@ const relId = (v: any) => (v && typeof v === 'object' ? v.id : v)
 async function cmsAdmin() {
   const payload = await getPayload({ config: configPromise })
   const { user } = await payload.auth({ headers: await getHeaders() })
-  const ok = Boolean(user && (user as any).collection === 'users' && (user as any).role === 'admin')
+  const ok = userHas(user, ADMINS)
   return { payload, user: ok ? (user as any) : null }
 }
 

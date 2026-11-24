@@ -2,6 +2,7 @@
 // "Download scores" box shown above the Quiz Rounds and Quiz Users lists (CMS admins only).
 import { useAuth } from '@payloadcms/ui'
 import { useEffect, useState } from 'react'
+import { REPORT_READERS, userHas } from '@/access/roles'
 
 type Quiz = { id: number | string; quizTitle?: string; title?: string }
 
@@ -22,7 +23,7 @@ export function ScoreExport() {
       .catch(() => {})
   }, [])
 
-  if (user?.role !== 'admin') return null
+  if (!userHas(user, REPORT_READERS)) return null
 
   const href = `/api/reports/scores?${new URLSearchParams({ ...(quiz ? { quiz } : {}), ...(withTest ? { test: '1' } : {}) })}`
 

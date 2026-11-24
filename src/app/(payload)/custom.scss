@@ -334,3 +334,731 @@
       #8b5cf6
     ) !important;
 }
+
+/* =====================================================================================
+   WordPress-style admin (payload-builder playbook): light theme, dark #1d2327 menu,
+   WordPress blue #2271b1, #f0f0f1 page background, white boxes with #c3c4c7 borders.
+   The menu itself is components/admin/WpMenu; Payload's grouped list is hidden here.
+   ===================================================================================== */
+:root,
+html[data-theme='light'] {
+  --wp-blue: #2271b1;
+  --wp-blue-hover: #135e96;
+  --wp-blue-dark: #0a4b78;
+  --wp-menu: #1d2327;
+  --wp-menu-sub: #2c3338;
+  --wp-menu-text: #f0f0f1;
+  --wp-menu-hover: #72aee6;
+  --wp-bg: #f0f0f1;
+  --wp-box: #fff;
+  --wp-border: #c3c4c7;
+  --wp-border-input: #8c8f94;
+  --wp-text: #3c434a;
+  --wp-heading: #1d2327;
+  --wp-muted: #646970;
+  --wp-stripe: #f6f7f7;
+
+  --nav-width: 220px;
+  --theme-bg: var(--wp-bg);
+  --theme-text: var(--wp-text);
+  --theme-input-bg: #fff;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
+    'Helvetica Neue', sans-serif;
+}
+
+/* ---------- menu (left) ---------- */
+.template-default .nav {
+  background: var(--wp-menu);
+  border-right: 0;
+}
+.template-default .nav .nav__scroll {
+  padding: calc(var(--app-header-height) + 4px) 0 16px;
+}
+.template-default .nav .nav__wrap > .nav-group,
+.template-default .nav .nav__wrap > .nav__link {
+  display: none; /* replaced by the WordPress menu */
+}
+.template-default .nav .nav__controls {
+  padding: 12px;
+  color: var(--wp-menu-text);
+  border-top: 1px solid #3c434a;
+  width: 100%;
+}
+.template-default .nav .nav__controls a,
+.template-default .nav .nav__controls button,
+.template-default .nav .nav__controls svg {
+  color: var(--wp-menu-text);
+  stroke: currentColor;
+}
+.template-default .nav .nav__controls a:hover,
+.template-default .nav .nav__controls button:hover {
+  color: var(--wp-menu-hover);
+}
+
+.wpm {
+  width: 100%;
+}
+.wpm-list,
+.wpm-sub {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.wpm-item {
+  margin: 0;
+}
+.wpm-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 8px 10px;
+  color: var(--wp-menu-text);
+  font-size: 14px;
+  line-height: 1.3;
+  text-decoration: none;
+  border-left: 4px solid transparent;
+}
+.wpm-icon {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  color: #a7aaad;
+}
+.wpm-top:hover,
+.wpm-top:focus-visible {
+  background: var(--wp-menu-sub);
+  color: var(--wp-menu-hover);
+}
+.wpm-top:hover .wpm-icon {
+  color: var(--wp-menu-hover);
+}
+.wpm-item.is-open > .wpm-top {
+  background: var(--wp-blue);
+  color: #fff;
+  font-weight: 500;
+}
+.wpm-item.is-open > .wpm-top .wpm-icon {
+  color: #fff;
+}
+.wpm-sub {
+  display: none;
+  background: var(--wp-menu-sub);
+  padding: 7px 0 8px;
+}
+.wpm-item.is-open > .wpm-sub {
+  display: block;
+}
+.wpm-sub a {
+  display: block;
+  padding: 5px 12px 5px 42px;
+  color: rgba(240, 246, 252, 0.75);
+  font-size: 13px;
+  line-height: 1.4;
+  text-decoration: none;
+}
+.wpm-sub a:hover,
+.wpm-sub a:focus-visible {
+  color: var(--wp-menu-hover);
+}
+.wpm-sub a.is-current {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ---------- top bar (WordPress admin bar) ---------- */
+.template-default .app-header,
+.template-default .app-header__bg {
+  background: var(--wp-menu);
+}
+.template-default .app-header {
+  color: var(--wp-menu-text);
+  border-bottom: 0;
+}
+.template-default .app-header .step-nav,
+.template-default .app-header .step-nav a,
+.template-default .app-header .step-nav span {
+  color: var(--wp-menu-text);
+}
+.template-default .app-header .step-nav a:hover {
+  color: var(--wp-menu-hover);
+}
+.template-default__nav-toggler svg,
+.template-default__nav-toggler button,
+.nav-toggler {
+  color: var(--wp-menu-text);
+}
+.template-default .app-header .step-nav__home svg,
+.template-default .app-header .app-header__account svg {
+  color: var(--wp-menu-text);
+}
+
+/* hamburger, breadcrumb dropdown and avatar on the dark bar */
+.template-default__nav-toggler-wrapper button,
+.template-default__nav-toggler-wrapper .nav-toggler,
+.template-default .app-header button,
+.template-default .app-header .popup-button {
+  background: transparent !important;
+  color: var(--wp-menu-text) !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+.template-default__nav-toggler-wrapper svg,
+.template-default .app-header svg {
+  color: var(--wp-menu-text);
+}
+.template-default__nav-toggler-wrapper .nav-toggler__icon *,
+.template-default__nav-toggler-wrapper .icon * {
+  stroke: var(--wp-menu-text);
+}
+.template-default .app-header .step-nav [class*='__last'],
+.template-default .app-header .step-nav [class*='dropdown'] {
+  color: var(--wp-menu-text) !important;
+}
+
+.template-default__nav-toggler-wrapper .hamburger {
+  background: transparent;
+  color: var(--wp-menu-text);
+}
+.template-default .app-header .rs__control {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  min-height: 0;
+}
+.template-default .app-header .rs__single-value,
+.template-default .app-header .rs__indicator {
+  color: var(--wp-menu-text);
+}
+
+/* ---------- page titles, links ---------- */
+.template-default .list-header h1,
+.template-default .doc-header__title,
+.template-default .collection-list h1,
+.template-default .account h1 {
+  font-size: 23px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--wp-heading);
+}
+.template-default .dashboard__label,
+.template-default .collections__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--wp-heading);
+  text-transform: none;
+}
+.template-default__wrap a:not(.btn):not(.wpm-top):not(.qd-pill):not(.qd-export):not(.card):not(.wp-button) {
+  color: var(--wp-blue);
+}
+.template-default__wrap a:not(.btn):not(.wpm-top):not(.qd-pill):not(.qd-export):not(.card):not(.wp-button):hover {
+  color: var(--wp-blue-hover);
+}
+
+/* ---------- buttons (Payload buttons read these variables) ---------- */
+.template-default .btn--style-primary {
+  --bg-color: var(--wp-blue);
+  --color: #fff;
+  --hover-bg: var(--wp-blue-hover);
+  --hover-color: #fff;
+  border-radius: 3px;
+}
+.template-default .btn--style-secondary {
+  --bg-color: var(--wp-stripe);
+  --color: var(--wp-blue);
+  --btn-border: 1px solid var(--wp-blue);
+  --hover-bg: var(--wp-bg);
+  --hover-color: var(--wp-blue-dark);
+  --hover-btn-border: 1px solid var(--wp-blue-dark);
+  border-radius: 3px;
+}
+.template-default .btn--style-pill {
+  --bg-color: var(--wp-stripe);
+  --color: var(--wp-blue);
+  --hover-bg: var(--wp-bg);
+  --hover-color: var(--wp-blue-dark);
+  box-shadow: inset 0 0 0 1px var(--wp-blue);
+  border-radius: 3px;
+}
+.template-default .btn--style-subtle {
+  --bg-color: var(--wp-stripe);
+  --color: #2c3338;
+  --btn-border: 1px solid var(--wp-border-input);
+  --hover-bg: var(--wp-bg);
+  --hover-btn-border: 1px solid var(--wp-blue);
+}
+.wp-button--primary {
+  background: var(--wp-blue);
+  border: 1px solid var(--wp-blue);
+  color: #fff !important;
+}
+.wp-button--primary:hover {
+  background: var(--wp-blue-hover);
+  border-color: var(--wp-blue-hover);
+}
+.wp-button {
+  display: inline-block;
+  padding: 0 10px;
+  min-height: 30px;
+  line-height: 28px;
+  font-size: 13px;
+  text-decoration: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.wp-button--hero {
+  padding: 0 36px;
+  min-height: 46px;
+  line-height: 44px;
+  font-size: 14px;
+}
+
+/* ---------- form fields ---------- */
+.template-default .field-type input:not([type='checkbox']):not([type='radio']),
+.template-default .field-type textarea,
+.template-default .rs__control,
+.template-default .search-filter__input,
+.template-default .react-datepicker__input-container input {
+  background: #fff;
+  border: 1px solid var(--wp-border-input);
+  border-radius: 4px;
+  box-shadow: 0 0 0 transparent;
+  color: #2c3338;
+}
+.template-default .field-type input:focus,
+.template-default .field-type textarea:focus,
+.template-default .rs__control--is-focused,
+.template-default .search-filter__input:focus {
+  border-color: var(--wp-blue);
+  box-shadow: 0 0 0 1px var(--wp-blue);
+  outline: 2px solid transparent;
+}
+.template-default .field-label {
+  color: var(--wp-heading);
+  font-weight: 600;
+}
+
+/* ---------- list tables (wp-list-table) ---------- */
+.template-default .table {
+  background: var(--wp-box);
+  border: 1px solid var(--wp-border);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+.template-default .table table {
+  background: var(--wp-box);
+}
+.template-default .table thead th {
+  background: var(--wp-box);
+  color: #2c3338;
+  font-weight: 400;
+  border-bottom: 1px solid var(--wp-border);
+}
+.template-default .table tbody tr:nth-child(odd) td {
+  background: var(--wp-stripe);
+}
+.template-default .table tbody tr:nth-child(even) td {
+  background: var(--wp-box);
+}
+.template-default .table tbody td:first-child a {
+  font-weight: 600;
+}
+
+/* ---------- boxes: dashboard cards, edit sidebar, tabs, rows ---------- */
+.template-default .card {
+  background: var(--wp-box);
+  border: 1px solid var(--wp-border);
+  border-radius: 0;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+.template-default .card:hover {
+  border-color: var(--wp-blue);
+}
+.template-default .doc-controls,
+.template-default .doc-controls__wrapper {
+  background: var(--wp-box);
+  border-bottom: 1px solid var(--wp-border);
+}
+.template-default .document-fields__sidebar-wrap,
+.template-default .document-fields__sidebar {
+  background: var(--wp-box);
+  border-left: 1px solid var(--wp-border);
+}
+.template-default .document-fields__main {
+  background: var(--wp-bg);
+}
+.template-default .tabs-field__tabs {
+  border-bottom: 1px solid var(--wp-border);
+}
+.template-default .tabs-field__tab-button {
+  background: #dcdcde;
+  border: 1px solid var(--wp-border);
+  border-bottom: 0;
+  margin-right: 4px;
+  padding: 5px 10px;
+  color: #50575e;
+  font-weight: 600;
+}
+.template-default .tabs-field__tab-button--active {
+  background: var(--wp-bg);
+  color: #000;
+  margin-bottom: -1px;
+  border-bottom: 1px solid var(--wp-bg);
+}
+.template-default .tabs-field__tab-button:after {
+  display: none;
+}
+.template-default .collapsible {
+  border: 1px solid var(--wp-border);
+  border-radius: 0;
+  background: var(--wp-box);
+}
+.template-default .collapsible__toggle-wrap {
+  background: var(--wp-stripe);
+}
+
+/* =====================================================================================
+   Quiz Dashboard (/admin/quiz-dashboard) - layout of the Let's Talk Chennai registrations
+   dashboard, in WordPress colours.
+   ===================================================================================== */
+.qd {
+  padding: 24px 0 48px;
+  color: var(--wp-text);
+}
+.qd-card {
+  background: var(--wp-box);
+  border: 1px solid var(--wp-border);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+  border-radius: 8px;
+}
+.qd-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 18px 20px;
+}
+.qd-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #d63638;
+}
+.qd-title {
+  margin: 2px 0 2px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--wp-heading);
+}
+.qd-sub {
+  margin: 0;
+  font-size: 12px;
+  color: var(--wp-muted);
+}
+.qd-head__right {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.qd-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 14px;
+  min-width: 140px;
+  border: 1px solid #dcdcde;
+  border-radius: 6px;
+  background: #fff;
+}
+.qd-stat b {
+  font-size: 17px;
+  color: var(--wp-heading);
+}
+.qd-stat span {
+  font-size: 11px;
+  color: var(--wp-muted);
+}
+.qd-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 6px;
+  background: #00a32a;
+  color: #fff !important;
+  font-weight: 700;
+  font-size: 13px;
+  text-decoration: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+.qd-export::before {
+  content: '';
+  width: 12px;
+  height: 14px;
+  border: 2px solid #fff;
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+.qd-export:hover {
+  background: #008a20;
+}
+.qd-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 22px 0 0;
+}
+.qd-pills--sub {
+  margin-top: 14px;
+}
+.qd-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid #dcdcde;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--wp-heading) !important;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+.qd-pills--sub .qd-pill {
+  padding: 7px 14px;
+  font-size: 13px;
+}
+.qd-pill:hover {
+  border-color: var(--wp-blue);
+}
+.qd-pill.is-active {
+  background: linear-gradient(135deg, #135e96, #2271b1);
+  border-color: #135e96;
+  color: #fff !important;
+}
+.qd-count {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #f0f6fc;
+  color: var(--wp-blue);
+  font-size: 12px;
+  text-align: center;
+}
+.qd-pill.is-active .qd-count {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+.qd-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 12px;
+}
+.qd-input {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--wp-border-input);
+  border-radius: 4px;
+  background: #fff;
+  color: #2c3338;
+  font-size: 13px;
+}
+.qd-filters input[type='search'] {
+  width: 280px;
+}
+.qd-input:focus {
+  border-color: var(--wp-blue);
+  box-shadow: 0 0 0 1px var(--wp-blue);
+  outline: 0;
+}
+.qd-day,
+.qd-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.qd-btn {
+  min-height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--wp-blue);
+  border-radius: 3px;
+  background: var(--wp-blue);
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+.qd-btn:hover {
+  background: var(--wp-blue-hover);
+}
+.qd-table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+}
+.qd-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.qd-table thead th {
+  position: sticky;
+  top: 0;
+  background: #1e4b8f;
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: left;
+  white-space: nowrap;
+  padding: 14px 14px;
+}
+.qd-table td {
+  padding: 12px 14px;
+  border-top: 1px solid #f0f0f1;
+  white-space: nowrap;
+  color: #2c3338;
+}
+.qd-table tbody tr:nth-child(even) td {
+  background: #fafafa;
+}
+.qd-table tbody tr:hover td {
+  background: #f0f6fc;
+}
+.qd-table .r {
+  text-align: right;
+}
+.qd-table .strong {
+  font-weight: 600;
+  color: var(--wp-heading);
+}
+.qd-table .muted {
+  color: var(--wp-muted);
+}
+.qd-empty {
+  padding: 40px 14px !important;
+  text-align: center;
+  color: var(--wp-muted) !important;
+}
+.qd-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+  background: #f0f0f1;
+  color: #50575e;
+}
+.qd-badge--active,
+.qd-badge--scheduled {
+  background: #edfaef;
+  color: #008a20;
+}
+.qd-badge--completed {
+  background: #f0f6fc;
+  color: var(--wp-blue);
+}
+.qd-pager {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--wp-muted);
+}
+.qd-pager__links {
+  display: inline-flex;
+  gap: 14px;
+}
+.qd-pager .off {
+  color: #a7aaad;
+}
+
+/* ---------- login / forgot password: WordPress login screen (logo kept) ---------- */
+html body .login.template-minimal,
+html body .forgot-password.template-minimal {
+  background: var(--wp-bg) !important;
+}
+html body .login.template-minimal .template-minimal__wrap,
+html body .forgot-password.template-minimal .template-minimal__wrap {
+  max-width: 380px;
+  padding: 26px 24px 30px;
+  border-radius: 0;
+  background: #fff;
+  backdrop-filter: none;
+  border: 1px solid var(--wp-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+html body .login.template-minimal h1,
+html body .login.template-minimal h2 {
+  font-size: 18px;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--wp-heading);
+}
+html body .login.template-minimal p {
+  color: var(--wp-muted);
+}
+html body .login.template-minimal p b {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--wp-heading);
+}
+html body .login.template-minimal .field-label,
+html body .forgot-password.template-minimal .field-label {
+  color: var(--wp-text);
+  font-weight: 400;
+  font-size: 14px;
+}
+html body .login.template-minimal .field-type__wrap input,
+html body .forgot-password.template-minimal .field-type__wrap input {
+  border-radius: 4px !important;
+  border: 1px solid var(--wp-border-input) !important;
+  background: #fff !important;
+  box-shadow: 0 0 0 transparent !important;
+  font-size: 18px;
+  height: 40px;
+}
+html body .login.template-minimal .field-type__wrap input:focus,
+html body .forgot-password.template-minimal .field-type__wrap input:focus {
+  border-color: var(--wp-blue) !important;
+  box-shadow: 0 0 0 1px var(--wp-blue) !important;
+}
+html body .login.template-minimal a,
+html body .login.template-minimal .login__form a,
+html body .forgot-password.template-minimal a {
+  color: var(--wp-blue);
+  font-weight: 400;
+  font-size: 13px;
+}
+html body .login.template-minimal .form-submit .btn,
+html body .forgot-password.template-minimal .form-submit .btn {
+  --bg-color: var(--wp-blue);
+  --hover-bg: var(--wp-blue-hover);
+  background: var(--wp-blue) !important;
+  border-radius: 3px !important;
+  box-shadow: none !important;
+  font-size: 13px;
+  font-weight: 400;
+  min-height: 36px;
+}
+html body .login.template-minimal .form-submit .btn:hover,
+html body .forgot-password.template-minimal .form-submit .btn:hover {
+  background: var(--wp-blue-hover) !important;
+  transform: none;
+}
+
+/* hamburger on the dark bar (phones / tablets too) */
+.template-default .hamburger {
+  background: transparent !important;
+  color: var(--wp-menu-text);
+}

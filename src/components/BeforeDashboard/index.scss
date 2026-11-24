@@ -1,24 +1,73 @@
-@import '~@payloadcms/ui/scss';
-
+// WordPress dashboard "Welcome" panel
 .dashboard .before-dashboard {
-  margin-bottom: base(1.5);
+  margin-bottom: 24px;
 
-  &__banner {
-    & h4 {
+  &__welcome {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+    padding: 23px 24px 20px;
+  }
+
+  &__intro h2 {
+    margin: 0 0 6px;
+    font-size: 21px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: #1d2327;
+  }
+
+  &__intro p {
+    margin: 0 0 18px;
+    font-size: 16px;
+    color: #50575e;
+  }
+
+  &__columns {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1d2327;
+    }
+
+    ul {
       margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    li {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+
+    a:not(.wp-button) {
+      color: #2271b1;
+      text-decoration: none;
+
+      &:hover {
+        color: #135e96;
+        text-decoration: underline;
+      }
     }
   }
 
-  &__instructions {
-    list-style: decimal;
-    margin-bottom: base(0.5);
-
-    & li {
-      width: 100%;
-    }
+  &__note {
+    margin: 8px 0 0;
+    color: #646970;
+    font-size: 13px;
   }
 
-  & a:hover {
-    opacity: 0.85;
+  &__ok {
+    color: #00a32a;
   }
 }

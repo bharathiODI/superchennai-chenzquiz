@@ -1,5 +1,5 @@
-import { isNotAdmin } from '@/access/checkRole'
-import { isAdmin, isAdminAdminAccess } from '@/access/isAdmin'
+import { WRITERS, createContent, deleteContent, hiddenUnless, updateContent } from '@/access/roles'
+import { createdByField } from '@/fields/createdBy'
 import { AboutUsBlock } from '@/blocks/AboutUs/config'
 import { Banner } from '@/blocks/Banner/config'
 import { Code } from '@/blocks/Code/config'
@@ -35,12 +35,13 @@ import { InstaReelsBlock } from './Blocks/InstaReelsSlider/config'
 
 export const Questions: CollectionConfig<'questions'> = {
   slug: 'questions',
+  // WordPress roles: editors and up - any question; authors - their own; contributors - their own
+  // drafts only (no Publish button for them). Players read published questions.
   access: {
-    admin: isAdminAdminAccess,
-    create: isAdmin,
-    delete: isAdmin,
+    create: createContent,
+    delete: deleteContent,
     read: authenticatedOrPublished,
-    update: isAdmin,
+    update: updateContent,
   },
   defaultPopulate: {
     title: true,
@@ -48,8 +49,9 @@ export const Questions: CollectionConfig<'questions'> = {
   },
   defaultSort: 'order',
   admin: {
-    hidden: isNotAdmin,
+    hidden: hiddenUnless(WRITERS),
     defaultColumns: ['title', 'slug', 'updatedAt'],
+    components: { edit: { PublishButton: '@/components/admin/RolePublishButton#RolePublishButton' } },
     livePreview: {
       url: ({ data, req }) => {
         const path = generatePreviewPath({
@@ -70,6 +72,7 @@ export const Questions: CollectionConfig<'questions'> = {
     useAsTitle: 'title',
   },
   fields: [
+    createdByField(),
     {
       name: 'title',
       type: 'text',

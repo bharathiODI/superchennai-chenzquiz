@@ -68,15 +68,15 @@ export interface Config {
   };
   blocks: {};
   collections: {
-    quizzes: Quiz;
     questions: Question;
+    quizzes: Quiz;
     'quiz-users': QuizUser;
     'quiz-rounds': QuizRound;
     'quiz-attempts': QuizAttempt;
     'user-submissions': UserSubmission;
-    pages: Page;
     posts: Post;
     media: Media;
+    pages: Page;
     users: User;
     redirects: Redirect;
     forms: Form;
@@ -90,15 +90,15 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    quizzes: QuizzesSelect<false> | QuizzesSelect<true>;
     questions: QuestionsSelect<false> | QuestionsSelect<true>;
+    quizzes: QuizzesSelect<false> | QuizzesSelect<true>;
     'quiz-users': QuizUsersSelect<false> | QuizUsersSelect<true>;
     'quiz-rounds': QuizRoundsSelect<false> | QuizRoundsSelect<true>;
     'quiz-attempts': QuizAttemptsSelect<false> | QuizAttemptsSelect<true>;
     'user-submissions': UserSubmissionsSelect<false> | UserSubmissionsSelect<true>;
-    pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
@@ -115,16 +115,16 @@ export interface Config {
   };
   fallbackLocale: null;
   globals: {
-    'quiz-settings': QuizSetting;
-    'quiz-site-settings': QuizSiteSetting;
     header: Header;
     footer: Footer;
+    'quiz-settings': QuizSetting;
+    'quiz-site-settings': QuizSiteSetting;
   };
   globalsSelect: {
-    'quiz-settings': QuizSettingsSelect<false> | QuizSettingsSelect<true>;
-    'quiz-site-settings': QuizSiteSettingsSelect<false> | QuizSiteSettingsSelect<true>;
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    'quiz-settings': QuizSettingsSelect<false> | QuizSettingsSelect<true>;
+    'quiz-site-settings': QuizSiteSettingsSelect<false> | QuizSiteSettingsSelect<true>;
   };
   locale: null;
   widgets: {
@@ -180,75 +180,11 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "quizzes".
- */
-export interface Quiz {
-  id: number;
-  quizTitle: string;
-  /**
-   * Auto-generated unique URL slug
-   */
-  slug: string;
-  quizDate: string;
-  /**
-   * Set when this quiz should automatically conclude
-   */
-  quizEndDate: string;
-  /**
-   * Questions players can get. Each round gives a player the next questions they have not answered yet, in Question Number order (or shuffled, if "Shuffle questions" is ticked below). Nobody gets a question twice - a question edited after a player answered it counts as new. Swap in each day's questions before the day starts (Quiz Settings > Game day, 12:30 AM by default).
-   */
-  questions: (number | Question)[];
-  roundsPerDay?: number | null;
-  questionsPerRound?: number | null;
-  /**
-   * Which question in each round is sponsored (3 = third). 0 = no sponsored slot.
-   */
-  sponsoredPosition?: number | null;
-  /**
-   * Off: every player gets the questions in Question Number order (then Display Order). On: each player gets them in a random order. The sponsored question always keeps its slot.
-   */
-  shuffleQuestions?: boolean | null;
-  /**
-   * Sponsored question per day (same for every player). Leave "Round" empty to use it in all rounds that day. Days without one get a regular question in that slot. Sponsored questions are never served as regular questions.
-   */
-  sponsoredQuestions?:
-    | {
-        date: string;
-        round?: number | null;
-        question: number | Question;
-        id?: string | null;
-      }[]
-    | null;
-  status?: ('draft' | 'active' | 'completed') | null;
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (number | null) | Media;
-    description?: string | null;
-    /**
-     * Paste valid JSON-LD schema for this quiz
-     */
-    schema?:
-      | {
-          [k: string]: unknown;
-        }
-      | unknown[]
-      | string
-      | number
-      | boolean
-      | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "questions".
  */
 export interface Question {
   id: number;
+  createdBy?: (number | null) | User;
   title: string;
   heroImage?: (number | null) | Media;
   mobileImage?: (number | null) | Media;
@@ -408,6 +344,38 @@ export interface Question {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users".
+ */
+export interface User {
+  id: number;
+  /**
+   * What this person can do in the CMS (WordPress roles). Only a Super Admin can give or take the Super Admin role.
+   */
+  role: 'superadmin' | 'admin' | 'editor' | 'author' | 'contributor' | 'viewer' | 'user';
+  name?: string | null;
+  phone?: string | null;
+  location?: string | null;
+  /**
+   * Upload author profile photo (square image preferred)
+   */
+  profileImage?: (number | null) | Media;
+  phoneVerified?: boolean | null;
+  otp?: string | null;
+  otpExpires?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  password?: string | null;
+  collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
@@ -497,6 +465,71 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quizzes".
+ */
+export interface Quiz {
+  id: number;
+  quizTitle: string;
+  /**
+   * Auto-generated unique URL slug
+   */
+  slug: string;
+  quizDate: string;
+  /**
+   * Set when this quiz should automatically conclude
+   */
+  quizEndDate: string;
+  /**
+   * Questions players can get. Each round gives a player the next questions they have not answered yet, in Question Number order (or shuffled, if "Shuffle questions" is ticked below). Nobody gets a question twice - a question edited after a player answered it counts as new. Swap in each day's questions before the day starts (Quiz Settings > Game day, 12:30 AM by default).
+   */
+  questions: (number | Question)[];
+  roundsPerDay?: number | null;
+  questionsPerRound?: number | null;
+  /**
+   * Which question in each round is sponsored (3 = third). 0 = no sponsored slot.
+   */
+  sponsoredPosition?: number | null;
+  /**
+   * Off: every player gets the questions in Question Number order (then Display Order). On: each player gets them in a random order. The sponsored question always keeps its slot.
+   */
+  shuffleQuestions?: boolean | null;
+  /**
+   * Sponsored question per day (same for every player). Leave "Round" empty to use it in all rounds that day. Days without one get a regular question in that slot. Sponsored questions are never served as regular questions.
+   */
+  sponsoredQuestions?:
+    | {
+        date: string;
+        round?: number | null;
+        question: number | Question;
+        id?: string | null;
+      }[]
+    | null;
+  status?: ('draft' | 'active' | 'completed') | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+    /**
+     * Paste valid JSON-LD schema for this quiz
+     */
+    schema?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * Players. Read-only here (changed only by the game). Search by name, phone or email.
@@ -593,6 +626,86 @@ export interface UserSubmission {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  createdBy?: (number | null) | User;
+  title: string;
+  heroImage?: (number | null) | Media;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  relatedPosts?: (number | Post)[] | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  views?: number | null;
+  likes?: number | null;
+  publishedAt?: string | null;
+  authors?: (number | User)[] | null;
+  blogCategory:
+    | 'technology'
+    | 'health'
+    | 'travel'
+    | 'education'
+    | 'finance'
+    | 'business'
+    | 'lifestyle'
+    | 'food'
+    | 'fitness'
+    | 'parenting'
+    | 'personal-development'
+    | 'fashion'
+    | 'beauty'
+    | 'gaming'
+    | 'entertainment'
+    | 'culture'
+    | 'politics'
+    | 'science'
+    | 'environment'
+    | 'real-estate'
+    | 'career'
+    | 'news'
+    | 'photography'
+    | 'spirituality'
+    | 'writing'
+    | 'diy'
+    | 'pets'
+    | 'automotive'
+    | 'home-garden'
+    | 'productivity';
+  populatedAuthors?:
+    | {
+        id?: string | null;
+        name?: string | null;
+      }[]
+    | null;
+  slug?: string | null;
+  slugLock?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -704,114 +817,6 @@ export interface Page {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: number;
-  title: string;
-  heroImage?: (number | null) | Media;
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  relatedPosts?: (number | Post)[] | null;
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (number | null) | Media;
-    description?: string | null;
-  };
-  views?: number | null;
-  likes?: number | null;
-  publishedAt?: string | null;
-  authors?: (number | User)[] | null;
-  blogCategory:
-    | 'technology'
-    | 'health'
-    | 'travel'
-    | 'education'
-    | 'finance'
-    | 'business'
-    | 'lifestyle'
-    | 'food'
-    | 'fitness'
-    | 'parenting'
-    | 'personal-development'
-    | 'fashion'
-    | 'beauty'
-    | 'gaming'
-    | 'entertainment'
-    | 'culture'
-    | 'politics'
-    | 'science'
-    | 'environment'
-    | 'real-estate'
-    | 'career'
-    | 'news'
-    | 'photography'
-    | 'spirituality'
-    | 'writing'
-    | 'diy'
-    | 'pets'
-    | 'automotive'
-    | 'home-garden'
-    | 'productivity';
-  populatedAuthors?:
-    | {
-        id?: string | null;
-        name?: string | null;
-      }[]
-    | null;
-  slug?: string | null;
-  slugLock?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users".
- */
-export interface User {
-  id: number;
-  role: 'admin' | 'client' | 'user';
-  name?: string | null;
-  phone?: string | null;
-  location?: string | null;
-  /**
-   * Upload author profile photo (square image preferred)
-   */
-  profileImage?: (number | null) | Media;
-  phoneVerified?: boolean | null;
-  otp?: string | null;
-  otpExpires?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  password?: string | null;
-  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3312,12 +3317,12 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'quizzes';
-        value: number | Quiz;
-      } | null)
-    | ({
         relationTo: 'questions';
         value: number | Question;
+      } | null)
+    | ({
+        relationTo: 'quizzes';
+        value: number | Quiz;
       } | null)
     | ({
         relationTo: 'quiz-users';
@@ -3336,16 +3341,16 @@ export interface PayloadLockedDocument {
         value: number | UserSubmission;
       } | null)
     | ({
-        relationTo: 'pages';
-        value: number | Page;
-      } | null)
-    | ({
         relationTo: 'posts';
         value: number | Post;
       } | null)
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'users';
@@ -3421,43 +3426,10 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "quizzes_select".
- */
-export interface QuizzesSelect<T extends boolean = true> {
-  quizTitle?: T;
-  slug?: T;
-  quizDate?: T;
-  quizEndDate?: T;
-  questions?: T;
-  roundsPerDay?: T;
-  questionsPerRound?: T;
-  sponsoredPosition?: T;
-  shuffleQuestions?: T;
-  sponsoredQuestions?:
-    | T
-    | {
-        date?: T;
-        round?: T;
-        question?: T;
-        id?: T;
-      };
-  status?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        image?: T;
-        description?: T;
-        schema?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "questions_select".
  */
 export interface QuestionsSelect<T extends boolean = true> {
+  createdBy?: T;
   title?: T;
   heroImage?: T;
   mobileImage?: T;
@@ -3601,6 +3573,40 @@ export interface QuestionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quizzes_select".
+ */
+export interface QuizzesSelect<T extends boolean = true> {
+  quizTitle?: T;
+  slug?: T;
+  quizDate?: T;
+  quizEndDate?: T;
+  questions?: T;
+  roundsPerDay?: T;
+  questionsPerRound?: T;
+  sponsoredPosition?: T;
+  shuffleQuestions?: T;
+  sponsoredQuestions?:
+    | T
+    | {
+        date?: T;
+        round?: T;
+        question?: T;
+        id?: T;
+      };
+  status?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+        schema?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "quiz-users_select".
  */
 export interface QuizUsersSelect<T extends boolean = true> {
@@ -3660,6 +3666,133 @@ export interface UserSubmissionsSelect<T extends boolean = true> {
   answers?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  createdBy?: T;
+  title?: T;
+  heroImage?: T;
+  content?: T;
+  relatedPosts?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  views?: T;
+  likes?: T;
+  publishedAt?: T;
+  authors?: T;
+  blogCategory?: T;
+  populatedAuthors?:
+    | T
+    | {
+        id?: T;
+        name?: T;
+      };
+  slug?: T;
+  slugLock?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  caption?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        square?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        small?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        medium?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        large?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        xlarge?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        og?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -5488,132 +5621,6 @@ export interface PBChenzCreativeHeroBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
- */
-export interface PostsSelect<T extends boolean = true> {
-  title?: T;
-  heroImage?: T;
-  content?: T;
-  relatedPosts?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        image?: T;
-        description?: T;
-      };
-  views?: T;
-  likes?: T;
-  publishedAt?: T;
-  authors?: T;
-  blogCategory?: T;
-  populatedAuthors?:
-    | T
-    | {
-        id?: T;
-        name?: T;
-      };
-  slug?: T;
-  slugLock?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_select".
- */
-export interface MediaSelect<T extends boolean = true> {
-  alt?: T;
-  caption?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  url?: T;
-  thumbnailURL?: T;
-  filename?: T;
-  mimeType?: T;
-  filesize?: T;
-  width?: T;
-  height?: T;
-  focalX?: T;
-  focalY?: T;
-  sizes?:
-    | T
-    | {
-        thumbnail?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        square?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        small?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        medium?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        large?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        xlarge?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-        og?:
-          | T
-          | {
-              url?: T;
-              width?: T;
-              height?: T;
-              mimeType?: T;
-              filesize?: T;
-              filename?: T;
-            };
-      };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -5898,6 +5905,64 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header".
+ */
+export interface Header {
+  id: number;
+  /**
+   * Upload the logo for the header.
+   */
+  logo?: (number | null) | Media;
+  /**
+   * Upload the logo for the header right side.
+   */
+  secondarylogo?: (number | null) | Media;
+  navItems?:
+    | {
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: number | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: number | Post;
+              } | null);
+          url?: string | null;
+          label: string;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer".
+ */
+export interface Footer {
+  id: number;
+  copyright?: string | null;
+  companyInfo?: {
+    supportEmail?: string | null;
+  };
+  socialMedia?:
+    | {
+        platform: string;
+        url: string;
+        icon?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
  * Player titles, per-game timers, the speed bonus and the shareable scorecard.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -6043,61 +6108,51 @@ export interface QuizSiteSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "header".
+ * via the `definition` "header_select".
  */
-export interface Header {
-  id: number;
-  /**
-   * Upload the logo for the header.
-   */
-  logo?: (number | null) | Media;
-  /**
-   * Upload the logo for the header right side.
-   */
-  secondarylogo?: (number | null) | Media;
+export interface HeaderSelect<T extends boolean = true> {
+  logo?: T;
+  secondarylogo?: T;
   navItems?:
+    | T
     | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'pages';
-                value: number | Page;
-              } | null)
-            | ({
-                relationTo: 'posts';
-                value: number | Post;
-              } | null);
-          url?: string | null;
-          label: string;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "footer".
+ * via the `definition` "footer_select".
  */
-export interface Footer {
-  id: number;
-  copyright?: string | null;
-  companyInfo?: {
-    supportEmail?: string | null;
-  };
-  socialMedia?:
+export interface FooterSelect<T extends boolean = true> {
+  copyright?: T;
+  companyInfo?:
+    | T
     | {
-        platform: string;
-        url: string;
-        icon?: (number | null) | Media;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+        supportEmail?: T;
+      };
+  socialMedia?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        icon?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -6212,54 +6267,6 @@ export interface QuizSiteSettingsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "header_select".
- */
-export interface HeaderSelect<T extends boolean = true> {
-  logo?: T;
-  secondarylogo?: T;
-  navItems?:
-    | T
-    | {
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-            };
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "footer_select".
- */
-export interface FooterSelect<T extends boolean = true> {
-  copyright?: T;
-  companyInfo?:
-    | T
-    | {
-        supportEmail?: T;
-      };
-  socialMedia?:
-    | T
-    | {
-        platform?: T;
-        url?: T;
-        icon?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -6282,12 +6289,12 @@ export interface TaskSchedulePublish {
           value: number | Question;
         } | null)
       | ({
-          relationTo: 'pages';
-          value: number | Page;
-        } | null)
-      | ({
           relationTo: 'posts';
           value: number | Post;
+        } | null)
+      | ({
+          relationTo: 'pages';
+          value: number | Page;
         } | null);
     global?: string | null;
     user?: (number | null) | User;

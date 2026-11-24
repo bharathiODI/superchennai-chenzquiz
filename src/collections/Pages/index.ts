@@ -33,7 +33,6 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
-import { isNotAdmin } from '@/access/checkRole'
 import { AboutTriviaBlock } from '../Games/Blocks/AboutTriviaPage/config'
 import { HowItWorksBlock } from '../Games/Blocks/HowItWorksSection/config'
 import { LetsTalkChennaiFAQBlock } from '../Games/Blocks/LetsTalkChennaiFAQ/config'
@@ -41,7 +40,7 @@ import { TriviaAuthBlock } from '../Games/Blocks/ReadytoPlay/config'
 import { CreativeHeroBlock } from '../Games/Blocks/CreativeHero/config'
 import { InstaReelsBlock } from '../Games/Blocks/InstaReelsSlider/config'
 import { QuizRewardsBlock } from '../Games/Blocks/QuizRewards/config'
-import { isAdmin, isAdminAdminAccess } from '@/access/isAdmin'
+import { EDITORS, allow, hiddenUnless } from '@/access/roles'
 import { OurPartnersBlock } from '../Games/Blocks/OurPartnersBlock/config'
 import { buildLayoutField } from '@opendesigns/payload-builder'
 import { builderElements } from '@/builder/elements'
@@ -52,19 +51,19 @@ const builderLayout = buildLayoutField(builderElements, 'layout', true) as Block
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
+  // Pages: editors and up (WordPress: authors and contributors don't edit pages).
   access: {
-    admin: isAdminAdminAccess,
-    create: isAdmin,
-    delete: isAdmin,
+    create: allow(EDITORS),
+    delete: allow(EDITORS),
     read: authenticatedOrPublished,
-    update: isAdmin,
+    update: allow(EDITORS),
   },
   defaultPopulate: {
     title: true,
     slug: true,
   },
   admin: {
-    hidden: isNotAdmin,
+    hidden: hiddenUnless(EDITORS),
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) => {

@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 import { getPayload, type Where } from 'payload'
 import configPromise from '@payload-config'
 import { TEST_PLAYER_PHONES, realPlayersWhere } from '@/utilities/testPlayers'
+import { REPORT_READERS, userHas } from '@/access/roles'
 
-const DASHBOARD_ROLES = ['admin', 'client']
 // The winners board filters by today / this month / this year / a chosen date
 const WINNER_WINDOW_DAYS = 366
 
@@ -12,8 +12,8 @@ export async function GET(req: Request) {
     const payload = await getPayload({ config: configPromise })
     const { user } = await payload.auth({ headers: req.headers })
 
-    const role = user && 'role' in user ? String(user.role) : ''
-    if (!DASHBOARD_ROLES.includes(role)) {
+    // Super Admin, Administrator, Editor, Viewer (old 'client' accounts became Viewers)
+    if (!userHas(user, REPORT_READERS)) {
       return NextResponse.json({ error: 'Forbidden: admin access required' }, { status: 403 })
     }
 

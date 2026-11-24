@@ -27,8 +27,8 @@ import {
 } from '@payloadcms/plugin-seo/fields'
 import { slugField } from 'src/fields/slug'
 import { VideoBlock } from '@/blocks/VideoBlock/config'
-import { isAdmin, isAdminAdminAccess } from '@/access/isAdmin'
-import { isNotAdmin } from '@/access/checkRole'
+import { WRITERS, createContent, deleteContent, hiddenUnless, updateContent } from '@/access/roles'
+import { createdByField } from '@/fields/createdBy'
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
@@ -40,12 +40,12 @@ export const Posts: CollectionConfig<'posts'> = {
   //   update: () => true,
   // },
 
+  // WordPress roles: editors and up - any post; authors - their own; contributors - own drafts.
   access: {
-    admin: isAdminAdminAccess,
-    create: isAdmin,
-    delete: isAdmin,
+    create: createContent,
+    delete: deleteContent,
     read: authenticatedOrPublished,
-    update: isAdmin,
+    update: updateContent,
   },
 
   // This config controls what's populated by default when a post is referenced
@@ -61,7 +61,8 @@ export const Posts: CollectionConfig<'posts'> = {
     },
   },
   admin: {
-     hidden: isNotAdmin,
+    hidden: hiddenUnless(WRITERS),
+    components: { edit: { PublishButton: '@/components/admin/RolePublishButton#RolePublishButton' } },
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {
       url: ({ data, req }) => {
@@ -83,6 +84,7 @@ export const Posts: CollectionConfig<'posts'> = {
     useAsTitle: 'title',
   },
   fields: [
+    createdByField(),
     {
       name: 'title',
       type: 'text',

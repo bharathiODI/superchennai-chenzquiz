@@ -1,14 +1,16 @@
 import { GlobalConfig } from 'payload'
 import { revalidateFooter } from './hooks/revalidateFooter'
-import { isNotAdmin } from '@/access/checkRole'
+import { ADMINS, allow, hiddenUnless } from '@/access/roles'
 
 const Footer: GlobalConfig = {
   slug: 'footer',
+  // Appearance and quiz settings: Super Admins and Administrators (WordPress manage_options).
   access: {
     read: () => true,
+    update: allow(ADMINS),
   },
   admin: {
-    hidden: isNotAdmin,
+    hidden: hiddenUnless(ADMINS),
   },
   fields: [
     /* =========================================================

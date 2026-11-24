@@ -38,11 +38,20 @@ export default buildConfig({
   admin: {
     components: {
       beforeLogin: ['@/components/BeforeLogin'],
-      // Site status (playing now + maintenance switch) first on the dashboard
-      beforeDashboard: ['@/components/admin/SiteStatus#SiteStatus', '@/components/BeforeDashboard'],
+      // WordPress-style menu (roles decide what shows); Payload's own grouped list is hidden in CSS
+      beforeNavLinks: ['@/components/admin/WpMenu#WpMenu'],
+      // Viewers go straight to the Quiz Dashboard. Site status (playing now + maintenance) next.
+      beforeDashboard: [
+        '@/components/admin/ViewerHome#ViewerHome',
+        '@/components/admin/SiteStatus#SiteStatus',
+        '@/components/BeforeDashboard',
+      ],
       // "DEMO CMS" strip on the demo site (renders nothing on live)
       header: ['@/components/admin/SiteEnvBanner#SiteEnvBanner'],
-      views: {},
+      views: {
+        // Players, attempts and quiz details + Excel export (admins, editors, viewers)
+        quizDashboard: { Component: '@/components/admin/QuizDashboard#QuizDashboardView', path: '/quiz-dashboard' },
+      },
       graphics: {
         Logo: '@/components/admin/AdminLogo',
         Icon: '@/components/admin/AdminIcon',
@@ -52,6 +61,8 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    // WordPress admin is light; the WP look in custom.scss is written for the light theme.
+    theme: 'light',
     ...(isDemoSite() ? { meta: { titleSuffix: ' - DEMO' } } : {}),
     user: Users.slug,
     livePreview: {
@@ -90,18 +101,19 @@ export default buildConfig({
     push: false,
   }),
 
-  // CMS menu: grouped and in this order (groups appear in the order they first occur).
+  // CMS menu groups, WordPress order. The sidebar itself is components/admin/WpMenu; these groups
+  // are what Payload shows elsewhere (dashboard cards, search).
   collections: [
-    inGroup(Quizzes, 'Quiz'),
     inGroup(Questions, 'Quiz'),
+    inGroup(Quizzes, 'Quiz'),
     inGroup(QuizUsers, 'Players & Scores'),
     inGroup(QuizRounds, 'Players & Scores'),
     inGroup(QuizAttempts, 'Players & Scores'),
     inGroup(UserSubmissions, 'Players & Scores'),
-    inGroup(Pages, 'Website'),
-    inGroup(Posts, 'Website'),
-    inGroup(Media, 'Website'),
-    inGroup(Users, 'Admin'),
+    inGroup(Posts, 'Posts'),
+    inGroup(Media, 'Media'),
+    inGroup(Pages, 'Pages'),
+    inGroup(Users, 'Users'),
   ],
 
   // #################################################################################
@@ -116,10 +128,10 @@ export default buildConfig({
   ].filter(Boolean),
 
   globals: [
-    inGroup(QuizSettings, 'Quiz'),
-    inGroup(QuizSiteSettings, 'Quiz'),
-    inGroup(Header, 'Website'),
-    inGroup(Footer, 'Website'),
+    inGroup(Header, 'Appearance'),
+    inGroup(Footer, 'Appearance'),
+    inGroup(QuizSettings, 'Settings'),
+    inGroup(QuizSiteSettings, 'Settings'),
   ],
   blocks: [],
   plugins: [

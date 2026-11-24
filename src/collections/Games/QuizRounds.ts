@@ -1,10 +1,5 @@
 import type { CollectionConfig } from 'payload'
-import { isNotAdmin } from '@/access/checkRole'
-
-const isAdminUser = ({ req: { user } }: any) => {
-  const role = user?.role
-  return Array.isArray(role) ? role.includes('admin') : role === 'admin'
-}
+import { ADMINS, allow, hiddenUnless } from '@/access/roles'
 
 // One row per player, per day, per round: the questions that player was given.
 // Written only by the quiz APIs (overrideAccess); read-only for admins.
@@ -16,12 +11,12 @@ export const QuizRounds: CollectionConfig = {
     // Search box: player name, phone or game day (e.g. 2026-11-23)
     listSearchableFields: ['user.name', 'user.phone', 'day'],
     defaultColumns: ['user', 'quiz', 'day', 'round', 'status', 'score', 'completedAt'],
-    hidden: isNotAdmin,
+    hidden: hiddenUnless(ADMINS),
     description: 'Questions given to each player per game day and round. Read-only here (written only by the game). Search: player name, phone or game day (e.g. 2026-11-23).',
     components: { beforeListTable: ['@/components/admin/SiteStatus#SiteStatus', '@/components/admin/ScoreExport#ScoreExport'] },
   },
   access: {
-    read: isAdminUser,
+    read: allow(ADMINS),
     // Read-only in the CMS: scores and players are written only by the game itself, so nobody can
     // change them by mistake here. (Server code uses overrideAccess and is not affected.)
     create: () => false,

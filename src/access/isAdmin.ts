@@ -1,40 +1,10 @@
-// import type { Access, AccessArgs } from 'payload'
-
-// // Standard CRUD access rules (create, read, update, delete)
-// export const isAdmin: Access = ({ req: { user } }) => {
-//   return Boolean(user && user.role === 'admin')
-// }
-
-// // access.admin property-kku strictly boolean return panna type definition
-// export const isAdminAdminAccess = ({ req: { user } }: AccessArgs): boolean => {
-//   return Boolean(user && user.role === 'admin')
-// }
-
-// export const isAdminOrClientAdminAccess = ({ req: { user } }: AccessArgs): boolean => {
-//   return Boolean(user && (user.role === 'admin' || user.role === 'client'))
-// }
-
 import type { Access, AccessArgs } from 'payload'
 
-// Define user shape with role to satisfy TypeScript
-interface UserWithRole {
-  role?: string
-  [key: string]: unknown
-}
+import { ADMINS, EDITORS, userHas } from './roles'
 
-// Standard CRUD access rules (create, read, update, delete)
-export const isAdmin: Access = ({ req: { user } }) => {
-  const typedUser = user as UserWithRole | null | undefined
-  return Boolean(typedUser && typedUser.role === 'admin')
-}
-
-// access.admin property-kku strictly boolean return panna type definition
-export const isAdminAdminAccess = ({ req: { user } }: AccessArgs): boolean => {
-  const typedUser = user as UserWithRole | null | undefined
-  return Boolean(typedUser && typedUser.role === 'admin')
-}
-
-export const isAdminOrClientAdminAccess = ({ req: { user } }: AccessArgs): boolean => {
-  const typedUser = user as UserWithRole | null | undefined
-  return Boolean(typedUser && (typedUser.role === 'admin' || typedUser.role === 'client'))
-}
+// Old helpers, kept for anything that still imports them. New code: use ./roles (WordPress roles).
+/** Super Admin or Administrator. */
+export const isAdmin: Access = ({ req: { user } }) => userHas(user, ADMINS)
+export const isAdminAdminAccess = ({ req: { user } }: AccessArgs): boolean => userHas(user, ADMINS)
+/** Was "admin or client"; now Super Admin, Administrator or Editor. */
+export const isAdminOrClientAdminAccess = ({ req: { user } }: AccessArgs): boolean => userHas(user, EDITORS)

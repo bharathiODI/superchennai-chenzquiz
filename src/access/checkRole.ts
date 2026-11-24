@@ -1,5 +1,5 @@
-// import type { User } from 'payload'
+import { ADMINS, userHas } from './roles'
 
-export const isNotAdmin = ({ user }: { user: any }) => {
-  return user?.role !== 'admin'
-}
+// Old helper, kept for anything that still imports it. New code: hiddenUnless(...) from ./roles.
+/** For admin.hidden: hide unless Super Admin or Administrator. */
+export const isNotAdmin = ({ user }: { user: unknown }) => !userHas(user, ADMINS)

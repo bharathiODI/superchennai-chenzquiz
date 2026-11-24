@@ -9,8 +9,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { anyone } from '../access/anyone'
-import { authenticated } from '../access/authenticated'
-import { isNotAdmin } from '@/access/checkRole'
+import { EDITORS, UPLOADERS, allow, hiddenUnless } from '@/access/roles'
 // import { compressVideo } from '@/blocks/videoGallery/hook'
 
 const filename = fileURLToPath(import.meta.url)
@@ -19,13 +18,14 @@ const dirname = path.dirname(filename)
 export const Media: CollectionConfig = {
   slug: 'media',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    // Upload: authors and up. Edit / delete: editors and up. Players never write media.
+    create: allow(UPLOADERS),
+    delete: allow(EDITORS),
     read: anyone,
-    update: authenticated,
+    update: allow(EDITORS),
   },
   admin: {
-    hidden: isNotAdmin,
+    hidden: hiddenUnless(UPLOADERS),
   },
   fields: [
     {
