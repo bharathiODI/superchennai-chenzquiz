@@ -52,6 +52,7 @@ players see the message; a round already on screen can still be finished. Kept a
 bash chenzquiz-site.sh status [demo]                      # maintenance, players mid-round, database
 bash chenzquiz-site.sh playing [demo]                     # who is mid-round right now
 bash chenzquiz-site.sh maintenance on|off [demo] ["msg"]  # same switch as the CMS (no restart)
+bash chenzquiz-site.sh demo-db copy-live                  # copy ALL live data into the demo's own database
 bash chenzquiz-site.sh demo-db live                       # demo app on the LIVE database (exports)
 bash chenzquiz-site.sh demo-db demo                       # demo back on its own database
 bash chenzquiz-site.sh demo-ips "1.2.3.4 5.6.7.0/24"      # only these IPs can open the demo

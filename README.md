@@ -1,5 +1,7 @@
 # Chenz Quiz (Super Chennai)
 
+**All commands and notes in one place: [RUNBOOK.md](RUNBOOK.md).**
+
 Daily Chennai trivia at [chenzquiz.superchennai.com](https://chenzquiz.superchennai.com).
 Next.js 15 + Payload CMS 3 (Postgres), Tailwind.
 
