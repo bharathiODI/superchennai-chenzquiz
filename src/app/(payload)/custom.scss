@@ -1214,3 +1214,110 @@ html body .forgot-password.template-minimal .form-submit .btn:hover {
   filter: brightness(0.95);
   background: linear-gradient(90deg, #4b20d8, #6000dd 60%, #e6006e) !important;
 }
+
+/* ---------- Quiz Dashboard filters + export ---------- */
+.qd-filterbox {
+  margin: 18px 0 0;
+  padding: 14px 18px 6px;
+}
+.qd-frow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  padding: 0 0 10px;
+}
+.qd-frow + .qd-frow {
+  border-top: 1px solid #eeecf8;
+  padding-top: 10px;
+}
+.qd-flabel {
+  min-width: 118px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #74799a;
+}
+.qd-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.qd-chip {
+  padding: 5px 11px;
+  border: 1px solid #e0dcf5;
+  border-radius: 999px;
+  background: #fff;
+  color: #24204a !important;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none !important;
+}
+.qd-chip:hover {
+  border-color: #b9a8ff;
+  background: #f6f3ff;
+}
+.qd-chip.is-on {
+  background: #5b2eff;
+  border-color: #5b2eff;
+  color: #fff !important;
+}
+.qd-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #4a4870;
+}
+.qd-input.qd-num {
+  width: 84px;
+}
+.qd-input.qd-search {
+  width: 280px;
+}
+select.qd-input {
+  padding-right: 6px;
+}
+.qd-reset {
+  font-size: 13px;
+}
+.qd-resultbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0 12px;
+  font-size: 13.5px;
+  color: #11145a;
+}
+.qd-active {
+  color: #4a4870;
+}
+.qd-report {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 14px;
+  border: 1px solid #d6ccff;
+  border-radius: 8px;
+  background: #eeeaff;
+  color: #5b2eff !important;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none !important;
+}
+.qd-report:hover {
+  background: #e2dbff;
+}
+
+/* "Export filtered rows" above the Players & Scores lists */
+.list-export {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: #74799a;
+}

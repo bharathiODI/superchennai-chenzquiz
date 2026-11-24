@@ -13,7 +13,9 @@ export const QuizRounds: CollectionConfig = {
     defaultColumns: ['user', 'quiz', 'day', 'round', 'status', 'score', 'completedAt'],
     hidden: hiddenUnless(ADMINS),
     description: 'Questions given to each player per game day and round. Read-only here (written only by the game). Search: player name, phone or game day (e.g. 2026-11-23).',
-    components: { beforeListTable: ['@/components/admin/SiteStatus#SiteStatus', '@/components/admin/ScoreExport#ScoreExport'] },
+    components: {
+      beforeListTable: ['@/components/admin/SiteStatus#SiteStatus', '@/components/admin/ScoreExport#ScoreExport', '@/components/admin/ListExport#ListExport'],
+    },
   },
   access: {
     read: allow(ADMINS),

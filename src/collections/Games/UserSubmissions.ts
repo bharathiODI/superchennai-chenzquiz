@@ -7,6 +7,7 @@ export const UserSubmissions: CollectionConfig = {
     useAsTitle: 'id',
     defaultColumns: ['user', 'quiz', 'score', 'createdAt'],
     hidden: hiddenUnless(ADMINS),
+    components: { beforeListTable: ['@/components/admin/ListExport#ListExport'] },
   },
   // Admin only over the REST API (players are logged in to the same API)
   access: {

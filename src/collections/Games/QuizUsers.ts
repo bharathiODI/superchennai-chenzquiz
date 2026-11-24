@@ -34,7 +34,7 @@ export const QuizUsers: CollectionConfig = {
     listSearchableFields: ['name', 'phone', 'email'],
     description: 'Players. Read-only here (changed only by the game). Search by name, phone or email.',
     hidden: hiddenUnless(ADMINS),
-    components: { beforeListTable: ['@/components/admin/ScoreExport#ScoreExport'] },
+    components: { beforeListTable: ['@/components/admin/ScoreExport#ScoreExport', '@/components/admin/ListExport#ListExport'] },
   },
   // Sign-up, login and scoring go through the app's own API routes (server side), so the REST API
   // only needs: admins manage players; a player can read their own record.

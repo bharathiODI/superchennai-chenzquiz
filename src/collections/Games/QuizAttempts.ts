@@ -10,6 +10,7 @@ export const QuizAttempts: CollectionConfig = {
     defaultColumns: ['user', 'quiz', 'score', 'correctAnswers', 'timeTaken', 'round', 'completedAt'],
     description: 'One entry per finished round. Read-only here (written only by the game). Search: player name or phone.',
     hidden: hiddenUnless(ADMINS),
+    components: { beforeListTable: ['@/components/admin/ListExport#ListExport'] },
   },
   access: {
     // CMS admins: all. A player: their own. Other CMS roles: none (a CMS user's id is not a player id).
