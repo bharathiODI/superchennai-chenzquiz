@@ -1,4 +1,5 @@
 import { getNow } from '@/utilities/clock'
+import { activeQuizHealth } from '@/utilities/quizHealth'
 import type { Payload } from 'payload'
 
 import { gameDayKey } from '@/utilities/gameDay'
@@ -89,7 +90,9 @@ const pool = (payload: Payload): Pool => (payload.db as unknown as { pool: Pool 
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/
 
-export function parseFilters(sp: Record<string, string | string[] | undefined> | undefined): Filters {
+export function parseFilters(
+  sp: Record<string, string | string[] | undefined> | undefined,
+): Filters {
   const one = (k: string) => {
     const v = sp?.[k]
     return (Array.isArray(v) ? v[0] : v)?.trim() ?? ''
@@ -111,8 +114,19 @@ export function parseFilters(sp: Record<string, string | string[] | undefined> |
   const played = one('played')
   // Old links: tab=attempts is now Plays, tab=quizzes is gone
   const t: Tab =
-    tab === 'attempts' ? 'plays' : (['plays', 'questions', 'sponsor', 'flags', 'player'] as string[]).includes(tab) ? (tab as Tab) : 'players'
-  const sorts: Record<string, string> = t === 'plays' ? PLAY_SORTS : t === 'questions' ? QUESTION_SORTS : t === 'players' ? PLAYER_SORTS : { latest: 'Latest first' }
+    tab === 'attempts'
+      ? 'plays'
+      : (['plays', 'questions', 'sponsor', 'flags', 'player'] as string[]).includes(tab)
+        ? (tab as Tab)
+        : 'players'
+  const sorts: Record<string, string> =
+    t === 'plays'
+      ? PLAY_SORTS
+      : t === 'questions'
+        ? QUESTION_SORTS
+        : t === 'players'
+          ? PLAYER_SORTS
+          : { latest: 'Latest first' }
   const status = one('status')
   const flag = one('flag')
   const useIn = one('useIn')
@@ -144,7 +158,9 @@ export function parseFilters(sp: Record<string, string | string[] | undefined> |
     flag: flag === 'flagged' || flag === 'tooFast' || flag === 'linked' ? flag : 'any',
     minScore: num('minScore'),
     maxScore: num('maxScore'),
-    useIn: (['general', 'sponsored', 'both', 'none'] as string[]).includes(useIn) ? (useIn as Filters['useIn']) : 'any',
+    useIn: (['general', 'sponsored', 'both', 'none'] as string[]).includes(useIn)
+      ? (useIn as Filters['useIn'])
+      : 'any',
     playerId: Number.isInteger(player) && player > 0 ? player : null,
     sort: sorts[one('sort')] ? one('sort') : DEFAULT_SORT[t],
   }
@@ -155,7 +171,8 @@ export function filterParams(f: Filters, change: Partial<Filters> = {}): URLSear
   const n = { ...f, ...change }
   const p = new URLSearchParams()
   const put = (k: string, v: unknown) => {
-    if (v !== null && v !== undefined && v !== '' && v !== false) p.set(k, String(v === true ? 1 : v))
+    if (v !== null && v !== undefined && v !== '' && v !== false)
+      p.set(k, String(v === true ? 1 : v))
   }
   if (n.tab !== 'players') p.set('tab', n.tab)
   put('quiz', n.quizId)
@@ -196,7 +213,8 @@ export function filterParams(f: Filters, change: Partial<Filters> = {}): URLSear
 /** Plain-language list of the filters in use (shown above the table and in the Excel file). */
 export function describeFilters(f: Filters, quizTitle?: string): string[] {
   const out: string[] = []
-  const range = (a: string | null, b: string | null) => (a && b ? (a === b ? a : `${a} to ${b}`) : a ? `from ${a}` : `until ${b}`)
+  const range = (a: string | null, b: string | null) =>
+    a && b ? (a === b ? a : `${a} to ${b}`) : a ? `from ${a}` : `until ${b}`
   if (quizTitle) out.push(`Quiz: ${quizTitle}`)
   if (f.from || f.to) out.push(`Game days: ${range(f.from, f.to)}`)
   if (f.tab === 'players') {
@@ -235,7 +253,9 @@ class Params {
 
 type Ctx = { startMins: number; today: string }
 
-async function context(payload: Payload): Promise<Ctx & { gd: Awaited<ReturnType<typeof getGameDaySettings>> }> {
+async function context(
+  payload: Payload,
+): Promise<Ctx & { gd: Awaited<ReturnType<typeof getGameDaySettings>> }> {
   const gd = await getGameDaySettings(payload)
   const now = await getNow(payload) // the demo test clock moves "today" too
   return {
@@ -292,7 +312,11 @@ export async function queryRows(
       name: 'lower(u.name) ASC NULLS LAST, u.id',
     }
     const playedCond =
-      f.played === 'yes' ? 'att.user_id IS NOT NULL' : f.played === 'no' ? 'att.user_id IS NULL' : 'TRUE'
+      f.played === 'yes'
+        ? 'att.user_id IS NOT NULL'
+        : f.played === 'no'
+          ? 'att.user_id IS NULL'
+          : 'TRUE'
     // A quiz chosen: its players (or, for "didn't play", everyone)
     const quizPlayers =
       f.quizId && f.played !== 'no'
@@ -478,7 +502,13 @@ export async function loadDashboard(payload: Payload, f: Filters) {
   const Q2 = new Params()
   const qTests = Q2.add(f.tests, '::bool')
   const qTails = Q2.add(TEST_TAILS, '::text[]')
-  const quizzes: { id: number; title: string; players: number; plays: number; questions: number }[] = (
+  const quizzes: {
+    id: number
+    title: string
+    players: number
+    plays: number
+    questions: number
+  }[] = (
     await db.query(
       `SELECT q.id, coalesce(q.quiz_title, 'Quiz ' || q.id) AS title,
               count(DISTINCT r.user_id)::int AS players, count(r.id) FILTER (WHERE r.status = 'completed')::int AS plays,
@@ -493,10 +523,13 @@ export async function loadDashboard(payload: Payload, f: Filters) {
   ).rows
 
   const { rows, total } =
-    f.tab === 'player' ? { rows: [], total: 0 } : await queryRows(payload, f, ctx, PAGE_SIZE, (f.page - 1) * PAGE_SIZE)
+    f.tab === 'player'
+      ? { rows: [], total: 0 }
+      : await queryRows(payload, f, ctx, PAGE_SIZE, (f.page - 1) * PAGE_SIZE)
   return {
     today: ctx.today,
     dayStart: ctx.gd,
+    health: await activeQuizHealth(payload, await getNow(payload)),
     totals: totals as {
       players: number
       joined_today: number

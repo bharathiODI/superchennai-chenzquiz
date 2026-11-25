@@ -43,9 +43,12 @@ const fmtDateTime = (v: unknown) =>
     : '-'
 const fmtDate = (v: unknown) =>
   v
-    ? new Intl.DateTimeFormat('en-IN', { timeZone: IST, day: '2-digit', month: 'short', year: 'numeric' }).format(
-        new Date(String(v)),
-      )
+    ? new Intl.DateTimeFormat('en-IN', {
+        timeZone: IST,
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      }).format(new Date(String(v)))
     : '-'
 const fmtDay = (ymd: string) => fmtDate(`${ymd}T12:00:00+05:30`)
 const fmtSecs = (s: unknown) => {
@@ -54,7 +57,12 @@ const fmtSecs = (s: unknown) => {
   return n >= 60 ? `${Math.floor(n / 60)}m ${n % 60}s` : `${n}s`
 }
 const num = (v: unknown) => new Intl.NumberFormat('en-IN').format(Number(v) || 0)
-const USE_IN: Record<string, string> = { general: 'General', sponsored: 'Sponsored', both: 'Both', none: 'Not in play' }
+const USE_IN: Record<string, string> = {
+  general: 'General',
+  sponsored: 'Sponsored',
+  both: 'Both',
+  none: 'Not in play',
+}
 
 function href(f: Filters, change: Partial<Filters>) {
   const p = filterParams(f, { page: 1, ...change })
@@ -89,7 +97,11 @@ const CLEARED: Partial<Filters> = {
   useIn: 'any',
 }
 
-export async function QuizDashboardView({ initPageResult, params, searchParams }: AdminViewServerProps) {
+export async function QuizDashboardView({
+  initPageResult,
+  params,
+  searchParams,
+}: AdminViewServerProps) {
   const { req, permissions, visibleEntities, locale } = initPageResult
   const user = req.user
   if (!user) redirect('/admin/login?redirect=%2Fadmin%2Fquiz-dashboard')
@@ -114,7 +126,9 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
       <div className="qd">
         <div className="qd-card qd-head">
           <h1 className="qd-title">Quiz Dashboard</h1>
-          <p className="qd-sub">Your role doesn&apos;t include the quiz dashboard. Ask a Super Admin.</p>
+          <p className="qd-sub">
+            Your role doesn&apos;t include the quiz dashboard. Ask a Super Admin.
+          </p>
         </div>
       </div>,
     )
@@ -141,7 +155,14 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
     f.tab === 'questions' ? q.questions : f.tab === 'players' ? q.players : q.plays
   const quizTitle = d.quizzes.find((q) => q.id === f.quizId)?.title
   const active = describeFilters(f, quizTitle)
-  const noun = { players: 'players', plays: 'plays', questions: 'questions', sponsor: 'game days', flags: 'flagged plays', player: '' }[f.tab]
+  const noun = {
+    players: 'players',
+    plays: 'plays',
+    questions: 'questions',
+    sponsor: 'game days',
+    flags: 'flagged plays',
+    player: '',
+  }[f.tab]
   const dataOk = d.totals.total_mismatch === 0 && d.totals.missing_summary === 0
 
   // Quick date ranges (India game days)
@@ -160,9 +181,18 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
     { label: 'Yesterday', regFrom: addDays(t, -1), regTo: addDays(t, -1) },
     { label: 'Last 7 days', regFrom: addDays(t, -6), regTo: t },
   ]
-  const isPeriod = (p: { from: string | null; to: string | null }) => p.from === f.from && p.to === f.to
-  const isJoined = (p: { regFrom: string | null; regTo: string | null }) => p.regFrom === f.regFrom && p.regTo === f.regTo
-  const sorts = f.tab === 'plays' ? PLAY_SORTS : f.tab === 'questions' ? QUESTION_SORTS : f.tab === 'players' ? PLAYER_SORTS : null
+  const isPeriod = (p: { from: string | null; to: string | null }) =>
+    p.from === f.from && p.to === f.to
+  const isJoined = (p: { regFrom: string | null; regTo: string | null }) =>
+    p.regFrom === f.regFrom && p.regTo === f.regTo
+  const sorts =
+    f.tab === 'plays'
+      ? PLAY_SORTS
+      : f.tab === 'questions'
+        ? QUESTION_SORTS
+        : f.tab === 'players'
+          ? PLAYER_SORTS
+          : null
   const playerLink = (id: number) => href({ ...f, tab: 'player', sort: 'latest' }, { playerId: id })
   const flagBadges = (r: any) => (
     <>
@@ -181,12 +211,15 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
           <div className="qd-card qd-head">
             <div>
               <div className="qd-eyebrow">
-                <a href={href({ ...f, tab: 'players', sort: 'points' }, { playerId: null })}>‹ Quiz Dashboard</a>
+                <a href={href({ ...f, tab: 'players', sort: 'points' }, { playerId: null })}>
+                  ‹ Quiz Dashboard
+                </a>
               </div>
               <h1 className="qd-title">{p ? p.user.name || 'Player' : 'Player not found'}</h1>
               {p && (
                 <p className="qd-sub">
-                  {p.user.phone || '-'} · {p.user.email || 'no email'} · joined {fmtDate(p.user.created_at)}
+                  {p.user.phone || '-'} · {p.user.email || 'no email'} · joined{' '}
+                  {fmtDate(p.user.created_at)}
                 </p>
               )}
             </div>
@@ -204,14 +237,17 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
                   <b>{fmtSecs(p.user.total_time)}</b>
                   <span>Total time</span>
                 </div>
-                {p.user.disqualified && <span className="qd-badge qd-badge--bad">Disqualified</span>}
+                {p.user.disqualified && (
+                  <span className="qd-badge qd-badge--bad">Disqualified</span>
+                )}
                 {canFlag && <DisqualifyButton id={p.user.id} disqualified={p.user.disqualified} />}
               </div>
             )}
           </div>
           {p && p.user.total_xp !== p.user.attempts_xp && (
             <div className="qd-card qd-msg qd-msg--err">
-              Saved total ({num(p.user.total_xp)}) differs from the sum of finished plays ({num(p.user.attempts_xp)}).
+              Saved total ({num(p.user.total_xp)}) differs from the sum of finished plays (
+              {num(p.user.attempts_xp)}).
             </div>
           )}
           {p &&
@@ -220,7 +256,11 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
                 <div className="qd-play__head">
                   <b>{fmtDay(pl.day)}</b>
                   <span>{pl.quiz}</span>
-                  <span>{pl.status === 'completed' ? `${num(pl.score)} points · ${fmtSecs(pl.time_taken)}` : 'Opened, not finished'}</span>
+                  <span>
+                    {pl.status === 'completed'
+                      ? `${num(pl.score)} points · ${fmtSecs(pl.time_taken)}`
+                      : 'Opened, not finished'}
+                  </span>
                   {flagBadges(pl)}
                 </div>
                 <table className="qd-table qd-table--compact">
@@ -243,7 +283,9 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
                         <td>{a.question}</td>
                         <td>
                           {a.answer === null || a.answer === undefined ? (
-                            <span className="muted">{pl.status === 'completed' ? 'not recorded (before 25 Nov)' : '-'}</span>
+                            <span className="muted">
+                              {pl.status === 'completed' ? 'not recorded (before 25 Nov)' : '-'}
+                            </span>
                           ) : a.timed_out ? (
                             <span className="qd-bad">Time out</span>
                           ) : (
@@ -254,9 +296,13 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
                         </td>
                         <td className="r">
                           {a.points === null || a.points === undefined ? '-' : num(a.points)}
-                          {Number(a.speed_bonus) > 0 ? <span className="muted"> (+{a.speed_bonus})</span> : null}
+                          {Number(a.speed_bonus) > 0 ? (
+                            <span className="muted"> (+{a.speed_bonus})</span>
+                          ) : null}
                         </td>
-                        <td className="r">{a.seconds === null || a.seconds === undefined ? '-' : `${a.seconds}s`}</td>
+                        <td className="r">
+                          {a.seconds === null || a.seconds === undefined ? '-' : `${a.seconds}s`}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -276,16 +322,26 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
       <div className="qd">
         <div className="qd-card qd-head">
           <div>
-            <div className="qd-eyebrow">Quiz reports{cmsRole(user) === 'viewer' ? ' · view only' : ''}</div>
+            <div className="qd-eyebrow">
+              Quiz reports{cmsRole(user) === 'viewer' ? ' · view only' : ''}
+            </div>
             <h1 className="qd-title">Quiz Dashboard</h1>
             <p className="qd-sub">
-              Today&apos;s game day: {fmtDay(d.today)} (starts {formatStartHour(d.dayStart)} India time).{' '}
+              Today&apos;s game day: {fmtDay(d.today)} (starts {formatStartHour(d.dayStart)} India
+              time).{' '}
               <span className={dataOk ? 'qd-ok' : 'qd-bad'}>
                 {dataOk
                   ? 'Data check: player totals match their finished plays.'
                   : `Data check: ${d.totals.total_mismatch} player total(s) differ from their finished plays${d.totals.missing_summary ? `, ${d.totals.missing_summary} play(s) without a summary row` : ''} - run the data check script.`}
               </span>
             </p>
+            {d.health.map((h) => (
+              <p key={h.id} className="qd-sub">
+                Live quiz <b>{h.title}</b>: {h.closed ? 'closed' : 'open until'}{' '}
+                {h.endsAtIndia ?? 'no end date'} · in play: {num(h.general)} General,{' '}
+                {num(h.sponsored)} Sponsored{h.drafts ? ` (+${num(h.drafts)} drafts)` : ''}.
+              </p>
+            ))}
           </div>
           <div className="qd-head__right">
             <div className="qd-stat">
@@ -308,20 +364,36 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
               <b>{num(d.totals.plays)}</b>
               <span>Finished plays</span>
             </div>
-            <a className="qd-report" href={reportHref} title="Day-wise scores, daily ranking and every play">
+            <a
+              className="qd-report"
+              href={reportHref}
+              title="Day-wise scores, daily ranking and every play"
+            >
               Full score report (Excel)
             </a>
           </div>
         </div>
+
+        {d.health
+          .flatMap((h) => h.warnings)
+          .map((w) => (
+            <div key={w} className="qd-card qd-msg qd-msg--err">
+              {w}
+            </div>
+          ))}
 
         <nav className="qd-pills" aria-label="Report">
           {tabs.map((tb) => (
             <a
               key={tb.id}
               className={`qd-pill${f.tab === tb.id ? ' is-active' : ''}`}
-              href={href({ ...f, sort: defaultSort(tb.id) }, { tab: tb.id, flag: 'any', status: 'all' })}
+              href={href(
+                { ...f, sort: defaultSort(tb.id) },
+                { tab: tb.id, flag: 'any', status: 'all' },
+              )}
             >
-              {tb.label} {tb.count !== undefined && <span className="qd-count">{num(tb.count)}</span>}
+              {tb.label}{' '}
+              {tb.count !== undefined && <span className="qd-count">{num(tb.count)}</span>}
             </a>
           ))}
         </nav>
@@ -331,26 +403,40 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
             All quizzes
           </a>
           {d.quizzes.map((q) => (
-            <a key={q.id} className={`qd-pill${f.quizId === q.id ? ' is-active' : ''}`} href={href(f, { quizId: q.id })}>
+            <a
+              key={q.id}
+              className={`qd-pill${f.quizId === q.id ? ' is-active' : ''}`}
+              href={href(f, { quizId: q.id })}
+            >
               {q.title} <span className="qd-count">{num(quizCount(q))}</span>
             </a>
           ))}
         </nav>
 
-        <form className="qd-card qd-filterbox" method="get" action="/admin/quiz-dashboard" data-soft>
+        <form
+          className="qd-card qd-filterbox"
+          method="get"
+          action="/admin/quiz-dashboard"
+          data-soft
+        >
           {f.tab !== 'players' && <input type="hidden" name="tab" value={f.tab} />}
           {f.quizId && <input type="hidden" name="quiz" value={f.quizId} />}
           <div className="qd-frow">
             <span className="qd-flabel">{f.tab === 'players' ? 'Played on' : 'Game days'}</span>
             <span className="qd-chips">
               {periods.map((p) => (
-                <a key={p.label} className={`qd-chip${isPeriod(p) ? ' is-on' : ''}`} href={href(f, { from: p.from, to: p.to })}>
+                <a
+                  key={p.label}
+                  className={`qd-chip${isPeriod(p) ? ' is-on' : ''}`}
+                  href={href(f, { from: p.from, to: p.to })}
+                >
                   {p.label}
                 </a>
               ))}
             </span>
             <label className="qd-field">
-              From <input className="qd-input" type="date" name="from" defaultValue={f.from ?? ''} />
+              From{' '}
+              <input className="qd-input" type="date" name="from" defaultValue={f.from ?? ''} />
             </label>
             <label className="qd-field">
               To <input className="qd-input" type="date" name="to" defaultValue={f.to ?? ''} />
@@ -373,35 +459,85 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
                 <span className="qd-flabel">Joined</span>
                 <span className="qd-chips">
                   {joinedRanges.map((p) => (
-                    <a key={p.label} className={`qd-chip${isJoined(p) ? ' is-on' : ''}`} href={href(f, { regFrom: p.regFrom, regTo: p.regTo })}>
+                    <a
+                      key={p.label}
+                      className={`qd-chip${isJoined(p) ? ' is-on' : ''}`}
+                      href={href(f, { regFrom: p.regFrom, regTo: p.regTo })}
+                    >
                       {p.label}
                     </a>
                   ))}
                 </span>
                 <label className="qd-field">
-                  From <input className="qd-input" type="date" name="regFrom" defaultValue={f.regFrom ?? ''} />
+                  From{' '}
+                  <input
+                    className="qd-input"
+                    type="date"
+                    name="regFrom"
+                    defaultValue={f.regFrom ?? ''}
+                  />
                 </label>
                 <label className="qd-field">
-                  To <input className="qd-input" type="date" name="regTo" defaultValue={f.regTo ?? ''} />
+                  To{' '}
+                  <input
+                    className="qd-input"
+                    type="date"
+                    name="regTo"
+                    defaultValue={f.regTo ?? ''}
+                  />
                 </label>
               </div>
               <div className="qd-frow">
                 <span className="qd-flabel">Score &amp; streak</span>
                 <label className="qd-field">
-                  Points from <input className="qd-input qd-num" type="number" min="0" name="minPoints" defaultValue={f.minPoints ?? ''} />
+                  Points from{' '}
+                  <input
+                    className="qd-input qd-num"
+                    type="number"
+                    min="0"
+                    name="minPoints"
+                    defaultValue={f.minPoints ?? ''}
+                  />
                 </label>
                 <label className="qd-field">
-                  to <input className="qd-input qd-num" type="number" min="0" name="maxPoints" defaultValue={f.maxPoints ?? ''} />
+                  to{' '}
+                  <input
+                    className="qd-input qd-num"
+                    type="number"
+                    min="0"
+                    name="maxPoints"
+                    defaultValue={f.maxPoints ?? ''}
+                  />
                 </label>
                 <label className="qd-field">
-                  Days played ≥ <input className="qd-input qd-num" type="number" min="0" name="minDays" defaultValue={f.minDays ?? ''} />
+                  Days played ≥{' '}
+                  <input
+                    className="qd-input qd-num"
+                    type="number"
+                    min="0"
+                    name="minDays"
+                    defaultValue={f.minDays ?? ''}
+                  />
                 </label>
                 <label className="qd-field">
                   Current streak ≥{' '}
-                  <input className="qd-input qd-num" type="number" min="0" name="minStreak" defaultValue={f.minStreak ?? ''} />
+                  <input
+                    className="qd-input qd-num"
+                    type="number"
+                    min="0"
+                    name="minStreak"
+                    defaultValue={f.minStreak ?? ''}
+                  />
                 </label>
                 <label className="qd-field">
-                  Best streak ≥ <input className="qd-input qd-num" type="number" min="0" name="minBest" defaultValue={f.minBest ?? ''} />
+                  Best streak ≥{' '}
+                  <input
+                    className="qd-input qd-num"
+                    type="number"
+                    min="0"
+                    name="minBest"
+                    defaultValue={f.minBest ?? ''}
+                  />
                 </label>
               </div>
             </>
@@ -428,10 +564,24 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
                 </select>
               </label>
               <label className="qd-field">
-                Score from <input className="qd-input qd-num" type="number" min="0" name="minScore" defaultValue={f.minScore ?? ''} />
+                Score from{' '}
+                <input
+                  className="qd-input qd-num"
+                  type="number"
+                  min="0"
+                  name="minScore"
+                  defaultValue={f.minScore ?? ''}
+                />
               </label>
               <label className="qd-field">
-                to <input className="qd-input qd-num" type="number" min="0" name="maxScore" defaultValue={f.maxScore ?? ''} />
+                to{' '}
+                <input
+                  className="qd-input qd-num"
+                  type="number"
+                  min="0"
+                  name="maxScore"
+                  defaultValue={f.maxScore ?? ''}
+                />
               </label>
             </div>
           )}
@@ -440,13 +590,20 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
             <div className="qd-frow">
               <span className="qd-flabel">Flag</span>
               <label className="qd-field">
-                <select className="qd-input" name="flag" defaultValue={f.flag === 'any' ? '' : f.flag}>
+                <select
+                  className="qd-input"
+                  name="flag"
+                  defaultValue={f.flag === 'any' ? '' : f.flag}
+                >
                   <option value="">Too fast or linked</option>
                   <option value="tooFast">Too fast</option>
                   <option value="linked">Linked numbers (same phone)</option>
                 </select>
               </label>
-              <span className="qd-sub">Flags, not bans: an Administrator decides (Disqualify takes a player off the leaderboard).</span>
+              <span className="qd-sub">
+                Flags, not bans: an Administrator decides (Disqualify takes a player off the
+                leaderboard).
+              </span>
             </div>
           )}
 
@@ -489,7 +646,8 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
             )}
             {f.tab !== 'questions' && (
               <label className="qd-check">
-                <input type="checkbox" name="tests" value="1" defaultChecked={f.tests} /> Include test players
+                <input type="checkbox" name="tests" value="1" defaultChecked={f.tests} /> Include
+                test players
               </label>
             )}
             <button className="qd-btn" type="submit">
@@ -613,10 +771,18 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
                     <td>{r.game_day ? fmtDay(r.game_day) : '-'}</td>
                     <td>{r.status === 'completed' ? 'Finished' : 'Opened'}</td>
                     <td className="r strong">{r.score === null ? '-' : num(r.score)}</td>
-                    <td className="r">{r.correct_answers === null ? '-' : `${num(r.correct_answers)} / ${num(r.questions)}`}</td>
+                    <td className="r">
+                      {r.correct_answers === null
+                        ? '-'
+                        : `${num(r.correct_answers)} / ${num(r.questions)}`}
+                    </td>
                     <td className="r">{fmtSecs(r.time_taken)}</td>
                     <td>{flagBadges(r)}</td>
-                    {f.tab === 'flags' ? <td>{r.same_device || '-'}</td> : <td>{fmtDateTime(r.completed_at)}</td>}
+                    {f.tab === 'flags' ? (
+                      <td>{r.same_device || '-'}</td>
+                    ) : (
+                      <td>{fmtDateTime(r.completed_at)}</td>
+                    )}
                     {f.tab === 'flags' && canFlag && (
                       <td>
                         <DisqualifyButton id={r.user_id} disqualified={r.disqualified} />
@@ -660,20 +826,30 @@ export async function QuizDashboardView({ initPageResult, params, searchParams }
         </div>
         {f.tab === 'questions' && (
           <p className="qd-sub">
-            Given = times the question was handed to a player. Right, time-outs and time count answers from 25 Nov 2026 (when
-            answers started being stored).
+            Given = times the question was handed to a player. Right, time-outs and time count
+            answers from 25 Nov 2026 (when answers started being stored).
           </p>
         )}
-        {f.tab === 'sponsor' && <p className="qd-sub">One row per game day: answers given in the sponsored slot (Q3).</p>}
+        {f.tab === 'sponsor' && (
+          <p className="qd-sub">One row per game day: answers given in the sponsored slot (Q3).</p>
+        )}
 
         <div className="qd-pager">
           <span>{d.total ? `Showing ${num(from)}–${num(to)} of ${num(d.total)}` : 'No rows'}</span>
           <span className="qd-pager__links">
-            {f.page > 1 ? <a href={href(f, { page: f.page - 1 })}>‹ Previous</a> : <span className="off">‹ Previous</span>}
+            {f.page > 1 ? (
+              <a href={href(f, { page: f.page - 1 })}>‹ Previous</a>
+            ) : (
+              <span className="off">‹ Previous</span>
+            )}
             <span>
               Page {f.page} of {d.pages}
             </span>
-            {f.page < d.pages ? <a href={href(f, { page: f.page + 1 })}>Next ›</a> : <span className="off">Next ›</span>}
+            {f.page < d.pages ? (
+              <a href={href(f, { page: f.page + 1 })}>Next ›</a>
+            ) : (
+              <span className="off">Next ›</span>
+            )}
           </span>
         </div>
       </div>
