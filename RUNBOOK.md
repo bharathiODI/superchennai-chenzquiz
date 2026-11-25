@@ -277,8 +277,8 @@ Turn on once: `bash /root/chenzquiz-site.sh demo-tools on` (it prints the key). 
 **Automatic 30-day run** (before every release to live):
 ```bash
 cd /var/www/chenzquiz-demo/current
-node scripts/demo-sim.mjs --key "$(sed -n 's/^DEMO_TOOLS_KEY=//p' ../shared/.env)"            # 10 players x 30 days
-node scripts/demo-sim.mjs --key <key> --days 5 --players 3                                      # quick run
+node scripts/demo-sim.mjs --url http://127.0.0.1:3017                                         # 10 players x 30 days (key read from the demo .env)
+node scripts/demo-sim.mjs --url http://127.0.0.1:3017 --days 5 --players 3                                      # quick run
 ```
 It plays the test players through pretend days and checks: no answer in the browser, Q3 sponsored, no repeats while unseen questions exist, reload resumes, time-outs score 0, one play a day, scores add up. Exit code 0 = all passed; the clock goes back to today.
 

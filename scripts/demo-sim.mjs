@@ -6,8 +6,8 @@
  * and puts the clock back to today at the end.
  *
  *   cd /var/www/chenzquiz-demo/current
- *   node scripts/demo-sim.mjs --key <DEMO_TOOLS_KEY>                 # 30 days, 10 players
- *   node scripts/demo-sim.mjs --key <KEY> --days 5 --players 3       # quick run
+ *   node scripts/demo-sim.mjs                                        # 30 days, 10 players (key from .env)
+ *   node scripts/demo-sim.mjs --days 5 --players 3                   # quick run
  *   node scripts/demo-sim.mjs --url https://chenzquiz-demo.superchennai.com --key <KEY>
  *
  * Run from the demo's folder and it also checks the database (DATABASE_URI from its .env).
@@ -23,7 +23,8 @@ try {
 
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`)
-  return i > 0 ? process.argv[i + 1] : fallback
+  const v = i > 0 ? process.argv[i + 1] : undefined
+  return v === undefined || v.startsWith('--') || v === '' ? fallback : v
 }
 const BASE = (arg('url', process.env.NEXT_PUBLIC_SERVER_URL || 'http://127.0.0.1:3000') || '').replace(/\/$/, '')
 const KEY = arg('key', process.env.DEMO_TOOLS_KEY || '')
