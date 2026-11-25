@@ -67,11 +67,22 @@ jobs:
             ssh-keyscan -p "$DEPLOY_PORT" "$DEPLOY_HOST" > ~/.ssh/known_hosts
           fi
           chmod 600 ~/.ssh/known_hosts
-          printf 'Host prod\n  HostName %s\n  User %s\n  Port %s\n  IdentityFile ~/.ssh/deploy_key\n  IdentitiesOnly yes\n  ServerAliveInterval 30\n' \
+          printf 'Host prod\n  HostName %s\n  User %s\n  Port %s\n  IdentityFile ~/.ssh/deploy_key\n  IdentitiesOnly yes\n  ServerAliveInterval 30\n  ConnectTimeout 20\n  ConnectionAttempts 2\n' \
             "$DEPLOY_HOST" "$DEPLOY_USER" "$DEPLOY_PORT" > ~/.ssh/config
 
       - name: Check the site is set up on the server
         run: |
+          # A dropped connection is retried; "can't reach" and "not set up" get their own messages.
+          reached=0
+          for try in 1 2 3 4; do
+            if ssh prod true; then reached=1; break; fi
+            echo "Server not reachable over SSH (try $try of 4) - retrying in 15 s"
+            sleep 15
+          done
+          if [ "$reached" != 1 ]; then
+            echo "::error::Can't reach the server over SSH (port $DEPLOY_PORT). Re-run the job. If it fails again, check on the server that sshd is running and that no firewall (Hostinger VPS firewall, ufw, fail2ban) blocks GitHub's addresses."
+            exit 1
+          fi
           # shellcheck disable=SC2029  # paths are meant to expand here, on the runner
           if ! ssh prod "test -f '$DEPLOY_PATH/shared/.env'"; then
             echo "::error::$DEPLOY_PATH/shared/.env not found on the server. For the demo site run scripts/demo-setup.sh on the server once (see DEPLOYMENT.md)."
