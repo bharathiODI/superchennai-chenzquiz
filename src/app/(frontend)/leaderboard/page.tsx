@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import { getNow } from '@/utilities/clock'
 import type { Metadata } from 'next/types'
 import { getPayload } from 'payload'
 import Link from 'next/link'
@@ -111,7 +112,7 @@ export default async function LeaderboardPage({
 
   const requestedPage = Number(resolvedSearchParams?.page)
   const askedPage = Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1
-  const now = new Date()
+  const now = await getNow(payload)
 
   // ---------------------------------------------------------------
   // 1. Ranking for the selected period - only the top TOP_PLAYERS are shown publicly
@@ -123,7 +124,8 @@ export default async function LeaderboardPage({
   if (tab === 'all') {
     const result = await payload.find({
       collection: 'quiz-users',
-      where: realPlayersWhere, // test players are never ranked
+      // test players and disqualified players are never ranked
+      where: { and: [realPlayersWhere, { disqualified: { not_equals: true } }] },
       sort: ['-totalXP', 'totalTimeTaken', 'createdAt'],
       limit: TOP_PLAYERS,
       page: 1,
@@ -195,7 +197,8 @@ export default async function LeaderboardPage({
     }
 
     ranked = Array.from(stats.values())
-      .filter((r) => !isTestPhone(usersById.get(r.id)?.phone)) // test players are never ranked
+      // test players and disqualified players are never ranked
+      .filter((r) => !isTestPhone(usersById.get(r.id)?.phone) && !usersById.get(r.id)?.disqualified)
       .map((r) => ({ ...r, name: r.name || 'Anonymous' }))
       .sort(byRank)
       .slice(0, TOP_PLAYERS)

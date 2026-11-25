@@ -72,6 +72,7 @@ export interface Config {
     quizzes: Quiz;
     'quiz-users': QuizUser;
     'quiz-rounds': QuizRound;
+    'quiz-answers': QuizAnswer;
     'quiz-attempts': QuizAttempt;
     'user-submissions': UserSubmission;
     posts: Post;
@@ -94,6 +95,7 @@ export interface Config {
     quizzes: QuizzesSelect<false> | QuizzesSelect<true>;
     'quiz-users': QuizUsersSelect<false> | QuizUsersSelect<true>;
     'quiz-rounds': QuizRoundsSelect<false> | QuizRoundsSelect<true>;
+    'quiz-answers': QuizAnswersSelect<false> | QuizAnswersSelect<true>;
     'quiz-attempts': QuizAttemptsSelect<false> | QuizAttemptsSelect<true>;
     'user-submissions': UserSubmissionsSelect<false> | UserSubmissionsSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
@@ -186,6 +188,10 @@ export interface Question {
   id: number;
   createdBy?: (number | null) | User;
   title: string;
+  /**
+   * Which slots of the Round layout this question can fill. Published questions of the live quiz are in play straight away; "Not in play" keeps one out without unpublishing it.
+   */
+  useIn: 'general' | 'sponsored' | 'both' | 'none';
   heroImage?: (number | null) | Media;
   mobileImage?: (number | null) | Media;
   content?: {
@@ -482,10 +488,31 @@ export interface Quiz {
    * Set when this quiz should automatically conclude
    */
   quizEndDate: string;
+  questions?: (number | Question)[] | null;
   /**
-   * Questions players can get. Each round gives a player the next questions they have not answered yet, in Question Number order (or shuffled, if "Shuffle questions" is ticked below). Nobody gets a question twice - a question edited after a player answered it counts as new. Swap in each day's questions before the day starts (Quiz Settings > Game day, 12:30 AM by default).
+   * One row per question a player gets each day, in order (Q1, Q2, ...). General slots take questions marked General or Both; Sponsored slots take Sponsored or Both. Each player gets random questions they have never had. Changes apply from the next game day.
    */
-  questions: (number | Question)[];
+  roundLayout?:
+    | {
+        source: 'general' | 'sponsored';
+        /**
+         * Added to the normal time for this question.
+         */
+        extraSeconds?: number | null;
+        /**
+         * Normal = points + speed bonus. Fixed = no speed bonus.
+         */
+        points: 'normal' | 'fixed';
+        /**
+         * Empty = the question's own points.
+         */
+        fixedPoints?: number | null;
+        sponsorName?: string | null;
+        sponsorLine?: string | null;
+        sponsorLogo?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
   roundsPerDay?: number | null;
   questionsPerRound?: number | null;
   /**
@@ -507,6 +534,9 @@ export interface Quiz {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Only one quiz can be Scheduled / Active in the same dates. Set the other one to Completed first.
+   */
   status?: ('draft' | 'active' | 'completed') | null;
   meta?: {
     title?: string | null;
@@ -532,7 +562,7 @@ export interface Quiz {
   createdAt: string;
 }
 /**
- * Players. Read-only here (changed only by the game). Search by name, phone or email.
+ * Players. Read-only here (changed only by the game), except Disqualified. Search by name, phone or email.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "quiz-users".
@@ -543,6 +573,10 @@ export interface QuizUser {
   phone?: string | null;
   email?: string | null;
   message?: string | null;
+  /**
+   * Disqualified players can still log in but are left off the leaderboard. Use after reviewing a flag.
+   */
+  disqualified?: boolean | null;
   /**
    * Total XP earned by playing daily quizzes
    */
@@ -577,9 +611,75 @@ export interface QuizRound {
   score?: number | null;
   completedAt?: string | null;
   /**
-   * Questions reused because the pool ran out (only rounds before 23 Nov 2026 - questions are no longer repeated)
+   * Questions repeated because the player had seen every question that fits the slot
    */
   recycled?: number | null;
+  /**
+   * Questions answered so far
+   */
+  position?: number | null;
+  /**
+   * When the current question was shown
+   */
+  servedAt?: string | null;
+  /**
+   * Seconds, from the server clock
+   */
+  timeTaken?: number | null;
+  correctAnswers?: number | null;
+  tooFast?: boolean | null;
+  /**
+   * Another number played from the same phone
+   */
+  linked?: boolean | null;
+  deviceId?: string | null;
+  ip?: string | null;
+  /**
+   * The Round layout as it was when this round was created (one entry per question).
+   */
+  slots?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Every answer, one row per question. Read-only here (written only by the game). Search: player name, phone or answer.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-answers".
+ */
+export interface QuizAnswer {
+  id: number;
+  user: number | QuizUser;
+  quiz: number | Quiz;
+  round: number | QuizRound;
+  question: number | Question;
+  /**
+   * 1 = Q1
+   */
+  position: number;
+  answer?: string | null;
+  correct?: boolean | null;
+  timedOut?: boolean | null;
+  points?: number | null;
+  speedBonus?: number | null;
+  /**
+   * Server clock
+   */
+  seconds?: number | null;
+  /**
+   * Answered in a sponsored slot
+   */
+  sponsored?: boolean | null;
+  servedAt?: string | null;
+  answeredAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -3333,6 +3433,10 @@ export interface PayloadLockedDocument {
         value: number | QuizRound;
       } | null)
     | ({
+        relationTo: 'quiz-answers';
+        value: number | QuizAnswer;
+      } | null)
+    | ({
         relationTo: 'quiz-attempts';
         value: number | QuizAttempt;
       } | null)
@@ -3431,6 +3535,7 @@ export interface PayloadMigration {
 export interface QuestionsSelect<T extends boolean = true> {
   createdBy?: T;
   title?: T;
+  useIn?: T;
   heroImage?: T;
   mobileImage?: T;
   content?: T;
@@ -3581,6 +3686,18 @@ export interface QuizzesSelect<T extends boolean = true> {
   quizDate?: T;
   quizEndDate?: T;
   questions?: T;
+  roundLayout?:
+    | T
+    | {
+        source?: T;
+        extraSeconds?: T;
+        points?: T;
+        fixedPoints?: T;
+        sponsorName?: T;
+        sponsorLine?: T;
+        sponsorLogo?: T;
+        id?: T;
+      };
   roundsPerDay?: T;
   questionsPerRound?: T;
   sponsoredPosition?: T;
@@ -3614,6 +3731,7 @@ export interface QuizUsersSelect<T extends boolean = true> {
   phone?: T;
   email?: T;
   message?: T;
+  disqualified?: T;
   totalXP?: T;
   totalTimeTaken?: T;
   avatar?: T;
@@ -3635,6 +3753,37 @@ export interface QuizRoundsSelect<T extends boolean = true> {
   score?: T;
   completedAt?: T;
   recycled?: T;
+  position?: T;
+  servedAt?: T;
+  timeTaken?: T;
+  correctAnswers?: T;
+  tooFast?: T;
+  linked?: T;
+  deviceId?: T;
+  ip?: T;
+  slots?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "quiz-answers_select".
+ */
+export interface QuizAnswersSelect<T extends boolean = true> {
+  user?: T;
+  quiz?: T;
+  round?: T;
+  question?: T;
+  position?: T;
+  answer?: T;
+  correct?: T;
+  timedOut?: T;
+  points?: T;
+  speedBonus?: T;
+  seconds?: T;
+  sponsored?: T;
+  servedAt?: T;
+  answeredAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -5981,7 +6130,7 @@ export interface QuizSetting {
       }[]
     | null;
   /**
-   * Each day's rounds run from the start hour until the same hour the next day. Nobody can start a round during the break just before it. Players never get a question they have already answered - unless it was edited after they answered it. Put each day's questions in the quiz's Question Pool before the start hour (new questions, or the same ones rewritten).
+   * Each day's play runs from the start time until the same time the next day. Nobody can start during the break just before it. Every player gets random questions they have never had, laid out by the quiz's Round layout; the pool is every published question of the live quiz (Use in: General, Sponsored or Both).
    */
   gameDay?: {
     /**
@@ -6019,6 +6168,21 @@ export interface QuizSetting {
           id?: string | null;
         }[]
       | null;
+  };
+  /**
+   * Answers are checked and timed on the server. These rules flag unusual play on the dashboard; an admin decides what to do (no automatic bans).
+   */
+  safety?: {
+    speedFloorSeconds?: number | null;
+    tooFastRoundSeconds?: number | null;
+    /**
+     * 0 = off
+     */
+    linkedWindowMinutes?: number | null;
+    /**
+     * On: each player sees the options of a question (MCQ, Dropdown) in a different order, so answers can't be passed on as "the second one". Off: the order set on the question.
+     */
+    shuffleOptions?: boolean | null;
   };
   scorecard?: {
     /**
@@ -6196,6 +6360,14 @@ export interface QuizSettingsSelect<T extends boolean = true> {
               bonus?: T;
               id?: T;
             };
+      };
+  safety?:
+    | T
+    | {
+        speedFloorSeconds?: T;
+        tooFastRoundSeconds?: T;
+        linkedWindowMinutes?: T;
+        shuffleOptions?: T;
       };
   scorecard?:
     | T

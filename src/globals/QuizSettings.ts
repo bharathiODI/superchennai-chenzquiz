@@ -67,7 +67,7 @@ export const QuizSettings: GlobalConfig = {
               label: 'Game day (India time)',
               admin: {
                 description:
-                  "Each day's rounds run from the start hour until the same hour the next day. Nobody can start a round during the break just before it. Players never get a question they have already answered - unless it was edited after they answered it. Put each day's questions in the quiz's Question Pool before the start hour (new questions, or the same ones rewritten).",
+                  "Each day's play runs from the start time until the same time the next day. Nobody can start during the break just before it. Every player gets random questions they have never had, laid out by the quiz's Round layout; the pool is every published question of the live quiz (Use in: General, Sponsored or Both).",
               },
               fields: [
                 {
@@ -160,6 +160,59 @@ export const QuizSettings: GlobalConfig = {
                       ],
                     },
                   ],
+                },
+              ],
+            },
+            {
+              name: 'safety',
+              type: 'group',
+              label: 'Fair play',
+              admin: {
+                description:
+                  'Answers are checked and timed on the server. These rules flag unusual play on the dashboard; an admin decides what to do (no automatic bans).',
+              },
+              fields: [
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'speedFloorSeconds',
+                      type: 'number',
+                      label: 'No speed bonus under (seconds per answer)',
+                      defaultValue: 1.5,
+                      min: 0,
+                      max: 30,
+                      admin: { width: '33%', step: 0.5 },
+                    },
+                    {
+                      name: 'tooFastRoundSeconds',
+                      type: 'number',
+                      label: 'Flag a day finished under (seconds)',
+                      defaultValue: 6,
+                      min: 0,
+                      max: 300,
+                      admin: { width: '33%' },
+                    },
+                    {
+                      name: 'linkedWindowMinutes',
+                      type: 'number',
+                      label: 'Flag numbers on one phone within (minutes)',
+                      defaultValue: 60,
+                      min: 0,
+                      max: 1440,
+                      admin: { width: '33%', description: '0 = off' },
+                    },
+                  ],
+                },
+                {
+                  name: 'shuffleOptions',
+                  type: 'checkbox',
+                  label: 'Shuffle answer options for each player',
+                  defaultValue: true,
+                  admin: {
+                    description:
+                      'On: each player sees the options of a question (MCQ, Dropdown) in a different order, so answers can\'t be passed on as "the second one". Off: the order set on the question.',
+                  },
                 },
               ],
             },

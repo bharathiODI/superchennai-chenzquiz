@@ -11,7 +11,7 @@ import { addSheet, istDateTime, istStamp, xlsxResponse } from '@/utilities/xlsxS
 // GET /api/reports/list?collection=<slug>&search=...&where[...]=...&sort=...
 // The CMS list's own search, filters and sort -> every matching row as Excel.
 // Super Admins / Administrators, Players & Scores lists only; read with the user's own access.
-const ALLOWED = ['quiz-users', 'quiz-rounds', 'quiz-attempts', 'user-submissions'] as const
+const ALLOWED = ['quiz-users', 'quiz-rounds', 'quiz-answers', 'quiz-attempts', 'user-submissions'] as const
 const MAX_ROWS = 50_000
 const SKIP_TYPES = new Set(['ui', 'join', 'richText', 'blocks', 'password'])
 

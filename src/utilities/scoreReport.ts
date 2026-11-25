@@ -2,7 +2,7 @@
 // Built from quiz rounds: every round records the player, its game day and its score, so the
 // report always matches the leaderboard. Pure data shaping lives here; the route makes the file.
 import type { Payload } from 'payload'
-import { relId } from './quizRounds'
+import { relId } from './play'
 import { gameDayKey } from './gameDay'
 import { getGameDaySettings } from './getGameTimers'
 import { isTestPhone } from './testPlayers'

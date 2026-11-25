@@ -10,7 +10,7 @@ export const QuizRounds: CollectionConfig = {
     useAsTitle: 'day',
     // Search box: player name, phone or game day (e.g. 2026-11-23)
     listSearchableFields: ['user.name', 'user.phone', 'day'],
-    defaultColumns: ['user', 'quiz', 'day', 'round', 'status', 'score', 'completedAt'],
+    defaultColumns: ['user', 'quiz', 'day', 'status', 'score', 'timeTaken', 'tooFast', 'linked', 'completedAt'],
     hidden: hiddenUnless(ADMINS),
     description: 'Questions given to each player per game day and round. Read-only here (written only by the game). Search: player name, phone or game day (e.g. 2026-11-23).',
     components: {
@@ -53,7 +53,37 @@ export const QuizRounds: CollectionConfig = {
       fields: [
         { name: 'score', type: 'number' },
         { name: 'completedAt', type: 'date' },
-        { name: 'recycled', type: 'number', defaultValue: 0, admin: { description: 'Questions reused because the pool ran out (only rounds before 23 Nov 2026 - questions are no longer repeated)' } },
+        { name: 'recycled', type: 'number', defaultValue: 0, admin: { description: 'Questions repeated because the player had seen every question that fits the slot' } },
+      ],
+    },
+    {
+      type: 'collapsible',
+      label: 'Play details',
+      admin: { initCollapsed: true },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            { name: 'position', type: 'number', defaultValue: 0, admin: { width: '25%', description: 'Questions answered so far' } },
+            { name: 'servedAt', type: 'date', admin: { width: '25%', description: 'When the current question was shown' } },
+            { name: 'timeTaken', type: 'number', admin: { width: '25%', description: 'Seconds, from the server clock' } },
+            { name: 'correctAnswers', type: 'number', admin: { width: '25%' } },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            { name: 'tooFast', type: 'checkbox', label: 'Too fast', index: true, admin: { width: '25%' } },
+            { name: 'linked', type: 'checkbox', label: 'Linked numbers', index: true, admin: { width: '25%', description: 'Another number played from the same phone' } },
+            { name: 'deviceId', type: 'text', index: true, admin: { width: '25%' } },
+            { name: 'ip', type: 'text', admin: { width: '25%' } },
+          ],
+        },
+        {
+          name: 'slots',
+          type: 'json',
+          admin: { description: 'The Round layout as it was when this round was created (one entry per question).' },
+        },
       ],
     },
   ],

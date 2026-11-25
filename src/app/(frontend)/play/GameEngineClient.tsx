@@ -1,7 +1,10 @@
 /* eslint-disable @next/next/no-img-element */
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+// The daily play (lean setup, Nov 2026). One question at a time: the server sends the question
+// without its answer and starts its timer; each answer goes to the server, which checks it, times
+// it and replies with the result. A reload resumes the same question with the time left.
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { MCQGame } from './components/games/MCQGame'
@@ -15,518 +18,235 @@ import { DragDropGame } from './components/games/DragDropGame'
 
 import confetti from 'canvas-confetti'
 import QuizResultCard, { type SubmitTitle } from './components/QuizResultCard'
-import { DEFAULT_SCORING, questionScore, speedBonus, type ScoringSettings } from '@/utilities/gameScoring'
+import { DEFAULT_SCORING, speedBonus, type ScoringSettings } from '@/utilities/gameScoring'
+
+type Answered = { position: number; correct: boolean; timedOut: boolean; points: number }
+type Play = {
+  roundId: string | number
+  position: number
+  total: number
+  question: any
+  timeLimit: number
+  secondsLeft: number
+  answers: Answered[]
+  scoreSoFar: number
+  scoring: ScoringSettings
+}
+type Feedback = {
+  position: number
+  total: number
+  correct: boolean
+  timedOut: boolean
+  points: number
+  speedBonus: number
+  explanation: string | null
+  reveal: { correctOptionId?: string | null; correctAnswer?: string | null }
+  pickedId?: string | null
+  finished: boolean
+  scoreSoFar: number
+  result?: { todayScore: number; totalXP: number; title: SubmitTitle }
+}
+
+const DEVICE_KEY = 'chenz-device-id'
+function deviceId(): string {
+  try {
+    let id = localStorage.getItem(DEVICE_KEY)
+    if (!id || !/^[a-zA-Z0-9_-]{8,64}$/.test(id)) {
+      id =
+        typeof crypto !== 'undefined' && 'randomUUID' in crypto
+          ? crypto.randomUUID().replace(/-/g, '')
+          : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`
+      localStorage.setItem(DEVICE_KEY, id)
+    }
+    return id
+  } catch {
+    return ''
+  }
+}
+
+const celebrate = () => {
+  confetti({ particleCount: 100, spread: 80, startVelocity: 45, origin: { x: 0.5, y: 0.65 } })
+  setTimeout(() => confetti({ particleCount: 80, angle: 60, spread: 70, startVelocity: 50, origin: { x: 0, y: 0.65 } }), 200)
+  setTimeout(() => confetti({ particleCount: 80, angle: 120, spread: 70, startVelocity: 50, origin: { x: 1, y: 0.65 } }), 400)
+}
 
 export default function GameEngineClient({ quiz }: { quiz: any }) {
   const router = useRouter()
-  // This player's questions for the current round (from /api/quiz-round)
-  const [questions, setQuestions] = useState<any[]>([])
-  const [roundInfo, setRoundInfo] = useState<{
-    round: number
-    totalRounds: number
-    roundId: string | number | null
-  } | null>(null)
-  const [roundsDone, setRoundsDone] = useState<{ completed: number; total: number } | null>(null)
-  // Speed bonus tiers from CMS > Quiz Settings > Game Timers & Scoring (sent with the round)
-  const [scoring, setScoring] = useState<ScoringSettings>(DEFAULT_SCORING)
-  const [notice, setNotice] = useState<string | null>(null)
-  const [noticeTitle, setNoticeTitle] = useState<string | null>(null)
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [totalScore, setTotalScore] = useState(0)
-  const [isCompleted, setIsCompleted] = useState(false)
-  const [answersLog, setAnswersLog] = useState<any[]>([])
+  const [phase, setPhase] = useState<'loading' | 'notice' | 'playing' | 'feedback' | 'finished' | 'done'>('loading')
+  const [play, setPlay] = useState<Play | null>(null)
+  const [feedback, setFeedback] = useState<Feedback | null>(null)
+  const [notice, setNotice] = useState<{ title?: string; text: string } | null>(null)
+  const [done, setDone] = useState<{ todayScore: number; opensAt: string | null; otherQuiz?: string | null } | null>(null)
   const [currentUser, setCurrentUser] = useState<any>(null)
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true)
-  const [alreadyPlayedToday, setAlreadyPlayedToday] = useState(false)
-  const [lastAttemptScore, setLastAttemptScore] = useState<number | null>(null)
-  // When the next game day starts, e.g. "12:30 AM" (from the server, set in Quiz Settings)
-  const [opensAt, setOpensAt] = useState<string | null>(null)
-  const [resultTitle, setResultTitle] = useState<SubmitTitle | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [timeLeft, setTimeLeft] = useState(0)
+  const deadlineRef = useRef(0)
+  const busyRef = useRef(false)
 
-  const [userAnswersState, setUserAnswersState] = useState<Record<number, any>>({})
+  const headers = useCallback((): HeadersInit => ({ 'Content-Type': 'application/json', 'x-device-id': deviceId() }), [])
 
-  const [showSkipWarningModal, setShowSkipWarningModal] = useState(false)
-  const [pendingFinalSubmit, setPendingFinalSubmit] = useState<{
-    score: number
-    logs: any[]
-  } | null>(null)
-
-  const currentQ = questions[currentIndex]
-  const questionTimeLimit = Number(currentQ?.timeLimit ?? 60)
-  const [timeLeft, setTimeLeft] = useState<number>(questionTimeLimit)
-  const timeLeftRef = useRef(timeLeft)
-  timeLeftRef.current = timeLeft
-  const timerRef = useRef<NodeJS.Timeout | null>(null)
-
-  // ⏱️ கேம் ஆரம்பிக்கும் நேரத்தை சேமிக்க Ref
-  const startTimeRef = useRef<number>(Date.now())
-
-  // 1. Auth Protection Check & User Status Check
-  useEffect(() => {
-    const checkUserAndStatus = async () => {
-      const storedUser = localStorage.getItem('user')
-      const token = localStorage.getItem('token')
-
-      if (!storedUser || !token) {
+  /** Today's state from the server: the current question, or why there is none. */
+  const load = useCallback(async () => {
+    setError(null)
+    try {
+      const res = await fetch(`/api/quiz-round?quizId=${quiz.id}`, { cache: 'no-store', headers: headers() })
+      if (res.status === 401) {
         router.push('/login')
         return
       }
-
-      try {
-        const parsedUser = JSON.parse(storedUser)
-        setCurrentUser(parsedUser)
-
-        if (quiz?.id && parsedUser?.id) {
-          const res = await fetch(
-            `/api/quiz-round?quizId=${quiz.id}&userId=${parsedUser.id}`,
-            { cache: 'no-store' },
-          )
-          const data = await res.json()
-
-          if (data?.state === 'ready') {
-            setQuestions(data.questions || [])
-            if (data.scoring?.tiers) setScoring(data.scoring)
-            setRoundInfo({ round: data.round, totalRounds: data.totalRounds, roundId: data.roundId })
-            startTimeRef.current = Date.now()
-          } else if (data?.state === 'done') {
-            setAlreadyPlayedToday(true)
-            setLastAttemptScore(data?.todayScore ?? 0)
-            setOpensAt(data?.opensAt ?? null)
-            setRoundInfo({ round: data.totalRounds, totalRounds: data.totalRounds, roundId: null })
-          } else if (data?.state === 'not_started') {
-            setNotice('This challenge has not started yet. Check back soon!')
-          } else if (data?.state === 'closed') {
-            setNotice('This challenge has ended. Thanks for playing!')
-          } else if (data?.state === 'maintenance') {
-            setNoticeTitle('Back in a few minutes')
-            setNotice(data.message || 'Chenz Quiz is being updated. Please try again in a few minutes.')
-          } else if (data?.state === 'cooloff') {
-            setNoticeTitle("Today's round has closed")
-            setNotice(`Today's round has closed. New questions open at ${data.opensAt || '12:30 AM'}.`)
-          } else if (data?.state === 'empty') {
-            setNotice(
-              `You've played all the questions available right now. New questions open at ${data.opensAt || '12:30 AM'}.`,
-            )
-          } else {
-            setNotice('We could not load your questions. Please reload the page.')
-          }
-        }
-      } catch (e) {
-        console.error('Error verifying daily status:', e)
-      } finally {
-        setIsLoadingAuth(false)
-      }
-    }
-
-    checkUserAndStatus()
-  }, [router, quiz?.id])
-
-  // 2. Active Countdown Timer Logic
-  useEffect(() => {
-    if (isCompleted || !currentQ || showSkipWarningModal) return
-
-    setTimeLeft(questionTimeLimit)
-
-    if (timerRef.current) clearInterval(timerRef.current)
-
-    timerRef.current = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current)
-          handleGameCompletion({
-            isCorrect: false,
-            pointsEarned: 0,
-            answerDetail: 'Time Out',
-          })
-          return 0
-        }
-        return prevTime - 1
-      })
-    }, 1000)
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
-    }
-  }, [currentIndex, currentQ?.id, isCompleted, questionTimeLimit, showSkipWarningModal])
-
-  const celebrate = () => {
-    // Center burst
-    confetti({
-      particleCount: 100,
-      spread: 80,
-      startVelocity: 45,
-      origin: { x: 0.5, y: 0.65 },
-    })
-
-    // Left burst
-    setTimeout(() => {
-      confetti({
-        particleCount: 80,
-        angle: 60,
-        spread: 70,
-        startVelocity: 50,
-        origin: { x: 0, y: 0.65 },
-      })
-    }, 200)
-
-    // Right burst
-    setTimeout(() => {
-      confetti({
-        particleCount: 80,
-        angle: 120,
-        spread: 70,
-        startVelocity: 50,
-        origin: { x: 1, y: 0.65 },
-      })
-    }, 400)
-
-    // More falling confetti
-    setTimeout(() => {
-      confetti({
-        particleCount: 120,
-        spread: 120,
-        startVelocity: 30,
-        gravity: 0.8,
-        scalar: 1.1,
-        origin: { x: 0.5, y: 0.3 },
-      })
-    }, 700)
-  }
-
-  useEffect(() => {
-    if (isCompleted) {
-
-      celebrate()
-    }
-
-    if (alreadyPlayedToday) {
-
-      celebrate()
-    }
-  }, [isCompleted, alreadyPlayedToday])
-
-  // Helper to trigger completion or warning
-  const processNextOrFinish = (newScore: number, updatedLog: any[]) => {
-    if (currentIndex + 1 < questions.length) {
-      setCurrentIndex((prev) => prev + 1)
-    } else {
-      // Check if any question was skipped
-      const hasSkipped = updatedLog.some((log) => log.userAnswer === 'Skipped')
-
-      if (hasSkipped) {
-        setPendingFinalSubmit({ score: newScore, logs: updatedLog })
-        setShowSkipWarningModal(true)
-      } else {
-        completeAndSubmitQuiz(newScore, updatedLog)
-      }
-    }
-  }
-
-  // 🎯 Game Completion Logic
-  // const handleGameCompletion = (result: {
-  //   isCorrect: boolean
-  //   pointsEarned?: number
-  //   answerDetail?: any
-  // }) => {
-  //   if (timerRef.current) clearInterval(timerRef.current)
-
-  //   const defaultPoints = Number(currentQ?.points ?? 10)
-  //   const negativePoints = Number(currentQ?.negativePoints ?? 0)
-
-  //   let pointsToAdd = 0
-  //   if (result.isCorrect) {
-  //     pointsToAdd = result.pointsEarned ?? defaultPoints
-  //     if (currentQ?.enableDoubleUp) {
-  //       pointsToAdd *= 2
-  //     }
-  //   } else {
-  //     pointsToAdd =
-  //       result.pointsEarned !== undefined ? result.pointsEarned : -Math.abs(negativePoints)
-  //   }
-
-  //   const newScore = totalScore + pointsToAdd
-  //   const currentLog = {
-  //     questionId: currentQ?.id,
-  //     title: currentQ?.questionTitle || currentQ?.title,
-  //     gameType: currentQ?.gameType,
-  //     isCorrect: result.isCorrect,
-  //     pointsEarned: pointsToAdd,
-  //     userAnswer: result.answerDetail || null,
-  //   }
-
-  //   const updatedLog = [...answersLog, currentLog]
-
-  //   setTotalScore(newScore)
-  //   setAnswersLog(updatedLog)
-
-  //   processNextOrFinish(newScore, updatedLog)
-  // }
-
-  // 🎯 Game Completion Logic
-  const handleGameCompletion = (result: {
-    isCorrect: boolean
-    pointsEarned?: number
-    answerDetail?: any
-  }) => {
-    if (timerRef.current) clearInterval(timerRef.current)
-
-    const defaultPoints = Number(currentQ?.points ?? 10)
-    const negativePoints = Number(currentQ?.negativePoints ?? 0)
-    const secondsLeft = timeLeftRef.current
-
-    // Correct: question points + speed bonus (x2 for Double Up). Wrong: negative points (or partial points).
-    let pointsToAdd = 0
-    let bonus = 0
-    if (result.isCorrect) {
-      const scored = questionScore({
-        isCorrect: true,
-        basePoints: result.pointsEarned ?? defaultPoints,
-        secondsLeft,
-        timeLimit: questionTimeLimit,
-        doubleUp: Boolean(currentQ?.enableDoubleUp),
-        scoring,
-      })
-      pointsToAdd = scored.points
-      bonus = scored.bonus
-    } else {
-      pointsToAdd =
-        result.pointsEarned !== undefined ? result.pointsEarned : -Math.abs(negativePoints)
-    }
-
-    // 💡 ADD THIS: Current index-kku user select panna answer-a save panrom
-    setUserAnswersState((prev) => ({
-      ...prev,
-      [currentIndex]: result.answerDetail || null,
-    }))
-
-    const newScore = totalScore + pointsToAdd
-    const currentLog = {
-      questionId: currentQ?.id,
-      title: currentQ?.questionTitle || currentQ?.title,
-      gameType: currentQ?.gameType,
-      isCorrect: result.isCorrect,
-      pointsEarned: pointsToAdd,
-      speedBonus: bonus,
-      secondsLeft,
-      userAnswer: result.answerDetail || null,
-    }
-
-    // 💡 UPDATE THIS: Array length increase aagama current index log-a replace/update panrom
-    const updatedLog = [...answersLog]
-    updatedLog[currentIndex] = currentLog
-
-    setTotalScore(newScore)
-    setAnswersLog(updatedLog)
-
-    processNextOrFinish(newScore, updatedLog)
-  }
-
-  // ⏭️ Skip Question Logic
-  // const handleSkip = () => {
-  //   if (timerRef.current) clearInterval(timerRef.current)
-
-  //   const currentLog = {
-  //     questionId: currentQ?.id,
-  //     title: currentQ?.questionTitle || currentQ?.title,
-  //     gameType: currentQ?.gameType,
-  //     isCorrect: false,
-  //     pointsEarned: 0,
-  //     userAnswer: 'Skipped',
-  //   }
-
-  //   const updatedLog = [...answersLog, currentLog]
-  //   setAnswersLog(updatedLog)
-
-  //   processNextOrFinish(totalScore, updatedLog)
-  // }
-
-  // ⏭️ Skip Question Logic
-  const handleSkip = () => {
-    if (timerRef.current) clearInterval(timerRef.current)
-
-    const currentLog = {
-      questionId: currentQ?.id,
-      title: currentQ?.questionTitle || currentQ?.title,
-      gameType: currentQ?.gameType,
-      isCorrect: false,
-      pointsEarned: 0,
-      userAnswer: 'Skipped',
-    }
-
-    const updatedLog = [...answersLog]
-    updatedLog[currentIndex] = currentLog
-
-    setAnswersLog(updatedLog)
-
-    processNextOrFinish(totalScore, updatedLog)
-  }
-
-  const handleBackToSkippedQuestion = () => {
-    setShowSkipWarningModal(false)
-    const firstSkippedIndex = answersLog.findIndex((log) => log?.userAnswer === 'Skipped')
-    if (firstSkippedIndex !== -1) {
-      setCurrentIndex(firstSkippedIndex)
-    } else if (currentIndex > 0) {
-      setCurrentIndex((prev) => prev - 1)
-    }
-  }
-
-  const handlePrevious = () => {
-    if (currentIndex > 0) {
-      if (timerRef.current) clearInterval(timerRef.current)
-
-      const prevLog = answersLog[currentIndex - 1]
-      if (prevLog && prevLog.userAnswer !== 'Skipped') {
-        setTotalScore((prevScore) => Math.max(0, prevScore - (prevLog.pointsEarned || 0)))
-      }
-
-      setCurrentIndex((prev) => prev - 1)
-    }
-  }
-
-  // Final Submit Handler
-  const completeAndSubmitQuiz = (finalScore: number, logs: any[]) => {
-    setIsCompleted(true)
-    setShowSkipWarningModal(false)
-    const timeSpentInSeconds = Math.max(1, Math.round((Date.now() - startTimeRef.current) / 1000))
-    submitFinalScore(finalScore, logs, timeSpentInSeconds)
-  }
-
-  const submitFinalScore = async (finalScore: number, logs: any[], timeSpentSeconds: number) => {
-    try {
-      const activeUserId = currentUser?.id
-
-      if (!activeUserId) {
-        console.error('❌ User ID missing for submission')
-        return
-      }
-
-      setIsSubmitting(true)
-      const res = await fetch('/api/quiz-submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          quizId: quiz?.id,
-          userId: activeUserId,
-          roundId: roundInfo?.roundId,
-          scoreEarned: finalScore,
-          answers: logs,
-          timeTaken: timeSpentSeconds,
-        }),
-      })
-
       const data = await res.json()
-
-      if (!res.ok && data.alreadyPlayed) {
-        setAlreadyPlayedToday(true)
+      setFeedback(null)
+      if (data?.state === 'playing') {
+        setPlay(data)
+        deadlineRef.current = Date.now() + Number(data.secondsLeft) * 1000
+        setTimeLeft(Math.ceil(Number(data.secondsLeft)))
+        setPhase('playing')
+      } else if (data?.state === 'done') {
+        setDone({ todayScore: Number(data.todayScore) || 0, opensAt: data.opensAt ?? null, otherQuiz: data.otherQuiz ?? null })
+        setPhase('done')
       } else {
-        if (data?.title) setResultTitle(data.title)
-        if (data?.rounds) setRoundsDone({ completed: data.rounds.completed, total: data.rounds.total })
+        const texts: Record<string, { title?: string; text: string }> = {
+          not_started: { text: 'This challenge has not started yet. Check back soon!' },
+          closed: { text: 'This challenge has ended. Thanks for playing!' },
+          maintenance: { title: 'Back in a few minutes', text: data.message || 'Chenz Quiz is being updated. Please try again in a few minutes.' },
+          cooloff: { title: "Today's round has closed", text: `Today's round has closed. New questions open at ${data.opensAt || '12:30 AM'}.` },
+          empty: { text: `You've played all the questions available right now. New questions open at ${data.opensAt || '12:30 AM'}.` },
+        }
+        setNotice(texts[data?.state] || { text: 'We could not load your questions. Please reload the page.' })
+        setPhase('notice')
       }
-    } catch (err) {
-      console.error('❌ Error submitting score:', err)
-    } finally {
-      setIsSubmitting(false)
+    } catch {
+      setNotice({ text: 'We could not load your questions. Please check your connection and reload.' })
+      setPhase('notice')
+    }
+  }, [quiz.id, headers, router])
+
+  // Logged in? Then load today's play.
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user')
+    const token = localStorage.getItem('token')
+    if (!storedUser || !token) {
+      router.push('/login')
+      return
+    }
+    try {
+      setCurrentUser(JSON.parse(storedUser))
+    } catch {
+      /* ignore */
+    }
+    load()
+  }, [load, router])
+
+  /** Sends one answer (or a time-out) for the current question. */
+  const sendAnswer = useCallback(
+    async (answer: Record<string, unknown>, pickedId: string | null = null) => {
+      if (!play || busyRef.current) return
+      busyRef.current = true
+      setBusy(true)
+      setError(null)
+      try {
+        const res = await fetch('/api/quiz-answer', {
+          method: 'POST',
+          headers: headers(),
+          body: JSON.stringify({ roundId: play.roundId, position: play.position, answer }),
+        })
+        if (res.status === 401) {
+          router.push('/login')
+          return
+        }
+        const data = await res.json().catch(() => null)
+        if (res.status === 409) {
+          await load() // already answered (another tab) or out of step: take the server's state
+          return
+        }
+        if (!res.ok || !data?.ok) {
+          setError(data?.error || 'Could not save your answer. Please try again.')
+          return
+        }
+        setFeedback({ ...data, pickedId })
+        setPhase('feedback')
+        if (data.finished) celebrate()
+      } catch {
+        setError('Could not reach the server. Check your connection and try again.')
+      } finally {
+        busyRef.current = false
+        setBusy(false)
+      }
+    },
+    [play, headers, load, router],
+  )
+
+  // Countdown from the server's time left; at zero, a time-out is recorded.
+  useEffect(() => {
+    if (phase !== 'playing' || !play) return
+    const tick = () => {
+      const left = Math.max(0, (deadlineRef.current - Date.now()) / 1000)
+      setTimeLeft(Math.ceil(left))
+      if (left <= 0) {
+        clearInterval(timer)
+        sendAnswer({ timeout: true })
+      }
+    }
+    const timer = setInterval(tick, 250)
+    tick()
+    return () => clearInterval(timer)
+  }, [phase, play, sendAnswer])
+
+  useEffect(() => {
+    if (phase === 'done') celebrate()
+  }, [phase])
+
+  /** A game component finished: turn its result into the answer the server expects. */
+  const onGameAnswer = (res: any) => {
+    const type = play?.question?.gameType
+    if (type === 'mcq') sendAnswer({ optionId: res.optionId }, res.optionId)
+    else if (type === 'dropdown') sendAnswer({ value: res.value ?? res.answerDetail })
+    else sendAnswer({ correct: Boolean(res?.isCorrect), detail: typeof res?.answerDetail === 'string' ? res.answerDetail : JSON.stringify(res?.answerDetail ?? '') })
+  }
+
+  const next = () => {
+    if (feedback?.finished) setPhase('finished')
+    else {
+      setPhase('loading')
+      load()
     }
   }
 
-  // Loading View
-  if (isLoadingAuth) {
+  /* ------------------------------------------------------------------ screens */
+
+  if (phase === 'loading') {
     return (
       <div className="relative flex flex-col items-center justify-center p-12 bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl shadow-2xl overflow-hidden max-w-md mx-auto my-12">
-        <div className="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
-
         <div className="relative flex items-center justify-center mb-6">
-          <svg
-            className="w-16 h-16 animate-spin text-indigo-500"
-            viewBox="0 0 100 100"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <linearGradient id="spinner-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#6366f1" />
-                <stop offset="100%" stopColor="#a855f7" />
-              </linearGradient>
-            </defs>
-            <circle
-              className="opacity-15"
-              cx="50"
-              cy="50"
-              r="40"
-              stroke="currentColor"
-              strokeWidth="8"
-            />
-            <path
-              d="M50 10 A 40 40 0 0 1 90 50"
-              stroke="url(#spinner-gradient)"
-              strokeWidth="8"
-              strokeLinecap="round"
-            />
+          <svg className="w-16 h-16 animate-spin text-indigo-500" viewBox="0 0 100 100" fill="none">
+            <circle className="opacity-15" cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" />
+            <path d="M50 10 A 40 40 0 0 1 90 50" stroke="#7c3aed" strokeWidth="8" strokeLinecap="round" />
           </svg>
-
-          <div className="absolute text-indigo-400 animate-pulse">
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 002-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              />
-            </svg>
-          </div>
         </div>
-
-        <h3 className="text-lg font-bold text-white tracking-wide mb-1">Verifying Identity</h3>
-        <p className="text-slate-400 text-sm font-medium flex items-center gap-2">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-          </span>
-          Authenticating player profile...
-        </p>
+        <h3 className="text-lg font-bold text-white tracking-wide mb-1">Loading your question</h3>
+        <p className="text-slate-400 text-sm font-medium">Getting today&apos;s challenge ready...</p>
       </div>
     )
   }
 
-  // Already Played View
-  if (alreadyPlayedToday) {
+  if (phase === 'done' && done) {
     return (
       <div className="relative overflow-hidden bg-white/95 backdrop-blur-xl border border-amber-200/80 rounded-3xl p-8 sm:p-10 text-center shadow-xl shadow-amber-500/5 max-w-lg mx-auto my-6">
-        <div className="absolute -top-12 -left-12 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-12 -right-12 w-40 h-40 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
-
         <div className="relative mx-auto w-20 h-20 mb-6 flex items-center justify-center bg-amber-100 rounded-full text-4xl shadow-inner border border-amber-200">
           ⏳
         </div>
-
         <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a] mb-2">
-          {roundInfo && roundInfo.totalRounds > 1
-            ? `All ${roundInfo.totalRounds} Rounds Done Today!`
-            : 'Already Played Today!'}
+          Already Played Today!
         </h2>
-
         <p className="text-slate-600 text-sm leading-relaxed mb-6">
-          {opensAt ? `New questions open at ${opensAt}.` : 'Come back tomorrow for a fresh set of questions.'}
+          {done.otherQuiz ? `You've played today's questions in ${done.otherQuiz}. ` : ''}
+          {done.opensAt ? `New questions open at ${done.opensAt}.` : 'Come back tomorrow for a fresh set of questions.'}
         </p>
-
-        {lastAttemptScore !== null && (
-          <div className="bg-amber-50/80 border border-amber-200/60 rounded-2xl p-4 max-w-xs mx-auto mb-8">
-            <span className="text-xs font-bold text-amber-700 uppercase tracking-wider block mb-0.5">
-              Today&apos;s Score
-            </span>
-            <span className="text-3xl font-black text-amber-900">+{lastAttemptScore} XP</span>
-          </div>
-        )}
-
+        <div className="bg-amber-50/80 border border-amber-200/60 rounded-2xl p-4 max-w-xs mx-auto mb-8">
+          <span className="text-xs font-bold text-amber-700 uppercase tracking-wider block mb-0.5">Today&apos;s Score</span>
+          <span className="text-3xl font-black text-amber-900">+{done.todayScore} XP</span>
+        </div>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             href="/leaderboard"
@@ -535,84 +255,43 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
             Check Leaderboard
           </Link>
           <Link
-            href="/quizzes"
+            href="/profile"
             className="w-full sm:w-auto px-6 py-3.5 bg-slate-100 hover:bg-slate-200/80 text-slate-700 font-bold text-sm rounded-2xl transition-all duration-200"
           >
-            Explore Other Quizzes
+            My Profile
           </Link>
         </div>
       </div>
     )
   }
 
-  // Completed View
-  if (isCompleted) {
+  if (phase === 'finished' && feedback?.result) {
     return (
       <QuizResultCard
         playerName={currentUser?.name}
-        scoreEarned={totalScore}
-        title={resultTitle}
-        isSubmitting={isSubmitting}
-        roundLabel={
-          roundInfo && roundInfo.totalRounds > 1
-            ? `Round ${roundInfo.round} of ${roundInfo.totalRounds} completed`
-            : undefined
-        }
-        nextRound={
-          roundInfo && roundsDone && roundsDone.completed < roundsDone.total
-            ? roundsDone.completed + 1
-            : undefined
-        }
-        onNextRound={() => window.location.reload()}
+        scoreEarned={feedback.result.todayScore}
+        title={feedback.result.title}
+        isSubmitting={false}
       />
     )
   }
 
-  // No Question Available Screen
-  if (!currentQ) {
+  if (phase === 'notice' || !play) {
     return (
       <div className="relative overflow-hidden bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-8 md:p-12 text-center shadow-xl shadow-slate-100/50 max-w-lg mx-auto">
-        <div className="absolute -top-12 -left-12 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-12 -right-12 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative mx-auto w-28 h-28 mb-6 flex items-center justify-center">
-          <div className="absolute inset-0 bg-indigo-50/80 rounded-full animate-pulse" />
-          <svg
-            className="relative w-16 h-16 text-indigo-500 drop-shadow-sm transition-transform duration-300 hover:scale-105"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="11" cy="11" r="8" className="stroke-indigo-600" />
-            <path d="m21 21-4.3-4.3" className="stroke-indigo-600" strokeWidth="2" />
-            <path
-              d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2 2-2 3"
-              className="stroke-amber-500"
-              strokeWidth="2"
-            />
-            <circle cx="12.5" cy="15" r="0.5" fill="currentColor" className="text-amber-500" />
-          </svg>
-        </div>
-
-        <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">
-          {noticeTitle || 'No Questions Available'}
-        </h3>
+        <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">{notice?.title || 'No Questions Available'}</h3>
         <p className="text-slate-500 text-sm md:text-base leading-relaxed mb-8 max-w-sm mx-auto">
-          {notice ||
-            'We couldn’t find any questions for this quiz module or all challenges have been completed.'}
+          {notice?.text || 'We could not find any questions right now.'}
         </p>
-
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <button
             onClick={() => router.push('/quizzes')}
-            className="w-full sm:w-auto px-6 py-3.5 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold text-sm rounded-2xl shadow-lg shadow-slate-900/10 transition-all duration-200"
+            className="w-full sm:w-auto px-6 py-3.5 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold text-sm rounded-2xl shadow-lg transition-all duration-200"
           >
-            Explore Other Quizzes
+            Back to Quizzes
           </button>
           <button
-            onClick={() => router.refresh()}
+            onClick={() => window.location.reload()}
             className="w-full sm:w-auto px-6 py-3.5 bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-slate-700 font-bold text-sm rounded-2xl transition-all duration-200"
           >
             Reload Page
@@ -622,249 +301,153 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
     )
   }
 
-  // Extract Question Level Properties
-  const gameType = currentQ?.gameType
-  const points = currentQ?.points ?? 10
-  const difficulty = currentQ?.difficulty || 'Medium'
-  const questionTitle = currentQ?.questionTitle || currentQ?.title || 'Challenge'
-  const heroImage = currentQ?.heroImage
-  const contentText = currentQ?.content
-  const initialAnswer = userAnswersState[currentIndex] || null
-  const gameData = {
-    ...currentQ,
-    points: points,
-    initialAnswer,
-    mcqGroup: currentQ?.mcqGroup,
-    dropdownGroup: currentQ?.dropdownGroup,
-    wordleGroup: currentQ?.wordleGroup,
-    wordFinderGroup: currentQ?.wordFinderGroup,
-    matchGroup: currentQ?.matchGroup,
-    spotLieGroup: currentQ?.spotLieGroup,
-    reorderGroup: currentQ?.reorderGroup,
-    dragDropGroup: currentQ?.dragDropGroup,
-  }
+  /* ------------------------------------------------------------------ the question */
 
-  const timerPercentage = (timeLeft / questionTimeLimit) * 100
-  const isTimeLow = timeLeft <= 10
+  const q = play.question
+  const gameType = q?.gameType
+  const slot = q?.slot || {}
+  const locked = phase === 'feedback' || busy
+  const timeLimit = Number(play.timeLimit) || 20
+  const shownLeft = phase === 'feedback' ? 0 : timeLeft
+  const timerPercentage = Math.max(0, Math.min(100, (shownLeft / timeLimit) * 100))
+  const isTimeLow = shownLeft <= 5 && phase === 'playing'
+  const scoring = play.scoring || DEFAULT_SCORING
+  const gameData = { ...q, initialAnswer: null }
+  const sponsorText =
+    slot.sponsorLine ||
+    (slot.extraSeconds && slot.sponsorName ? `+${slot.extraSeconds} seconds on this question, courtesy of ${slot.sponsorName}` : '')
 
   return (
     <div className="relative bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-xs">
-      {/* ⚠️ SKIPPED QUESTION WARNING MODAL */}
-      {showSkipWarningModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-white border border-slate-100 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl text-center relative overflow-hidden">
-            <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
-              ⚠️
-            </div>
-
-            <h3 className="text-xl font-extrabold text-slate-900 mb-2">
-              Skipped Questions Pending!
-            </h3>
-
-            <p className="text-slate-600 text-sm leading-relaxed mb-6">
-              Oops! You Skipped Some Questions 😅 You’ve got a few unanswered questions. Wanna go
-              back and finish them before submitting?
-            </p>
-
-            <div className="flex flex-col gap-2.5">
-              <button
-                onClick={handleBackToSkippedQuestion}
-                className="w-full py-3 px-5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-sm rounded-xl transition shadow-md shadow-indigo-500/20"
-              >
-                ⬅️ Back to Quiz & Answer
-              </button>
-
-              <button
-                onClick={() => {
-                  if (pendingFinalSubmit) {
-                    completeAndSubmitQuiz(pendingFinalSubmit.score, pendingFinalSubmit.logs)
-                  }
-                }}
-                className="w-full py-3 px-5 bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-slate-700 font-bold text-sm rounded-xl transition"
-              >
-                Submit Anyway ⏩
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Top Timer Progress Bar */}
+      {/* Timer bar */}
       <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mb-6">
         <div
-          className={`h-full transition-all duration-1000 ease-linear ${
-            isTimeLow ? 'bg-rose-500' : 'bg-indigo-600'
-          }`}
+          className={`h-full transition-all duration-300 ease-linear ${isTimeLow ? 'bg-rose-500' : 'bg-indigo-600'}`}
           style={{ width: `${timerPercentage}%` }}
         />
       </div>
 
-      {/* Header Info Bar */}
+      {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-100 pb-5 mb-6 flex-wrap gap-2">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="px-3 py-1 bg-indigo-50 text-indigo-700 font-bold text-[18px] rounded-full uppercase">
-            {roundInfo && roundInfo.totalRounds > 1 ? `Round ${roundInfo.round}/${roundInfo.totalRounds} · ` : ''}
-            Question {currentIndex + 1} of {questions.length}
+            Question {play.position + 1} of {play.total}
           </span>
-          {currentQ?.isSponsored && (
-            <span className="px-2.5 py-1 bg-amber-100 text-amber-800 font-bold text-xs rounded-full uppercase">
-              Sponsored
+          {phase === 'playing' && (
+            <span
+              className={`px-3 py-1 font-bold text-[18px] rounded-full transition-colors ${
+                isTimeLow ? 'bg-rose-100 text-rose-700 animate-pulse' : 'bg-slate-100 text-slate-700'
+              }`}
+            >
+              ⏱️ {shownLeft}s
             </span>
           )}
-          <span
-            className={`px-3 py-1 font-bold text-[18px] rounded-full transition-colors flex items-center gap-1 ${
-              isTimeLow ? 'bg-rose-100 text-rose-700 animate-pulse' : 'bg-slate-100 text-slate-700'
-            }`}
-          >
-            ⏱️ 00 : {timeLeft}s
-          </span>
-          <span className="px-3 py-1 bg-slate-100 text-slate-600 font-semibold text-xs rounded-full uppercase">
-            {gameType ? gameType.replace('_', ' ') : 'Loading...'}
-          </span>
-          <span className="px-2.5 py-1 bg-slate-100 text-slate-500 font-medium text-xs rounded-full">
-            🎯 {difficulty}
+          <span className="flex items-center gap-1" aria-label="Your answers so far">
+            {Array.from({ length: play.total }, (_, i) => {
+              const a = play.answers.find((x) => x.position === i + 1)
+              const mine = feedback && feedback.position === i ? feedback : null
+              const ok = a ? a.correct : mine ? mine.correct : null
+              return (
+                <span
+                  key={i}
+                  className={`w-2.5 h-2.5 rounded-full ${ok === true ? 'bg-emerald-500' : ok === false ? 'bg-rose-400' : i === play.position ? 'bg-indigo-500' : 'bg-slate-200'}`}
+                />
+              )
+            })}
           </span>
         </div>
         <span className="font-extrabold text-amber-600 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full text-xs">
-          +{points} XP {currentQ?.enableDoubleUp ? '(2x)' : ''}
-          {scoring.speedBonus && <> · ⚡ +{speedBonus(timeLeft, questionTimeLimit, scoring)} speed</>}
+          +{q?.points ?? 10} XP {q?.enableDoubleUp ? '(2x)' : ''}
+          {!slot.fixedPoints && scoring.speedBonus && phase === 'playing' && (
+            <> · ⚡ +{speedBonus(shownLeft, timeLimit, scoring)} speed</>
+          )}
         </span>
       </div>
 
-      {/* Hero Image */}
-      {heroImage && (
+      {/* Sponsored question */}
+      {slot.sponsored && (
+        <div className="mb-5 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
+          {slot.sponsorLogo && <img src={slot.sponsorLogo} alt={slot.sponsorName || 'Sponsor'} className="h-10 w-auto max-w-[120px] object-contain" />}
+          <div className="text-left">
+            <span className="block text-xs font-bold uppercase tracking-wider text-amber-700">
+              Sponsored{slot.sponsorName ? ` by ${slot.sponsorName}` : ''}
+            </span>
+            {sponsorText && <span className="block text-sm font-semibold text-amber-900">{sponsorText}</span>}
+          </div>
+        </div>
+      )}
+
+      {q?.heroImage && (
         <div className="mb-6 overflow-hidden rounded-2xl border border-slate-100 max-h-72">
-          <img
-            src={heroImage}
-            alt={questionTitle}
-            className="w-full h-full object-cover quizzzimagesectionnn "
-          />
+          <img src={q.heroImage} alt={q?.questionTitle || 'Question'} className="w-full h-full object-cover quizzzimagesectionnn " />
         </div>
       )}
 
-      {/* Title & Description with Gradient Styling */}
       <h2 className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a] mb-2">
-        {questionTitle}
+        {q?.questionTitle || q?.title || 'Challenge'}
       </h2>
-      {contentText && (
-        <p className="text-slate-600 text-sm leading-relaxed mb-6 whitespace-pre-line">
-          {contentText}
-        </p>
+      {q?.content && <p className="text-slate-600 text-sm leading-relaxed mb-6 whitespace-pre-line">{q.content}</p>}
+
+      <div className={`min-h-[250px] mt-4 ${locked && gameType !== 'mcq' ? 'pointer-events-none opacity-70' : ''}`}>
+        {gameType === 'mcq' && (
+          <MCQGame
+            key={`${play.roundId}-${play.position}`}
+            data={gameData}
+            onComplete={onGameAnswer}
+            locked={locked}
+            reveal={feedback ? { pickedId: feedback.pickedId ?? null, correctOptionId: feedback.reveal?.correctOptionId ?? null } : null}
+          />
+        )}
+        {gameType === 'dropdown' && <DropdownGame key={`${play.roundId}-${play.position}`} data={gameData} onComplete={onGameAnswer} locked={locked} />}
+        {gameType === 'wordle' && <WordleGame key={`${play.roundId}-${play.position}`} data={gameData} onComplete={onGameAnswer} />}
+        {gameType === 'word_finder' && <WordFinderGame key={`${play.roundId}-${play.position}`} data={gameData} onComplete={onGameAnswer} />}
+        {gameType === 'match_following' && <MatchGame key={`${play.roundId}-${play.position}`} data={gameData} onComplete={onGameAnswer} />}
+        {gameType === 'spot_lie' && <SpotLieGame key={`${play.roundId}-${play.position}`} data={gameData} onSelect={onGameAnswer} />}
+        {gameType === 'reorder' && <ReorderGame key={`${play.roundId}-${play.position}`} data={gameData} onComplete={onGameAnswer} />}
+        {gameType === 'drag_drop' && <DragDropGame key={`${play.roundId}-${play.position}`} data={gameData} onComplete={onGameAnswer} />}
+      </div>
+
+      {error && (
+        <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+          {error}{' '}
+          <button type="button" className="underline" onClick={() => load()}>
+            Reload the question
+          </button>
+        </div>
       )}
 
-      {/* Active Sub Game Component Container */}
-      <div className="min-h-[250px] mt-4">
-        {/* {gameType === 'mcq' && (
-          <MCQGame
-            key={currentQ?.id || currentIndex}
-            data={gameData}
-            onComplete={handleGameCompletion}
-          />
-        )}
-        {gameType === 'wordle' && (
-          <WordleGame
-            key={currentQ?.id || currentIndex}
-            data={gameData}
-            onComplete={handleGameCompletion}
-          />
-        )}
-        {gameType === 'word_finder' && (
-          <WordFinderGame
-            key={currentQ?.id || currentIndex}
-            data={gameData}
-            onComplete={handleGameCompletion}
-          />
-        )}
-        {gameType === 'dropdown' && (
-          <DropdownGame
-            key={currentQ?.id || currentIndex}
-            data={gameData}
-            onComplete={handleGameCompletion}
-          />
-        )}
-        {gameType === 'match_following' && (
-          <MatchGame
-            key={currentQ?.id || currentIndex}
-            data={gameData}
-            onComplete={handleGameCompletion}
-          />
-        )}
-        {gameType === 'spot_lie' && (
-          <SpotLieGame
-            key={currentQ?.id || currentIndex}
-            data={gameData}
-            onSelect={handleGameCompletion}
-          />
-        )}
-        {gameType === 'reorder' && (
-          <ReorderGame
-            key={currentQ?.id || currentIndex}
-            data={gameData}
-            onComplete={handleGameCompletion}
-          />
-        )}
-        {gameType === 'drag_drop' && (
-          <DragDropGame
-            key={currentQ?.id || currentIndex}
-            data={gameData}
-            onComplete={handleGameCompletion}
-          />
-        )} */}
-
-        <div className="min-h-[250px] mt-4">
-          {gameType === 'mcq' && (
-            <MCQGame key={currentQ?.id} data={gameData} onComplete={handleGameCompletion} />
-          )}
-          {gameType === 'wordle' && (
-            <WordleGame key={currentQ?.id} data={gameData} onComplete={handleGameCompletion} />
-          )}
-          {gameType === 'word_finder' && (
-            <WordFinderGame key={currentQ?.id} data={gameData} onComplete={handleGameCompletion} />
-          )}
-          {gameType === 'dropdown' && (
-            <DropdownGame key={currentQ?.id} data={gameData} onComplete={handleGameCompletion} />
-          )}
-          {gameType === 'match_following' && (
-            <MatchGame key={currentQ?.id} data={gameData} onComplete={handleGameCompletion} />
-          )}
-          {gameType === 'spot_lie' && (
-            <SpotLieGame key={currentQ?.id} data={gameData} onSelect={handleGameCompletion} />
-          )}
-          {gameType === 'reorder' && (
-            <ReorderGame key={currentQ?.id} data={gameData} onComplete={handleGameCompletion} />
-          )}
-          {gameType === 'drag_drop' && (
-            <DragDropGame key={currentQ?.id} data={gameData} onComplete={handleGameCompletion} />
-          )}
-        </div>
-      </div>
-      {/* Navigation Controls: Previous & Skip Buttons */}
-      <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between gap-4">
-        <button
-          onClick={handlePrevious}
-          disabled={currentIndex === 0}
-          className={`px-5 py-2.5 text-sm font-bold rounded-xl transition flex items-center gap-1 ${
-            currentIndex === 0
-              ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-60'
-              : 'bg-slate-100 hover:bg-slate-200 text-slate-700 active:scale-95'
+      {/* Result of this answer */}
+      {phase === 'feedback' && feedback && (
+        <div
+          className={`mt-6 rounded-2xl border p-5 ${
+            feedback.correct ? 'border-emerald-200 bg-emerald-50' : 'border-rose-200 bg-rose-50'
           }`}
         >
-          <span>⬅️ Previous</span>
-        </button>
-
-        <button
-          onClick={handleSkip}
-          className="px-5 py-2.5 bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold text-sm rounded-xl transition active:scale-95 flex items-center gap-1"
-        >
-          <span>Skip ⏩</span>
-        </button>
-      </div>
-
-      {/* Explanation / Hint Footer */}
-      {currentQ?.explanation && (
-        <div className="mt-6 pt-4 border-t border-slate-100 bg-indigo-50/50 p-4 rounded-2xl text-xs text-indigo-900">
-          <span className="font-bold block mb-1">💡 Hint / Explanation:</span>
-          {currentQ.explanation}
+          <p className={`text-lg font-black ${feedback.correct ? 'text-emerald-800' : 'text-rose-800'}`}>
+            {feedback.correct ? '✅ Correct!' : feedback.timedOut ? "⏱️ Time's up" : '❌ Not quite'}
+            {feedback.points !== 0 && (
+              <span className="ml-2 text-base font-bold">
+                {feedback.points > 0 ? '+' : ''}
+                {feedback.points} XP{feedback.speedBonus ? ` (⚡ +${feedback.speedBonus} speed)` : ''}
+              </span>
+            )}
+          </p>
+          {!feedback.correct && feedback.reveal?.correctAnswer && (
+            <p className="mt-1 text-sm font-semibold text-slate-700">Answer: {feedback.reveal.correctAnswer}</p>
+          )}
+          {feedback.explanation && (
+            <p className="mt-2 text-sm text-slate-700">
+              <span className="font-bold">💡 </span>
+              {feedback.explanation}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={next}
+            className="mt-4 w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-2xl transition shadow-md"
+          >
+            {feedback.finished ? 'See my score' : 'Next question →'}
+          </button>
         </div>
       )}
     </div>

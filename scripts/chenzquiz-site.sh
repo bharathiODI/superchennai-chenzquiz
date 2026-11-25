@@ -10,6 +10,8 @@
 #                                                            media) into the DEMO's own database for testing
 #   bash chenzquiz-site.sh demo-ips "1.2.3.4 5.6.7.0/24"     only these IPs can open the demo site
 #   bash chenzquiz-site.sh demo-ips open                     anyone with the link can open the demo
+#   bash chenzquiz-site.sh demo-tools on|off|key             demo tools (test clock, switch player,
+#                                                            simulate players) on the DEMO site only
 #
 # Safe deploy: maintenance on -> wait until "playing" shows 0 -> merge/deploy -> maintenance off.
 # The same switch is in the CMS dashboard (Site status).
@@ -56,6 +58,11 @@ show_playing() { # root
   printf 'Playing now: %s   (finished in the last 5 min: %s)\n' \
     "$(psql "$uri" -X -At -c "SELECT count(*) FROM quiz_rounds WHERE status = 'assigned' AND created_at > now() - interval '15 minutes'")" \
     "$(psql "$uri" -X -At -c "SELECT count(*) FROM quiz_rounds WHERE status = 'completed' AND completed_at > now() - interval '5 minutes'")"
+}
+
+# The demo tools only work on a database that has this table. Never created on live.
+mark_demo_db() { # demo database URI
+  psql "$1" -X -q -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS demo_flag (id int PRIMARY KEY DEFAULT 1, clock_offset_ms bigint NOT NULL DEFAULT 0, updated_at timestamptz DEFAULT now()); INSERT INTO demo_flag (id) VALUES (1) ON CONFLICT (id) DO NOTHING;"
 }
 
 wait_up() { # port
@@ -145,6 +152,7 @@ demo-db)
     (cd /tmp && DATABASE_URI="$demo_uri" node "$DEMO_ROOT/current/scripts/db-migrate.mjs") | sed 's/^/    /'
     psql "$demo_uri" -X -q -c "UPDATE quiz_site_settings SET test_players_allow_test_logins = true" &&
       echo "  test player logins: on (demo only)"
+    mark_demo_db "$demo_uri" && echo "  marked as a demo database (demo tools can be used)"
     rsync -a "$LIVE_ROOT/shared/media/" "$DEMO_ROOT/shared/media/" && echo "  media copied"
     write_flags "$DEMO_ROOT" "$was" ""
     pm2 restart "$DEMO_APP" --update-env >/dev/null
@@ -198,10 +206,49 @@ MSG
     before="$(sed -n 's/^maintenance_before=//p' "$MARK")"
     write_flags "$DEMO_ROOT" "${before:-off}" ""
     rm -f "$MARK"
+    mark_demo_db "$(db_uri "$DEMO_ROOT")" || true
     pm2 restart "$DEMO_APP" --update-env >/dev/null
     wait_up "$DEMO_PORT" || fail "demo app did not come back - check: pm2 logs $DEMO_APP"
     pm2 save >/dev/null 2>&1 || true
     echo "Done. The demo uses $(db_name "$(db_uri "$DEMO_ROOT")") again; maintenance on the demo: $(flags_state "$DEMO_ROOT")."
+  fi
+  ;;
+
+demo-tools)
+  what="${2:-}"; [[ "$what" =~ ^(on|off|key)$ ]] || fail "use: demo-tools on|off|key"
+  ENV_FILE="$DEMO_ROOT/shared/.env"; MARK="$DEMO_ROOT/shared/USING_LIVE_DB"
+  [ -f "$ENV_FILE" ] || fail "$ENV_FILE not found - set up the demo first (demo-setup.sh)"
+  key="$(sed -n 's/^DEMO_TOOLS_KEY=//p' "$ENV_FILE" | tail -1)"
+  if [ "$what" = key ]; then
+    [ -n "$key" ] && echo "Demo key: $key" || echo "Demo tools are off (no DEMO_TOOLS_KEY). Turn on: bash $0 demo-tools on"
+    exit 0
+  fi
+  if [ "$what" = on ]; then
+    [ ! -f "$MARK" ] || fail "the demo uses the LIVE database - demo tools stay off. First: bash $0 demo-db demo"
+    demo_uri="$(db_uri "$DEMO_ROOT")"; live_uri="$(db_uri "$LIVE_ROOT")"
+    [ "$(db_name "$demo_uri")" != "$(db_name "$live_uri")" ] || fail "the demo .env points at the live database - stopped"
+    say "Demo tools ON (demo site only)"
+    mark_demo_db "$demo_uri"
+    [ -n "$key" ] || { key="$(openssl rand -hex 12)"; set_env_line "$ENV_FILE" DEMO_TOOLS_KEY "$key"; }
+  else
+    say "Demo tools OFF"
+    set_env_line "$ENV_FILE" DEMO_TOOLS_KEY ""
+    psql "$(db_uri "$DEMO_ROOT")" -X -q -c "UPDATE demo_flag SET clock_offset_ms = 0" 2>/dev/null || true
+  fi
+  pm2 restart "$DEMO_APP" --update-env >/dev/null
+  wait_up "$DEMO_PORT" || fail "demo app did not come back - check: pm2 logs $DEMO_APP"
+  pm2 save >/dev/null 2>&1 || true
+  if [ "$what" = on ]; then
+    cat <<MSG
+Done. Open https://$DEMO_DOMAIN, click "Demo tools" (bottom right) and enter this key once:
+  $key
+  - Test clock: Next day / Jump to day N / Set time / Back to today (the whole demo moves together)
+  - Log in as any of the 10 test players without an SMS; reset their plays
+  - Simulate players: bots play today's questions (they show on the demo leaderboard)
+Automatic 30-day run:  cd $DEMO_ROOT/current && node scripts/demo-sim.mjs --key $key
+MSG
+  else
+    echo "Done. The demo tools are hidden and the demo clock is back to real time."
   fi
   ;;
 

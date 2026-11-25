@@ -98,6 +98,7 @@ bash /root/chenzquiz-site.sh demo-db live                      # demo app reads 
 bash /root/chenzquiz-site.sh demo-db demo                      # demo back on its own database
 bash /root/chenzquiz-site.sh demo-ips "1.2.3.4 5.6.7.0/24"     # only these IPs can open the demo
 bash /root/chenzquiz-site.sh demo-ips open                     # anyone with the link (still hidden from Google)
+bash /root/chenzquiz-site.sh demo-tools on|off|key             # demo tools: test clock, log in as a test player, simulate players
 ```
 - **`copy-live` vs `demo-db live`:**
   - `copy-live` gives the demo its own snapshot of live: players, scores, content, CMS logins and media. Games and logins work on it, and changes affect only the copy. The old demo data is backed up to `/root/_local/`. Run it again for fresher data.
@@ -170,33 +171,38 @@ npm run dev                                   # http://localhost:3000  (CMS at /
 
 ## 7. Game rules (what players get)
 
+Lean setup from 25 Nov 2026. Plan and diagrams: https://claude.ai/artifact/NKfhERTyz8r8jcxN9bfnN1
+
 | Rule | Value |
 |---|---|
-| Game day | **12:30 AM to 12:30 AM India time** (CMS > Settings > Quiz Settings > Game day: 0 / 30 / 60) |
-| Break | **11:30 PM - 12:30 AM**: no new rounds; a round on screen can finish |
-| Per day | 3 rounds x 3 questions; question 3 of each round = sponsored slot |
-| No repeats | A player never gets a question twice. Exception: a question edited and **published again** counts as new. |
-| Order | Question Number (or random if "Shuffle" is ticked on the quiz) |
-| Timer | Quiz Settings > time limit per game (MCQ 20 s). The question's own "Time" box is not used. |
-| Points | Question points (10) + speed bonus 1-5; Double Up x2; wrong = minus negative points (0) |
+| Live quiz | **One at a time.** A second quiz can't be set to Scheduled / Active in the same dates. |
+| Pool | **Every published question of the live quiz** whose *Use in* is General, Sponsored or Both. No pool list to maintain. |
+| Per day | **One play per player per day**, laid out by the quiz's **Round layout** (default: Q1 General, Q2 General, Q3 Sponsored +10 s, DRA Homes). |
+| Questions | Each slot gets a **random question this player has never been given** that fits the slot (General slot: General or Both; Sponsored slot: Sponsored or Both). |
+| Run out | No unseen Sponsored question left: an unseen General one, badge kept. Nothing unseen at all: the one the player saw longest ago (a repeat). Keep the bank topped up. |
+| Answers | Checked and timed **on the server**. The browser never gets the right answer or the explanation before the player answers. Options shuffled per player (setting). |
+| One at a time | No Back or Skip. A reload resumes the same question with the time left. Time runs out = 0 points. |
+| Game day | **12:30 AM to 12:30 AM India time**; break **11:30 PM - 12:30 AM** (no new plays; a play on screen can finish) |
+| Timer | Quiz Settings > time limit per game (MCQ 20 s) + the slot's extra time |
+| Points | Question points (10) + speed bonus 1-5 (none under 1.5 s); slot set to Fixed = no speed bonus; Double Up x2; wrong = minus negative points (0) |
+| Fair play | Flags, not bans: **Too fast** (day finished under 6 s) and **Linked numbers** (2+ numbers on one phone within 60 min) on Quiz Rounds. Tick **Disqualified** on a player to take them off the leaderboard. |
 | Streak | Game days in a row; stays alive if the player played today or yesterday |
-| Leaderboard | Public, **top 50 only**, on every tab; test players hidden |
-| Out of questions | Player sees "You've played all the questions available right now..." |
+| Leaderboard | Public, **top 50 only**, on every tab; test and disqualified players hidden |
 
-Changing the game day time or the speed bonus during the contest changes everyone's scores and days, so ask the developer first.
+All of these are in the CMS: the quiz (Round layout, dates, status), each question (*Use in*), and Settings > Quiz Settings > Game Timers & Scoring (game day, timers, speed bonus, **Fair play**). Changing the game day time or the speed bonus during the contest changes everyone's scores and days, so ask the developer first.
 
 ---
 
-## 8. Daily content routine
+## 8. Adding questions
 
-The CMS guide for the content team is at https://claude.ai/artifact/Aebp3j4RN4vePAvKReNnXs
+The CMS guide for the content team is at https://claude.ai/artifact/Aebp3j4RN4vePAvKReNnXs (written before the lean setup: there is no pool list or schedule any more).
 
-1. **During the day:** create tomorrow's 6 questions and click **Save Draft** (not Publish). Add them to the quiz's **Question Pool**; drafts stay hidden from players. Add tomorrow's **Sponsored question schedule** row and publish that question.
-2. **In the break (11:30 PM - 12:30 AM):** **Publish** tomorrow's questions, remove today's from the pool, and **Save** the quiz.
-3. **At 12:30 AM:** play one round with a test player to check.
+1. **Add New Question:** Quiz = the live quiz (filled in for you), **Use in** = General (Q1/Q2), Sponsored (the DRA slot) or Both, then **Publish**. It's in play straight away.
+2. **Add as many as you like at once** (all remaining days, or 30 every 10 days): players get random ones they haven't seen, so publishing early doesn't reveal a daily set.
+3. **Keep a question out without unpublishing it:** Use in = **Not in play**.
+4. **How many:** a daily player uses 2 General + 1 Sponsored a day. 90 days with no repeats = 180 General + 90 Sponsored.
 
-- Never publish tomorrow's questions before 11:30 PM: players would get them today.
-- Never edit a question players already answered, unless you're rewriting it for a new day.
+- Don't rewrite an old question to reuse it: players who saw it still count it as seen. Add a new one (Duplicate is in the ... menu).
 - "Schedule publish" doesn't work on this server (no job runner). Publish by hand.
 
 ---
@@ -255,7 +261,24 @@ The CMS guide for the content team is at https://claude.ai/artifact/Aebp3j4RN4ve
   ```
 - **Switching test logins on or off:** CMS > Settings > Quiz Site Settings > Test players. Removing the `TEST_OTP` line (then `pm2 restart ... --update-env`) also turns them off.
 - **Where they don't count:** test players are hidden from the leaderboard and from dashboard counts unless you tick "Include test players".
-- **Creating them:** `npm run seed` in the app folder (safe to repeat).
+- **Creating them:** `npm run seed` in the app folder (safe to repeat), or "Log in as" in the demo tools.
+
+### Demo tools (demo site only)
+
+Turn on once: `bash /root/chenzquiz-site.sh demo-tools on` (it prints the key). Then on https://chenzquiz-demo.superchennai.com click **Demo tools** (bottom right) and enter the key once.
+
+- **Test clock:** Next day / Jump to day N / Set time (e.g. 00:29 to test the 12:30 AM change) / Back to today. The whole demo moves together: questions, the one-play-a-day rule, streaks, leaderboard tabs, dashboard. A yellow bar shows the pretend date.
+- **Player:** log in as any of the 10 test numbers without an SMS; reset one or all of them.
+- **Simulated players:** bots (+91 88888 xxxxx) play today's questions; they show on the demo leaderboard. "Remove simulated players" deletes them.
+- **Safety:** the tools work only with the key **and** on a database marked as a demo database (`demo_flag` table, created by `demo-db copy-live` / `demo-db demo` / `demo-tools on`). On live, or while the demo uses the live database, they don't exist.
+
+**Automatic 30-day run** (before every release to live):
+```bash
+cd /var/www/chenzquiz-demo/current
+node scripts/demo-sim.mjs --key "$(sed -n 's/^DEMO_TOOLS_KEY=//p' ../shared/.env)"            # 10 players x 30 days
+node scripts/demo-sim.mjs --key <key> --days 5 --players 3                                      # quick run
+```
+It plays the test players through pretend days and checks: no answer in the browser, Q3 sponsored, no repeats while unseen questions exist, reload resumes, time-outs score 0, one play a day, scores add up. Exit code 0 = all passed; the clock goes back to today.
 
 ---
 
@@ -284,3 +307,5 @@ Run them from the live app folder: `cd /var/www/chenzquiz/current && node /root/
 | `2026-11-22-fix-mcq-answers.mjs` | 22 Nov | MCQ correct answers saved 1-based; `--apply`, `--apply --replay` |
 | `2026-11-23-undo-repeat-rounds.mjs` | 23 Nov | Undid the overnight repeated rounds; `--apply` |
 | `2026-11-23-check-high-scores.mjs` | 23 Nov | Read-only list of scores above a limit |
+| `2026-11-25-check-data.mjs` | 25 Nov | Read-only: do totals, rounds and attempts add up; double plays; fast rounds; quizzes. `--all` for every row |
+| `2026-11-25-merge-quiz.mjs` | 25 Nov | Merge "Day3 - Trivia" into TRIVIA. Dry run by default (lists double plays); `--apply` backs up first |

@@ -8,7 +8,7 @@ const isCmsAdmin: Access = ({ req: { user } }) => userHas(user, ADMINS)
 
 // Deleting a player in the CMS also deletes everything recorded for them.
 const deletePlayerData: CollectionBeforeDeleteHook = async ({ id, req }) => {
-  for (const collection of ['quiz-rounds', 'quiz-attempts', 'user-submissions'] as const) {
+  for (const collection of ['quiz-answers', 'quiz-rounds', 'quiz-attempts', 'user-submissions'] as const) {
     await req.payload.delete({
       collection: collection as any,
       where: { user: { equals: id } },
@@ -18,7 +18,7 @@ const deletePlayerData: CollectionBeforeDeleteHook = async ({ id, req }) => {
   }
 }
 
-export const QuizUsers: CollectionConfig = {
+const QuizUsersConfig: CollectionConfig = {
   slug: 'quiz-users',
 
   auth: {
@@ -32,7 +32,7 @@ export const QuizUsers: CollectionConfig = {
     useAsTitle: 'name',
     defaultColumns: ['name', 'phone', 'email', 'totalXP', 'totalTimeTaken', 'createdAt'],
     listSearchableFields: ['name', 'phone', 'email'],
-    description: 'Players. Read-only here (changed only by the game). Search by name, phone or email.',
+    description: 'Players. Read-only here (changed only by the game), except Disqualified. Search by name, phone or email.',
     hidden: hiddenUnless(ADMINS),
     components: { beforeListTable: ['@/components/admin/ScoreExport#ScoreExport', '@/components/admin/ListExport#ListExport'] },
   },
@@ -47,7 +47,8 @@ export const QuizUsers: CollectionConfig = {
       const user = args.req.user as any
       return user?.collection === 'quiz-users' ? { id: { equals: user.id } } : false
     },
-    update: () => false,
+    // Admins can only tick "Disqualified" (every other field is read-only, see below).
+    update: isCmsAdmin,
     // Admins can still delete a player (with their rounds and scores - see the hook below).
     delete: isCmsAdmin,
   },
@@ -82,6 +83,16 @@ export const QuizUsers: CollectionConfig = {
       },
     },
     {
+      name: 'disqualified',
+      type: 'checkbox',
+      defaultValue: false,
+      index: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Disqualified players can still log in but are left off the leaderboard. Use after reviewing a flag.',
+      },
+    },
+    {
       name: 'totalXP',
       type: 'number',
       defaultValue: 0,
@@ -109,4 +120,12 @@ export const QuizUsers: CollectionConfig = {
       admin: { components: { Field: '@/components/admin/PlayerHistory#PlayerHistory' } },
     },
   ],
+}
+
+// Every field except "disqualified" stays read-only in the CMS.
+export const QuizUsers: CollectionConfig = {
+  ...QuizUsersConfig,
+  fields: QuizUsersConfig.fields.map((f: any) =>
+    f.name && f.name !== 'disqualified' ? { ...f, access: { ...(f.access || {}), update: () => false } } : f,
+  ),
 }

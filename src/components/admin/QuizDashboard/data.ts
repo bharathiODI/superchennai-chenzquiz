@@ -1,3 +1,4 @@
+import { getNow } from '@/utilities/clock'
 import type { Payload } from 'payload'
 
 import { gameDayKey } from '@/utilities/gameDay'
@@ -193,10 +194,11 @@ type Ctx = { startMins: number; today: string }
 
 async function context(payload: Payload): Promise<Ctx & { gd: Awaited<ReturnType<typeof getGameDaySettings>> }> {
   const gd = await getGameDaySettings(payload)
+  const now = await getNow(payload) // the demo test clock moves "today" too
   return {
     gd,
     startMins: gd.startHour * 60 + gd.startMinute,
-    today: gameDayKey(new Date(), gd) ?? new Date().toISOString().slice(0, 10),
+    today: gameDayKey(now, gd) ?? now.toISOString().slice(0, 10),
   }
 }
 

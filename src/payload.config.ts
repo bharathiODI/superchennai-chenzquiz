@@ -22,6 +22,7 @@ import { Quizzes } from './collections/Games/Quizzes'
 import { UserSubmissions } from './collections/Games/UserSubmissions'
 import { QuizAttempts } from './collections/Games/QuizAttempts'
 import { QuizRounds } from './collections/Games/QuizRounds'
+import { QuizAnswers } from './collections/Games/QuizAnswers'
 import { QuizSettings } from './globals/QuizSettings'
 import { cmsOnlyWrites } from './plugins/cmsOnlyWrites'
 import { isDemoSite } from './utilities/siteEnv'
@@ -108,6 +109,7 @@ export default buildConfig({
     inGroup(Quizzes, 'Quiz'),
     inGroup(QuizUsers, 'Players & Scores'),
     inGroup(QuizRounds, 'Players & Scores'),
+    inGroup(QuizAnswers, 'Players & Scores'),
     inGroup(QuizAttempts, 'Players & Scores'),
     inGroup(UserSubmissions, 'Players & Scores'),
     inGroup(Posts, 'Posts'),

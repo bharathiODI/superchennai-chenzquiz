@@ -22,7 +22,7 @@ const SPEC: { id: string; label: string; icon: MenuItem['icon']; refs: Ref[] }[]
     icon: 'puzzle',
     refs: [
       { kind: 'collection', slug: 'questions', label: 'All Questions', add: 'Add New Question' },
-      { kind: 'collection', slug: 'quizzes', label: 'Quizzes & Question Pool' },
+      { kind: 'collection', slug: 'quizzes', label: 'Quizzes' },
     ],
   },
   {
@@ -32,6 +32,7 @@ const SPEC: { id: string; label: string; icon: MenuItem['icon']; refs: Ref[] }[]
     refs: [
       { kind: 'collection', slug: 'quiz-users', label: 'Players' },
       { kind: 'collection', slug: 'quiz-rounds', label: 'Quiz Rounds' },
+      { kind: 'collection', slug: 'quiz-answers', label: 'Answers' },
       { kind: 'collection', slug: 'quiz-attempts', label: 'Quiz Attempts' },
       { kind: 'collection', slug: 'user-submissions', label: 'User Submissions' },
     ],

@@ -19,6 +19,7 @@ import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c08
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { SlugComponent as SlugComponent_92cc057d0a2abb4f6cf0307edf59f986 } from '@/fields/slug/SlugComponent'
 import { RolePublishButton as RolePublishButton_b6264f3c15546f1c0eaa1fad71467544 } from '@/components/admin/RolePublishButton'
+import { SlotRowLabel as SlotRowLabel_685bbe0c410282e304ddc1f1900b9508 } from '@/components/admin/SlotRowLabel'
 import { PlayerHistory as PlayerHistory_18e7a35b2b98331a4206ebaf71d41619 } from '@/components/admin/PlayerHistory'
 import { ScoreExport as ScoreExport_87061e8cd8b931dbef9ada3b9007abeb } from '@/components/admin/ScoreExport'
 import { ListExport as ListExport_f53af2bc52923006b15b9bd0436267c6 } from '@/components/admin/ListExport'
@@ -62,6 +63,7 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@/fields/slug/SlugComponent#SlugComponent": SlugComponent_92cc057d0a2abb4f6cf0307edf59f986,
   "@/components/admin/RolePublishButton#RolePublishButton": RolePublishButton_b6264f3c15546f1c0eaa1fad71467544,
+  "@/components/admin/SlotRowLabel#SlotRowLabel": SlotRowLabel_685bbe0c410282e304ddc1f1900b9508,
   "@/components/admin/PlayerHistory#PlayerHistory": PlayerHistory_18e7a35b2b98331a4206ebaf71d41619,
   "@/components/admin/ScoreExport#ScoreExport": ScoreExport_87061e8cd8b931dbef9ada3b9007abeb,
   "@/components/admin/ListExport#ListExport": ListExport_f53af2bc52923006b15b9bd0436267c6,

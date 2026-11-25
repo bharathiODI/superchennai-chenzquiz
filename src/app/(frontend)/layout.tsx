@@ -21,6 +21,7 @@ import Link from 'next/link'
 import LeaderboardComponent from '@/blocks/Leaderboard/Leaderboard'
 import StickyNavigation from '@/blocks/StickyNavigation/StickyNavigation'
 import { SiteEnvBadge } from '@/components/SiteEnvBadge'
+import { DemoTools } from '@/components/DemoTools'
 import { MaintenanceBanner } from '@/components/MaintenanceBanner'
 import { isDemoSite } from '@/utilities/siteEnv'
 
@@ -52,6 +53,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <LeaderboardComponent />
           <StickyNavigation />
           <SiteEnvBadge />
+          <DemoTools />
         </Providers>
       </body>
     </html>

@@ -23,6 +23,7 @@ export function calculateUserStats(
   attempts: QuizAttempt[],
   userTotalXP?: number,
   gameDay: GameDaySettings = DEFAULT_GAME_DAY,
+  now: Date = new Date(),
 ) {
   const totalPlayed = attempts.length
   if (totalPlayed === 0) {
@@ -52,7 +53,7 @@ export function calculateUserStats(
   // Streaks: consecutive game days (they start at the Quiz Settings time, 12:30 AM by default)
   const { current: currentStreak, best: bestStreak } = computeStreaks(
     attempts.map((a) => a.completedAt).filter(Boolean),
-    new Date(),
+    now,
     (d) => gameDayKey(d, gameDay),
   )
 

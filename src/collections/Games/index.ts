@@ -50,7 +50,7 @@ export const Questions: CollectionConfig<'questions'> = {
   defaultSort: 'order',
   admin: {
     hidden: hiddenUnless(WRITERS),
-    defaultColumns: ['title', 'slug', 'updatedAt'],
+    defaultColumns: ['title', 'useIn', 'quiz', '_status', 'updatedAt'],
     components: { edit: { PublishButton: '@/components/admin/RolePublishButton#RolePublishButton' } },
     livePreview: {
       url: ({ data, req }) => {
@@ -77,6 +77,25 @@ export const Questions: CollectionConfig<'questions'> = {
       name: 'title',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'useIn',
+      type: 'select',
+      label: 'Use in',
+      required: true,
+      defaultValue: 'general',
+      index: true,
+      options: [
+        { label: 'General (Q1, Q2 ...)', value: 'general' },
+        { label: 'Sponsored (sponsored slot)', value: 'sponsored' },
+        { label: 'Both', value: 'both' },
+        { label: 'Not in play', value: 'none' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description:
+          'Which slots of the Round layout this question can fill. Published questions of the live quiz are in play straight away; "Not in play" keeps one out without unpublishing it.',
+      },
     },
     {
       type: 'tabs',
@@ -132,6 +151,22 @@ export const Questions: CollectionConfig<'questions'> = {
                   type: 'relationship',
                   relationTo: 'quizzes',
                   required: true,
+                  // New questions go to the live quiz
+                  defaultValue: async ({ req }: any) => {
+                    try {
+                      const live = await req.payload.find({
+                        collection: 'quizzes',
+                        where: { status: { equals: 'active' } },
+                        sort: 'quizDate',
+                        limit: 1,
+                        depth: 0,
+                        overrideAccess: true,
+                      })
+                      return live.docs[0]?.id ?? undefined
+                    } catch {
+                      return undefined
+                    }
+                  },
                   admin: { width: '50%' },
                 },
                 {
