@@ -1,7 +1,7 @@
 import type { ServerProps } from 'payload'
 import React from 'react'
 
-import { REPORT_READERS, cmsRole, userHas } from '@/access/roles'
+import { EDITORS, REPORT_READERS, cmsRole, userHas } from '@/access/roles'
 
 import { type MenuItem, WpMenuClient } from './client'
 
@@ -12,7 +12,7 @@ import { type MenuItem, WpMenuClient } from './client'
  * Payload's own permissions, so the menu and the access rules can't disagree. Anything new that
  * isn't listed here still appears under "More". Replaces Payload's grouped list (hidden in CSS).
  */
-type Kind = 'collection' | 'global'
+type Kind = 'collection' | 'global' | 'view'
 type Ref = { kind: Kind; slug: string; label?: string; add?: string }
 
 const SPEC: { id: string; label: string; icon: MenuItem['icon']; refs: Ref[] }[] = [
@@ -22,6 +22,7 @@ const SPEC: { id: string; label: string; icon: MenuItem['icon']; refs: Ref[] }[]
     icon: 'puzzle',
     refs: [
       { kind: 'collection', slug: 'questions', label: 'All Questions', add: 'Add New Question' },
+      { kind: 'view', slug: 'import-questions', label: 'Import Questions' },
       { kind: 'collection', slug: 'quizzes', label: 'Quizzes' },
     ],
   },
@@ -31,13 +32,11 @@ const SPEC: { id: string; label: string; icon: MenuItem['icon']; refs: Ref[] }[]
     icon: 'trophy',
     refs: [
       { kind: 'collection', slug: 'quiz-users', label: 'Players' },
-      { kind: 'collection', slug: 'quiz-rounds', label: 'Quiz Rounds' },
+      { kind: 'collection', slug: 'quiz-rounds', label: 'Plays' },
       { kind: 'collection', slug: 'quiz-answers', label: 'Answers' },
-      { kind: 'collection', slug: 'quiz-attempts', label: 'Quiz Attempts' },
-      { kind: 'collection', slug: 'user-submissions', label: 'User Submissions' },
+      { kind: 'collection', slug: 'quiz-attempts', label: 'Finished plays' },
     ],
   },
-  { id: 'posts', label: 'Posts', icon: 'pin', refs: [{ kind: 'collection', slug: 'posts', label: 'All Posts', add: 'Add New Post' }] },
   { id: 'media', label: 'Media', icon: 'image', refs: [{ kind: 'collection', slug: 'media', label: 'Library', add: 'Add New Media File' }] },
   { id: 'pages', label: 'Pages', icon: 'page', refs: [{ kind: 'collection', slug: 'pages', label: 'All Pages', add: 'Add New Page' }] },
   {
@@ -55,8 +54,8 @@ const SPEC: { id: string; label: string; icon: MenuItem['icon']; refs: Ref[] }[]
     label: 'Settings',
     icon: 'sliders',
     refs: [
-      { kind: 'global', slug: 'quiz-settings', label: 'Quiz Settings' },
-      { kind: 'global', slug: 'quiz-site-settings', label: 'Quiz Site Settings' },
+      { kind: 'global', slug: 'quiz-settings', label: 'Quiz settings: game & fair play' },
+      { kind: 'global', slug: 'quiz-site-settings', label: 'Quiz settings: site pages' },
     ],
   },
 ]
@@ -94,6 +93,11 @@ export function WpMenu({ payload, permissions, user }: ServerProps) {
   for (const s of SPEC) {
     const children: MenuItem['children'] = []
     for (const r of s.refs) {
+      // Custom admin views (e.g. Import Questions): Editors and up
+      if (r.kind === 'view') {
+        if (userHas(user, EDITORS)) children.push({ label: r.label ?? r.slug, href: `${A}/${r.slug}` })
+        continue
+      }
       listed.add(`${r.kind}:${r.slug}`)
       if (!visible(r.kind, r.slug)) continue
       children.push({ label: r.label ?? labelOf(entity(r.kind, r.slug)), href: url(r.kind, r.slug) })

@@ -1321,3 +1321,116 @@ select.qd-input {
   font-size: 13px;
   color: #74799a;
 }
+
+/* ---------- Lean setup (Nov 2026): dashboard tabs, flags, player detail, import, settings tabs ---------- */
+.qd-soft {
+  transition: opacity 0.15s;
+}
+.qd-soft.is-pending .qd-table-wrap,
+.qd-soft.is-pending .qd-resultbar,
+.qd-soft.is-pending .qd-play {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.qd-badge + .qd-badge {
+  margin-left: 4px;
+}
+.qd-badge--warn {
+  background: #fff4e0;
+  color: #9a5b00;
+}
+.qd-badge--bad {
+  background: #fdecec;
+  color: #b42318;
+}
+.qd-ok {
+  color: #008a20;
+  font-weight: 600;
+}
+.qd-bad {
+  color: #b42318;
+  font-weight: 600;
+}
+.qd-mini {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #d7d4ea;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.qd-mini--danger {
+  border-color: #f3c2bd;
+  color: #b42318;
+}
+.qd-msg {
+  font-weight: 600;
+}
+.qd-msg--ok {
+  border-left: 4px solid #008a20;
+}
+.qd-msg--err {
+  border-left: 4px solid #b42318;
+}
+.qd-row-bad td {
+  background: #fff8f7;
+}
+.qd-play {
+  margin-bottom: 12px;
+}
+.qd-play__head {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+.qd-table--compact td,
+.qd-table--compact th {
+  padding: 6px 10px !important;
+}
+.qs-tabs {
+  display: flex;
+  gap: 6px;
+  margin-right: auto;
+}
+.qs-tab {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #d7d4ea;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4a4870;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.qs-tab.is-on {
+  background: var(--brand-gradient, #7000ff);
+  border-color: transparent;
+  color: #fff;
+}
+.dup-btn {
+  margin: 0 8px 0 0 !important;
+}
+
+a.qd-btn,
+a.qd-btn:visited,
+.qs-tab.is-on,
+.qs-tab.is-on:visited {
+  color: #fff !important;
+}
+.qd-table td .qd-bad,
+.qd-table td .qd-ok {
+  white-space: normal;
+}
+.qd-import td {
+  white-space: normal !important;
+  vertical-align: top;
+}
+.qd-import td:nth-child(2) {
+  min-width: 220px;
+  max-width: 360px;
+}

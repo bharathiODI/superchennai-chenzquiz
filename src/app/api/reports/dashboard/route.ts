@@ -43,7 +43,7 @@ export async function GET(request: Request) {
       Phone: r.phone ?? '',
       Email: r.email ?? '',
       'Days played': num(r.days),
-      Rounds: num(r.rounds),
+      'Finished plays': num(r.rounds),
       Points: num(r.points),
       'Time (s)': num(Math.round(Number(r.secs) || 0)),
       'Current streak': num(r.streak),
@@ -51,38 +51,52 @@ export async function GET(request: Request) {
       'Last played (India time)': istDateTime(r.last_at),
       Joined: istDate(r.created_at),
     }))
-  } else if (f.tab === 'attempts') {
-    sheetName = 'Attempts'
+  } else if (f.tab === 'plays' || f.tab === 'flags') {
+    sheetName = f.tab === 'flags' ? 'Flags' : 'Plays'
     out = rows.map((r) => ({
-      ID: r.id,
       Player: r.name ?? '',
       Phone: r.phone ?? '',
       Email: r.email ?? '',
       Quiz: r.quiz ?? '',
       'Game day': r.game_day ?? '',
-      Round: num(r.round),
+      Status: r.status === 'completed' ? 'Finished' : 'Opened, not finished',
       Score: num(r.score),
       Correct: num(r.correct_answers),
-      Questions: num(r.total_questions),
+      Questions: num(r.questions),
       'Time (s)': num(r.time_taken),
+      'Too fast': r.too_fast ? 'yes' : '',
+      'Linked numbers': r.linked ? 'yes' : '',
+      Disqualified: r.disqualified ? 'yes' : '',
+      ...(f.tab === 'flags' ? { 'Other numbers on this phone': r.same_device ?? '', 'Device ID': r.device_id ?? '', 'IP address': r.ip ?? '' } : {}),
       'Finished at (India time)': istDateTime(r.completed_at),
     }))
-  } else {
-    sheetName = 'Quiz details'
+  } else if (f.tab === 'questions') {
+    sheetName = 'Questions'
     out = rows.map((r) => ({
       ID: r.id,
-      Quiz: r.title,
+      Question: r.question ?? '',
+      'Use in': r.use_in ?? '',
       Status: r.status ?? '',
-      Starts: istDateTime(r.quiz_date),
-      Ends: istDateTime(r.quiz_end_date),
-      'Rounds a day': num(r.rounds_per_day),
-      'Questions a round': num(r.questions_per_round),
-      'Question pool': num(r.pool),
-      'Pool published': num(r.pool_live),
-      Players: num(r.players),
-      'Played today': num(r.players_today),
-      'Finished rounds': num(r.attempts),
-      'Average score': num(r.avg_score),
+      Quiz: r.quiz ?? '',
+      Given: num(r.given),
+      Answered: num(r.answered),
+      Right: num(r.correct),
+      'Right %': num(r.pct),
+      'Time-outs': num(r.timeouts),
+      'Avg time (s)': num(r.secs),
+      'Last given': r.last_day ?? '',
+    }))
+  } else {
+    sheetName = 'Sponsor report'
+    out = rows.map((r) => ({
+      'Game day': r.game_day,
+      'Players who saw it': num(r.players),
+      Answered: num(r.answered),
+      Right: num(r.correct),
+      'Right %': num(r.pct),
+      'Time-outs': num(r.timeouts),
+      'Avg time (s)': num(r.secs),
+      'Sponsored questions used': num(r.questions),
     }))
   }
 
@@ -96,7 +110,7 @@ export async function GET(request: Request) {
       ['Rows', total > EXPORT_LIMIT ? `${EXPORT_LIMIT} of ${total} (narrow the filters for the rest)` : total],
       ['Filters', active.length ? active.join(' · ') : 'None (everything)'],
       ['Downloaded', `${new Date().toLocaleString('en-GB', { timeZone: 'Asia/Kolkata' })} (India time) by ${(user as any)?.email ?? ''}`],
-      ['Game day', `Starts at ${formatStartHour(gd)} India time. Points, rounds and days are for the chosen game days.`],
+      ['Game day', `Starts at ${formatStartHour(gd)} India time. Points, plays and days are for the chosen game days.`],
       ['Streaks', 'Current streak: game days in a row up to today or yesterday. Best streak: longest run ever.'],
     ]),
     'Filters',

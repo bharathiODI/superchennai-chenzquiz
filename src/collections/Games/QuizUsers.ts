@@ -20,6 +20,7 @@ const deletePlayerData: CollectionBeforeDeleteHook = async ({ id, req }) => {
 
 const QuizUsersConfig: CollectionConfig = {
   slug: 'quiz-users',
+  disableDuplicate: true, // player data is never copied
 
   auth: {
     disableLocalStrategy: true,

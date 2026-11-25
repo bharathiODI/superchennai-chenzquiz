@@ -52,6 +52,8 @@ export default buildConfig({
       views: {
         // Players, attempts and quiz details + Excel export (admins, editors, viewers)
         quizDashboard: { Component: '@/components/admin/QuizDashboard#QuizDashboardView', path: '/quiz-dashboard' },
+        // Many MCQ questions at once from Excel/CSV (Editors and up)
+        importQuestions: { Component: '@/components/admin/ImportQuestions#ImportQuestionsView', path: '/import-questions' },
       },
       graphics: {
         Logo: '@/components/admin/AdminLogo',

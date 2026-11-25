@@ -18,6 +18,7 @@ import { MetaDescriptionComponent as MetaDescriptionComponent_a8a977ebc872c5d5ea
 import { MetaImageComponent as MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { PreviewComponent as PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { SlugComponent as SlugComponent_92cc057d0a2abb4f6cf0307edf59f986 } from '@/fields/slug/SlugComponent'
+import { DuplicateButton as DuplicateButton_b4fe04737dc811563d53aaeb1feb340d } from '@/components/admin/DuplicateButton'
 import { RolePublishButton as RolePublishButton_b6264f3c15546f1c0eaa1fad71467544 } from '@/components/admin/RolePublishButton'
 import { SlotRowLabel as SlotRowLabel_685bbe0c410282e304ddc1f1900b9508 } from '@/components/admin/SlotRowLabel'
 import { PlayerHistory as PlayerHistory_18e7a35b2b98331a4206ebaf71d41619 } from '@/components/admin/PlayerHistory'
@@ -28,6 +29,7 @@ import { BuilderField as BuilderField_b9fc8e28cb12340b4f290bb3066fde93 } from '@
 import { LinkToDoc as LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { ReindexButton as ReindexButton_aead06e4cbf6b2620c5c51c9ab283634 } from '@payloadcms/plugin-search/client'
 import { RowLabel as RowLabel_ec255a65fa6fa8d1faeb09cf35284224 } from '@/Header/RowLabel'
+import { SettingsTabs as SettingsTabs_cf4d2cfc7a4a8d87a8bf98e75dfeed96 } from '@/components/admin/SettingsTabs'
 import { OrderedListFeatureClient as OrderedListFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { UnorderedListFeatureClient as UnorderedListFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { SiteEnvBanner as SiteEnvBanner_6bc324b089251776c0380f59f9549c90 } from '@/components/admin/SiteEnvBanner'
@@ -38,6 +40,7 @@ import { default as default_1a7510af427896d367a49dbf838d2de6 } from '@/component
 import { default as default_8a7ab0eb7ab5c511aba12e68480bfe5e } from '@/components/BeforeLogin'
 import { WpMenu as WpMenu_d0a3c2908a9fd627c66298fbd7c6bd43 } from '@/components/admin/WpMenu'
 import { QuizDashboardView as QuizDashboardView_60417a91ff61a9a8bef31407e43d20e7 } from '@/components/admin/QuizDashboard'
+import { ImportQuestionsView as ImportQuestionsView_286f9bd31e493a1c9968018cf21ff33c } from '@/components/admin/ImportQuestions'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -62,6 +65,7 @@ export const importMap = {
   "@payloadcms/plugin-seo/client#MetaImageComponent": MetaImageComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#PreviewComponent": PreviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@/fields/slug/SlugComponent#SlugComponent": SlugComponent_92cc057d0a2abb4f6cf0307edf59f986,
+  "@/components/admin/DuplicateButton#DuplicateButton": DuplicateButton_b4fe04737dc811563d53aaeb1feb340d,
   "@/components/admin/RolePublishButton#RolePublishButton": RolePublishButton_b6264f3c15546f1c0eaa1fad71467544,
   "@/components/admin/SlotRowLabel#SlotRowLabel": SlotRowLabel_685bbe0c410282e304ddc1f1900b9508,
   "@/components/admin/PlayerHistory#PlayerHistory": PlayerHistory_18e7a35b2b98331a4206ebaf71d41619,
@@ -72,6 +76,7 @@ export const importMap = {
   "@payloadcms/plugin-search/client#LinkToDoc": LinkToDoc_aead06e4cbf6b2620c5c51c9ab283634,
   "@payloadcms/plugin-search/client#ReindexButton": ReindexButton_aead06e4cbf6b2620c5c51c9ab283634,
   "@/Header/RowLabel#RowLabel": RowLabel_ec255a65fa6fa8d1faeb09cf35284224,
+  "@/components/admin/SettingsTabs#SettingsTabs": SettingsTabs_cf4d2cfc7a4a8d87a8bf98e75dfeed96,
   "@payloadcms/richtext-lexical/client#OrderedListFeatureClient": OrderedListFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#UnorderedListFeatureClient": UnorderedListFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@/components/admin/SiteEnvBanner#SiteEnvBanner": SiteEnvBanner_6bc324b089251776c0380f59f9549c90,
@@ -82,5 +87,6 @@ export const importMap = {
   "@/components/BeforeLogin#default": default_8a7ab0eb7ab5c511aba12e68480bfe5e,
   "@/components/admin/WpMenu#WpMenu": WpMenu_d0a3c2908a9fd627c66298fbd7c6bd43,
   "@/components/admin/QuizDashboard#QuizDashboardView": QuizDashboardView_60417a91ff61a9a8bef31407e43d20e7,
+  "@/components/admin/ImportQuestions#ImportQuestionsView": ImportQuestionsView_286f9bd31e493a1c9968018cf21ff33c,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

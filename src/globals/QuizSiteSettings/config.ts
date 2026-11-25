@@ -48,7 +48,8 @@ export const QuizSiteSettings: GlobalConfig = {
   },
   admin: {
     hidden: hiddenUnless(ADMINS),
-    description: 'Text and options for the login, quizzes and leaderboard pages, and the Terms & Conditions pop-up.',
+    description: 'Text and options for the login, quizzes and leaderboard pages, the Terms & Conditions pop-up and test logins.',
+    components: { elements: { beforeDocumentControls: ['@/components/admin/SettingsTabs#SettingsTabs'] } },
   },
   hooks: {
     afterChange: [revalidateQuizPages],

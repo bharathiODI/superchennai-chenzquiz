@@ -27,7 +27,7 @@ import {
 } from '@payloadcms/plugin-seo/fields'
 import { slugField } from 'src/fields/slug'
 import { VideoBlock } from '@/blocks/VideoBlock/config'
-import { WRITERS, createContent, deleteContent, hiddenUnless, updateContent } from '@/access/roles'
+import { createContent, deleteContent, updateContent } from '@/access/roles'
 import { createdByField } from '@/fields/createdBy'
 
 export const Posts: CollectionConfig<'posts'> = {
@@ -61,7 +61,8 @@ export const Posts: CollectionConfig<'posts'> = {
     },
   },
   admin: {
-    hidden: hiddenUnless(WRITERS),
+    // The quiz site has no posts page: hidden in the CMS (data kept)
+    hidden: true,
     components: { edit: { PublishButton: '@/components/admin/RolePublishButton#RolePublishButton' } },
     defaultColumns: ['title', 'slug', 'updatedAt'],
     livePreview: {

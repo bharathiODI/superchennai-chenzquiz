@@ -22,7 +22,8 @@ export const QuizSettings: GlobalConfig = {
   },
   admin: {
     hidden: hiddenUnless(ADMINS),
-    description: 'Player titles, per-game timers, the speed bonus and the shareable scorecard.',
+    description: 'Game day, timers, speed bonus, fair play, player titles and the shareable scorecard.',
+    components: { elements: { beforeDocumentControls: ['@/components/admin/SettingsTabs#SettingsTabs'] } },
   },
   fields: [
     {
@@ -80,7 +81,11 @@ export const QuizSettings: GlobalConfig = {
                       defaultValue: 0,
                       min: 0,
                       max: 23,
-                      admin: { width: '33%', step: 1, description: '0 = midnight, 8 = 8 AM, 20 = 8 PM' },
+                      admin: {
+                        width: '33%',
+                        step: 1,
+                        description: '0 = midnight, 8 = 8 AM, 20 = 8 PM',
+                      },
                     },
                     {
                       name: 'startMinute',
@@ -89,7 +94,11 @@ export const QuizSettings: GlobalConfig = {
                       defaultValue: 30,
                       min: 0,
                       max: 59,
-                      admin: { width: '33%', step: 5, description: 'hour 0 + minute 30 = 12:30 AM' },
+                      admin: {
+                        width: '33%',
+                        step: 5,
+                        description: 'hour 0 + minute 30 = 12:30 AM',
+                      },
                     },
                     {
                       name: 'coolOffMinutes',
@@ -98,7 +107,12 @@ export const QuizSettings: GlobalConfig = {
                       defaultValue: 60,
                       min: 0,
                       max: 720,
-                      admin: { width: '33%', step: 5, description: '60 with a 12:30 AM start = no play 11:30 PM-12:30 AM. 0 = no break.' },
+                      admin: {
+                        width: '33%',
+                        step: 5,
+                        description:
+                          '60 with a 12:30 AM start = no play 11:30 PM-12:30 AM. 0 = no break.',
+                      },
                     },
                   ],
                 },
@@ -163,14 +177,17 @@ export const QuizSettings: GlobalConfig = {
                 },
               ],
             },
+          ],
+        },
+        {
+          label: 'Fair play',
+          description:
+            'Answers are checked and timed on the server. These rules only flag unusual play on the Quiz Dashboard (Flags); an admin decides what to do - there are no automatic bans.',
+          fields: [
             {
               name: 'safety',
               type: 'group',
-              label: 'Fair play',
-              admin: {
-                description:
-                  'Answers are checked and timed on the server. These rules flag unusual play on the dashboard; an admin decides what to do (no automatic bans).',
-              },
+              label: 'Rules',
               fields: [
                 {
                   type: 'row',
@@ -238,7 +255,8 @@ export const QuizSettings: GlobalConfig = {
                       label: 'Logo, top left',
                       admin: {
                         width: '50%',
-                        description: 'Use a colour version that shows on white. Empty: "SUPER CHENNAI" text.',
+                        description:
+                          'Use a colour version that shows on white. Empty: "SUPER CHENNAI" text.',
                       },
                     },
                     {
@@ -246,15 +264,30 @@ export const QuizSettings: GlobalConfig = {
                       type: 'upload',
                       relationTo: 'media',
                       label: 'Logo, top right',
-                      admin: { width: '50%', description: 'Empty: the right-side logo from Header settings.' },
+                      admin: {
+                        width: '50%',
+                        description: 'Empty: the right-side logo from Header settings.',
+                      },
                     },
                   ],
                 },
                 {
                   type: 'row',
                   fields: [
-                    { name: 'headline', type: 'text', label: 'Headline', defaultValue: 'I just played the', admin: { width: '50%' } },
-                    { name: 'highlight', type: 'text', label: 'Highlighted line', defaultValue: 'Super Chennai Quiz!', admin: { width: '50%' } },
+                    {
+                      name: 'headline',
+                      type: 'text',
+                      label: 'Headline',
+                      defaultValue: 'I just played the',
+                      admin: { width: '50%' },
+                    },
+                    {
+                      name: 'highlight',
+                      type: 'text',
+                      label: 'Highlighted line',
+                      defaultValue: 'Super Chennai Quiz!',
+                      admin: { width: '50%' },
+                    },
                   ],
                 },
                 {
@@ -262,7 +295,10 @@ export const QuizSettings: GlobalConfig = {
                   type: 'upload',
                   relationTo: 'media',
                   label: 'Picture at the bottom',
-                  admin: { description: 'Chennai landmarks or similar, wide (about 1800 x 600). Empty: the default skyline.' },
+                  admin: {
+                    description:
+                      'Chennai landmarks or similar, wide (about 1800 x 600). Empty: the default skyline.',
+                  },
                 },
                 {
                   name: 'footerText',

@@ -1,12 +1,14 @@
 import type { CollectionConfig } from 'payload'
-import { ADMINS, allow, hiddenUnless } from '@/access/roles'
+import { ADMINS, allow } from '@/access/roles'
 
 export const UserSubmissions: CollectionConfig = {
   slug: 'user-submissions',
+  disableDuplicate: true, // player data is never copied
   admin: {
     useAsTitle: 'id',
     defaultColumns: ['user', 'quiz', 'score', 'createdAt'],
-    hidden: hiddenUnless(ADMINS),
+    // Nothing in the game writes these any more: hidden in the CMS (data kept)
+    hidden: true,
     components: { beforeListTable: ['@/components/admin/ListExport#ListExport'] },
   },
   // Admin only over the REST API (players are logged in to the same API)

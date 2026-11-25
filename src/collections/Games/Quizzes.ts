@@ -60,6 +60,7 @@ export const Quizzes: CollectionConfig = {
     useAsTitle: 'quizTitle',
     defaultColumns: ['quizTitle', 'slug', 'quizDate', 'status'],
     hidden: hiddenUnless(EDITORS),
+    components: { edit: { beforeDocumentControls: ['@/components/admin/DuplicateButton#DuplicateButton'] } },
   },
   // Question pool and sponsor schedule: editors and up (WordPress roles).
   access: {
@@ -74,6 +75,7 @@ export const Quizzes: CollectionConfig = {
       type: 'text',
       required: true,
       label: 'Quiz Title',
+      hooks: { beforeDuplicate: [({ value }) => (value ? `${value} (copy)` : value)] },
     },
     {
       name: 'slug',
@@ -86,6 +88,7 @@ export const Quizzes: CollectionConfig = {
         description: 'Auto-generated unique URL slug',
       },
       hooks: {
+        beforeDuplicate: [({ value }) => (value ? `${value}-copy-${Date.now().toString(36)}` : value)],
         beforeValidate: [
           ({ value, siblingData }) => {
             if (typeof value === 'string' && value.length > 0) {
@@ -311,6 +314,8 @@ export const Quizzes: CollectionConfig = {
         { label: 'Completed', value: 'completed' },
       ],
       defaultValue: 'draft',
+      // A copy starts as Draft (only one quiz can be live)
+      hooks: { beforeDuplicate: [() => 'draft'] },
       admin: {
         description:
           'Only one quiz can be Scheduled / Active in the same dates. Set the other one to Completed first.',

@@ -5,6 +5,7 @@ import { ADMINS, allow, hiddenUnless } from '@/access/roles'
 // right, and how long it took by the server clock. Written only by the game (overrideAccess).
 export const QuizAnswers: CollectionConfig = {
   slug: 'quiz-answers',
+  disableDuplicate: true, // player data is never copied
   labels: { singular: 'Answer', plural: 'Answers' },
   admin: {
     useAsTitle: 'answer',

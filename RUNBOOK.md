@@ -233,21 +233,23 @@ The CMS guide for the content team is at https://claude.ai/artifact/Aebp3j4RN4ve
 
 | Where | Who | What |
 |---|---|---|
-| CMS > **Quiz Dashboard** | Super Admin, Admin, Editor, Viewer | Players / Attempts / Quiz details with filters; **Export these N rows (Excel)** = exactly the filtered rows, every page |
-| Quiz Dashboard > **Full score report (Excel)** | same | Day-wise scores (score, time, played-at per day), daily ranking, every round |
-| CMS > Players & Scores lists | Super Admin, Admin | **Export filtered rows (Excel)** using the list's own search, Filters and sort |
+| CMS > **Quiz Dashboard** | Super Admin, Admin, Editor, Viewer | Tabs below, with filters that update in place; **Export these N rows (Excel)** = exactly the filtered rows |
+| Quiz Dashboard > **Full score report (Excel)** | same | Day-wise scores (score, time, played-at per day), daily ranking, every play |
+| CMS > Players & Scores lists | Super Admin, Admin | Players, Plays, Answers, Finished plays: **Export filtered rows (Excel)** using the list's own search, filters and sort |
 
-**Quiz Dashboard filters:**
-- **Players tab:**
-  - **Played on:** Today, Yesterday, Last 7 days, Last 30 days, This month, or your own dates.
-  - **Show:** all players, those who played in those days, or those who didn't.
-  - **Joined:** Today, Yesterday, Last 7 days, or your own dates.
-  - **Points** from-to, **days played** at least N, **current streak** at least N, **best streak** at least N.
-  - **Search**, and **sort** by points, streak, best streak, days, last played, newest or name.
-  - When dates are chosen, points, rounds and days count those days only.
-- **Attempts tab:** dates, round, score from-to, search, and sort by latest, score or fastest.
-- **Test players:** "Include test players" adds them (they're left out by default).
-- **The Excel file:** it has a **Filters** sheet listing what was applied and who downloaded it.
+**Quiz Dashboard tabs:**
+- **Players:** played on (Today, Yesterday, Last 7/30 days, This month, your own dates), show who played / didn't, joined dates, points, days played, current and best streak, search, sort. Click a name for the **player detail**: every play, each question, the answer given, right or wrong, points and seconds (answers are stored from 25 Nov 2026).
+- **Plays:** one row per player per day: finished or opened-not-finished, score, correct, time (server clock), Too fast / Linked flags.
+- **Questions:** how often each question was given, answered, % right, time-outs, average time. Sort by hardest or easiest to spot bad questions. Filter by Use in.
+- **Sponsor report:** per game day, the sponsored slot: players who saw it, answered, % right, time-outs, average time. Export it for DRA.
+- **Flags:** Too fast and Linked numbers (other numbers on the same phone). Administrators see **Disqualify / Clear** (takes a player off the leaderboard; nothing is deleted).
+- **Header:** registered players, joined today, played today, opened today but not finished, finished plays, and a **data check** line (green when every player's total equals their finished plays).
+- **Test players:** "Include test players" adds them (left out by default). The Excel file has a **Filters** sheet.
+
+**Questions in the CMS:**
+- **Import Questions** (Quiz menu, Editors and up): download the sample (Excel or CSV), fill one row per question (use_in, question, option_a ... option_f, correct as a letter, topic, explanation, points), **Check file** (row-by-row problems), then **Import** as Published or Drafts. A question already in the quiz is skipped.
+- **Duplicate** (button next to Save/Publish on a question or quiz): the copy is a Draft titled "(copy)"; a question gets the next Question Number; a quiz keeps its Round layout. Players and their data can't be duplicated.
+- **Settings:** the two Quiz settings pages share a tab bar: *Game, scoring & fair play* and *Site pages & logins*.
 
 ---
 

@@ -3,12 +3,14 @@ import type { CollectionConfig } from 'payload'
 
 export const QuizAttempts: CollectionConfig = {
   slug: 'quiz-attempts',
+  labels: { singular: 'Finished play', plural: 'Finished plays' },
+  disableDuplicate: true, // player data is never copied
   admin: {
     useAsTitle: 'id',
     // Search box: player name or phone (searching by record id broke on phone numbers)
     listSearchableFields: ['user.name', 'user.phone'],
     defaultColumns: ['user', 'quiz', 'score', 'correctAnswers', 'timeTaken', 'round', 'completedAt'],
-    description: 'One entry per finished round. Read-only here (written only by the game). Search: player name or phone.',
+    description: 'One summary row per finished play (score, correct answers, time), written together with the play. The leaderboard and reports read it. Read-only here. Search: player name or phone.',
     hidden: hiddenUnless(ADMINS),
     components: { beforeListTable: ['@/components/admin/ListExport#ListExport'] },
   },

@@ -338,9 +338,6 @@ export interface Question {
     image?: (number | null) | Media;
   };
   publishedAt?: string | null;
-  /**
-   * குறைந்த எண் (1, 2, 3) முதலில் தோன்றும்.
-   */
   order?: number | null;
   slug?: string | null;
   slugLock?: boolean | null;
@@ -591,7 +588,7 @@ export interface QuizUser {
   collection: 'quiz-users';
 }
 /**
- * Questions given to each player per game day and round. Read-only here (written only by the game). Search: player name, phone or game day (e.g. 2026-11-23).
+ * One play per player per game day: the questions they got, score, time (server clock) and flags. Read-only here (written only by the game). Search: player name, phone or game day (e.g. 2026-11-23).
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "quiz-rounds".
@@ -684,7 +681,7 @@ export interface QuizAnswer {
   createdAt: string;
 }
 /**
- * One entry per finished round. Read-only here (written only by the game). Search: player name or phone.
+ * One summary row per finished play (score, correct answers, time), written together with the play. The leaderboard and reports read it. Read-only here. Search: player name or phone.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "quiz-attempts".
@@ -6112,7 +6109,7 @@ export interface Footer {
   createdAt?: string | null;
 }
 /**
- * Player titles, per-game timers, the speed bonus and the shareable scorecard.
+ * Game day, timers, speed bonus, fair play, player titles and the shareable scorecard.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "quiz-settings".
@@ -6169,9 +6166,6 @@ export interface QuizSetting {
         }[]
       | null;
   };
-  /**
-   * Answers are checked and timed on the server. These rules flag unusual play on the dashboard; an admin decides what to do (no automatic bans).
-   */
   safety?: {
     speedFloorSeconds?: number | null;
     tooFastRoundSeconds?: number | null;
@@ -6205,7 +6199,7 @@ export interface QuizSetting {
   createdAt?: string | null;
 }
 /**
- * Text and options for the login, quizzes and leaderboard pages, and the Terms & Conditions pop-up.
+ * Text and options for the login, quizzes and leaderboard pages, the Terms & Conditions pop-up and test logins.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "quiz-site-settings".

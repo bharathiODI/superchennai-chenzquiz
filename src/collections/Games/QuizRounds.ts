@@ -5,14 +5,15 @@ import { ADMINS, allow, hiddenUnless } from '@/access/roles'
 // Written only by the quiz APIs (overrideAccess); read-only for admins.
 export const QuizRounds: CollectionConfig = {
   slug: 'quiz-rounds',
-  labels: { singular: 'Quiz Round', plural: 'Quiz Rounds' },
+  labels: { singular: 'Play', plural: 'Plays' },
+  disableDuplicate: true,
   admin: {
     useAsTitle: 'day',
     // Search box: player name, phone or game day (e.g. 2026-11-23)
     listSearchableFields: ['user.name', 'user.phone', 'day'],
     defaultColumns: ['user', 'quiz', 'day', 'status', 'score', 'timeTaken', 'tooFast', 'linked', 'completedAt'],
     hidden: hiddenUnless(ADMINS),
-    description: 'Questions given to each player per game day and round. Read-only here (written only by the game). Search: player name, phone or game day (e.g. 2026-11-23).',
+    description: 'One play per player per game day: the questions they got, score, time (server clock) and flags. Read-only here (written only by the game). Search: player name, phone or game day (e.g. 2026-11-23).',
     components: {
       beforeListTable: ['@/components/admin/SiteStatus#SiteStatus', '@/components/admin/ScoreExport#ScoreExport', '@/components/admin/ListExport#ListExport'],
     },
