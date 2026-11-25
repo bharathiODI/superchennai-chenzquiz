@@ -570,7 +570,7 @@ export async function loadPlayer(payload: Payload, id: number) {
   const lines = (
     await db.query(
       `SELECT r.id AS round_id, r.day, r.status, r.score, r.time_taken, coalesce(r.too_fast, false) AS too_fast,
-              coalesce(r.linked, false) AS linked, r.device_id, r.completed_at, coalesce(z.quiz_title, '') AS quiz,
+              coalesce(r.linked, false) AS linked, r.device_id, r.completed_at, coalesce(z.quiz_title, '') AS quiz, r.slots,
               rel."order" AS pos, qq.id AS question_id, coalesce(qq.question_title, qq.title, '(deleted question)') AS question,
               a.answer, a.correct, a.timed_out, a.points, a.speed_bonus, a.seconds, a.sponsored
          FROM quiz_rounds r

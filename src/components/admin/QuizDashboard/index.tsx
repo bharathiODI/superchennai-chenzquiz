@@ -280,7 +280,27 @@ export async function QuizDashboardView({
                           Q{a.pos}
                           {a.sponsored ? ' ★' : ''}
                         </td>
-                        <td>{a.question}</td>
+                        <td>
+                          {a.question}
+                          {pl.slots?.[a.pos - 1]?.recycled ? (
+                            <span
+                              className="qd-badge qd-badge--warn"
+                              title="This player had seen every question that fits, so one they saw before came back"
+                            >
+                              {' '}
+                              Repeat
+                            </span>
+                          ) : null}
+                          {pl.slots?.[a.pos - 1]?.fallback ? (
+                            <span
+                              className="qd-badge qd-badge--warn"
+                              title="No unseen Sponsored question was left, so a General one was used"
+                            >
+                              {' '}
+                              General in sponsored slot
+                            </span>
+                          ) : null}
+                        </td>
                         <td>
                           {a.answer === null || a.answer === undefined ? (
                             <span className="muted">
