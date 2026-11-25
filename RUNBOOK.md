@@ -18,7 +18,7 @@ More detail: [DEPLOYMENT.md](DEPLOYMENT.md) (deploys, migrations, seed) and [REA
 | Settings file | `/var/www/chenzquiz/shared/.env` | `/var/www/chenzquiz-demo/shared/.env` |
 
 - **Repo:** github.com/bharathiODI/superchennai-chenzquiz. Local copy: `D:\kavi\superchennai\chenzquiz`
-- **Server:** `root@srv820798`. Server scripts are copied to `/root` (`chenzquiz-deploy.sh`, `chenzquiz-site.sh`, `demo-setup.sh`, fix scripts).
+- **Server:** `root@89.116.21.132` (srv820798). Server scripts are copied to `/root` (`chenzquiz-deploy.sh`, `chenzquiz-site.sh`, `demo-setup.sh`, fix scripts).
 - **Deploys are automatic:** a push or merged pull request to `demo` deploys the demo; to `main` deploys live (GitHub > Actions > Deploy).
 - **Release folders:** each deploy is a new folder in `releases/`; `current` points at the live one; the last 3 are kept.
 - **Version check:** `https://<site>/version.json` shows the release that's running.
@@ -115,7 +115,7 @@ pm2 restart chenzquiz-superchennai --update-env # after editing shared/.env
 ### Updating the scripts in /root
 The repo copies are in `scripts/`, and a copy is also kept in `D:\kavi\superchennai\server-conf\`. After a change, copy them to the server:
 ```powershell
-scp D:\kavi\superchennai\server-conf\chenzquiz-site.sh D:\kavi\superchennai\server-conf\chenzquiz-deploy.sh root@<server>:/root/
+scp D:\kavi\superchennai\server-conf\chenzquiz-site.sh D:\kavi\superchennai\server-conf\chenzquiz-deploy.sh root@89.116.21.132:/root/
 ```
 
 ---
