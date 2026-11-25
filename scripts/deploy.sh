@@ -153,6 +153,17 @@ ELECTRON_SKIP_BINARY_DOWNLOAD=1 npm ci --no-audit --no-fund
 # Plain-SQL migrations in /migrations (additive and repeatable). They run before the build so
 # pages that read new tables can be built; the live app is unaffected by new tables or columns.
 if [ -f scripts/db-migrate.mjs ]; then
+  # A full backup first, so a migration can always be undone (the last 5 are kept).
+  log "Backing up the database"
+  DB_URI="$(sed -n 's/^DATABASE_URI=//p' "$SHARED/.env" | tail -1 | tr -d "\"'")"
+  [ -n "$DB_URI" ] || fail "DATABASE_URI not found in $SHARED/.env"
+  BACKUPS="$SHARED/backups"
+  mkdir -p "$BACKUPS" && chmod 700 "$BACKUPS"
+  pg_dump "$DB_URI" --no-owner --no-privileges | gzip > "$BACKUPS/before-$RELEASE.sql.gz"
+  chmod 600 "$BACKUPS/before-$RELEASE.sql.gz"
+  echo "  $BACKUPS/before-$RELEASE.sql.gz ($(du -h "$BACKUPS/before-$RELEASE.sql.gz" | cut -f1))"
+  ls -1t "$BACKUPS"/before-*.sql.gz | tail -n +6 | xargs -r rm -f
+
   log "Applying database migrations"
   node scripts/db-migrate.mjs
 fi

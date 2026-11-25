@@ -1437,3 +1437,20 @@ a.qd-btn:visited,
   min-width: 220px;
   max-width: 360px;
 }
+
+/* ---------- narrower edit sidebar (about 300px, like WordPress) on wide screens ---------- */
+@media (min-width: 1025px) {
+  .template-default .document-fields--has-sidebar:not(.document-fields--force-sidebar-wrap) {
+    --sidebar-gutter-h-left: 20px;
+    --sidebar-gutter-h-right: 20px;
+  }
+  .template-default
+    .document-fields--has-sidebar:not(.document-fields--force-sidebar-wrap)
+    .document-fields__sidebar-wrap {
+    width: var(--sidebar-wrap-width, 300px);
+    min-width: var(--sidebar-wrap-min-width, 300px);
+  }
+  .template-default .document-fields--has-sidebar:not(.document-fields--force-sidebar-wrap) .document-fields__main {
+    min-width: 0;
+  }
+}

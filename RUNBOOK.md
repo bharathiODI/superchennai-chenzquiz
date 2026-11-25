@@ -122,6 +122,7 @@ scp D:\kavi\superchennai\server-conf\chenzquiz-site.sh D:\kavi\superchennai\serv
 
 ## 5. Database and migrations
 
+- **Every deploy backs up the database first:** `shared/backups/before-<release>.sql.gz` (the last 5 are kept). Restore one with `gunzip -c <file> | psql "$DATABASE_URI"` on an emptied database.
 - **The app never changes tables by itself.** Every deploy runs `npm run db:migrate` (`scripts/db-migrate.mjs`), which applies the new files in `migrations/` in order and records them in the `app_migrations` table. It's safe to run again; it skips what's already done.
 - **Do NOT use `npx payload migrate`.** It stops to ask yes/no on databases that were set up in dev mode.
 
@@ -132,6 +133,8 @@ scp D:\kavi\superchennai\server-conf\chenzquiz-site.sh D:\kavi\superchennai\serv
 | 008 | Game day window (start time + break) |
 | 009 | Game day starts **12:30 AM** (minutes field); T&C text 8:00 AM -> 12:30 AM |
 | 010-011 | WordPress roles (Super Admin ... Viewer); admins -> Super Admin, old "client" -> Viewer; "Created by" on questions and posts |
+| 012 | Lean setup, new columns and tables only: Use in, Round layout, answers, play fields, Disqualified, fair-play settings |
+| 013 | Lean setup, data: questions in the sponsored schedule -> Sponsored; pool questions -> that quiz; published questions in no pool and no schedule -> Not in play; Round layout from the old settings. Nothing is deleted |
 
 **On any machine** (it uses `DATABASE_URI` from that machine's `.env`):
 ```bash
