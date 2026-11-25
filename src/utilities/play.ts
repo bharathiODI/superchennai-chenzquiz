@@ -26,22 +26,34 @@ export const GRACE_SECONDS = 2
 
 export type SlotSnapshot = Slot & { fallback?: boolean; recycled?: boolean }
 
-export const relId = (v: any): Id | null => (v && typeof v === 'object' ? (v.id ?? null) : (v ?? null))
+export const relId = (v: any): Id | null =>
+  v && typeof v === 'object' ? (v.id ?? null) : (v ?? null)
 export const toId = (v: any): Id => (/^\d+$/.test(String(v)) ? Number(v) : v)
 const same = (a: any, b: any) => String(relId(a)) === String(relId(b))
 
-const sql = (payload: Payload) => (payload.db as any).pool as { query: (q: string, p?: any[]) => Promise<{ rows: any[]; rowCount: number }> }
+const sql = (payload: Payload) =>
+  (payload.db as any).pool as {
+    query: (q: string, p?: any[]) => Promise<{ rows: any[]; rowCount: number }>
+  }
 
 /* ------------------------------------------------------------------ question shape for the browser */
 
 const hash = (s: string) => createHash('sha1').update(s).digest('hex')
 
 /** The question as the browser gets it: no correct answer, no explanation, options shuffled per player (setting). */
-export function clientQuestion(q: any, timeLimit: number, slot: SlotSnapshot, roundId: Id, shuffleOptions = true) {
+export function clientQuestion(
+  q: any,
+  timeLimit: number,
+  slot: SlotSnapshot,
+  roundId: Id,
+  shuffleOptions = true,
+) {
   const order = (list: any[]) =>
     shuffleOptions
       ? [...list].sort((a: any, b: any) =>
-          hash(`${roundId}:${q.id}:${a.id ?? a.optionText}`).localeCompare(hash(`${roundId}:${q.id}:${b.id ?? b.optionText}`)),
+          hash(`${roundId}:${q.id}:${a.id ?? a.optionText}`).localeCompare(
+            hash(`${roundId}:${q.id}:${b.id ?? b.optionText}`),
+          ),
         )
       : list
   const f: any = formatQuestion(q, timeLimit, slot.source === 'sponsored')
@@ -52,7 +64,9 @@ export function clientQuestion(q: any, timeLimit: number, slot: SlotSnapshot, ro
   }
   if (f.dropdownGroup) {
     delete f.dropdownGroup.correctAnswer
-    f.dropdownGroup.options = order((f.dropdownGroup.options || []).map((o: any) => ({ id: o.id, optionText: o.optionText })))
+    f.dropdownGroup.options = order(
+      (f.dropdownGroup.options || []).map((o: any) => ({ id: o.id, optionText: o.optionText })),
+    )
   }
   f.timeLimit = timeLimit
   f.slot = {
@@ -75,9 +89,18 @@ export const SERVER_CHECKED = new Set(['mcq', 'dropdown'])
 
 /* ------------------------------------------------------------------ answer checking */
 
-export type AnswerInput = { optionId?: string; value?: string; correct?: boolean; detail?: string; timeout?: boolean }
+export type AnswerInput = {
+  optionId?: string
+  value?: string
+  correct?: boolean
+  detail?: string
+  timeout?: boolean
+}
 
-function checkAnswer(q: any, answer: AnswerInput): { correct: boolean; text: string; reveal: Record<string, unknown> } {
+function checkAnswer(
+  q: any,
+  answer: AnswerInput,
+): { correct: boolean; text: string; reveal: Record<string, unknown> } {
   if (q.gameType === 'mcq') {
     const options = (q.mcqGroup?.options || []) as any[]
     const right = options[Number(q.mcqGroup?.correctOptionIndex)]
@@ -94,13 +117,19 @@ function checkAnswer(q: any, answer: AnswerInput): { correct: boolean; text: str
     const rightText =
       q.dropdownGroup?.correctAnswer || options.find((o: any) => o.isCorrect)?.optionText || ''
     return {
-      correct: Boolean(value) && (value === rightText || Boolean(options.find((o) => o.optionText === value)?.isCorrect)),
+      correct:
+        Boolean(value) &&
+        (value === rightText || Boolean(options.find((o) => o.optionText === value)?.isCorrect)),
       text: value,
       reveal: { correctAnswer: rightText },
     }
   }
   // Other game types need the answer in the browser to be playable; the browser reports the result.
-  return { correct: answer.correct === true, text: String(answer.detail ?? '').slice(0, 500), reveal: {} }
+  return {
+    correct: answer.correct === true,
+    text: String(answer.detail ?? '').slice(0, 500),
+    reveal: {},
+  }
 }
 
 /* ------------------------------------------------------------------ helpers */
@@ -122,19 +151,24 @@ const QUIZ_FIELDS = {
 
 function slotsOf(round: any, quiz: any): SlotSnapshot[] {
   const ids = ((round.questions || []) as any[]).map(relId)
-  if (Array.isArray(round.slots) && round.slots.length === ids.length) return round.slots as SlotSnapshot[]
+  if (Array.isArray(round.slots) && round.slots.length === ids.length)
+    return round.slots as SlotSnapshot[]
   // Rounds created before the Round layout: General everywhere except the sponsored question.
   const layout = quizSlots(quiz)
   return ids.map((id, i) => {
     const base = layout[i] ?? layout[layout.length - 1]
-    return { ...base, source: same(id, round.sponsoredQuestion) ? 'sponsored' : 'general' } as SlotSnapshot
+    return {
+      ...base,
+      source: same(id, round.sponsoredQuestion) ? 'sponsored' : 'general',
+    } as SlotSnapshot
   })
 }
 
 const extraFor = (slot: SlotSnapshot | undefined) => Number(slot?.extraSeconds) || 0
 
 /** The slot of a question (a round always has one per question; a safe default otherwise). */
-const slotAt = (slots: SlotSnapshot[], i: number): SlotSnapshot => slots[i] ?? slots[slots.length - 1] ?? normalizeSlot({})
+const slotAt = (slots: SlotSnapshot[], i: number): SlotSnapshot =>
+  slots[i] ?? slots[slots.length - 1] ?? normalizeSlot({})
 
 async function questionDocs(payload: Payload, ids: Id[]) {
   if (!ids.length) return new Map<string, any>()
@@ -149,7 +183,7 @@ async function questionDocs(payload: Payload, ids: Id[]) {
 }
 
 /** Pick one random element. */
-const pick = <T,>(list: T[]): T => list[randomInt(list.length)]!
+const pick = <T>(list: T[]): T => list[randomInt(list.length)]!
 
 /* ------------------------------------------------------------------ picking a new play */
 
@@ -179,7 +213,10 @@ async function createPlay(
     overrideAccess: true,
     select: { useIn: true },
   } as any)
-  const all = (bank.docs as any[]).map((d) => ({ id: d.id as Id, useIn: (d.useIn || 'general') as string }))
+  const all = (bank.docs as any[]).map((d) => ({
+    id: d.id as Id,
+    useIn: (d.useIn || 'general') as string,
+  }))
 
   // Everything this player has ever been given (any quiz), with the last day they got it
   const seenRows = (
@@ -193,7 +230,9 @@ async function createPlay(
   const lastSeen = new Map(seenRows.map((r: any) => [String(r.qid), String(r.last_day)]))
 
   const fits = (useIn: string, source: string) =>
-    source === 'sponsored' ? useIn === 'sponsored' || useIn === 'both' : useIn === 'general' || useIn === 'both'
+    source === 'sponsored'
+      ? useIn === 'sponsored' || useIn === 'both'
+      : useIn === 'general' || useIn === 'both'
 
   const chosen: Id[] = []
   const snapshots: SlotSnapshot[] = []
@@ -208,7 +247,9 @@ async function createPlay(
     if (unseen.length) choice = pick(unseen).id
     else if (slot.source === 'sponsored') {
       // No unseen sponsored question left: an unseen General one, badge kept
-      const general = free(all.filter((q) => fits(q.useIn, 'general') && !lastSeen.has(String(q.id))))
+      const general = free(
+        all.filter((q) => fits(q.useIn, 'general') && !lastSeen.has(String(q.id))),
+      )
       if (general.length) {
         choice = pick(general).id
         fallback = true
@@ -229,7 +270,11 @@ async function createPlay(
     }
     if (choice === null) continue
     chosen.push(choice)
-    snapshots.push({ ...slot, ...(fallback ? { fallback: true } : {}), ...(reused ? { recycled: true } : {}) })
+    snapshots.push({
+      ...slot,
+      ...(fallback ? { fallback: true } : {}),
+      ...(reused ? { recycled: true } : {}),
+    })
   }
   if (!chosen.length) return null
 
@@ -258,7 +303,14 @@ async function createPlay(
     // The same play created by a parallel request (unique index) - use that one.
     const again = await payload.find({
       collection: 'quiz-rounds' as any,
-      where: { and: [{ user: { equals: userId } }, { quiz: { equals: quiz.id } }, { day: { equals: day } }, { round: { equals: roundNo } }] },
+      where: {
+        and: [
+          { user: { equals: userId } },
+          { quiz: { equals: quiz.id } },
+          { day: { equals: day } },
+          { round: { equals: roundNo } },
+        ],
+      },
       depth: 0,
       limit: 1,
       overrideAccess: true,
@@ -285,7 +337,13 @@ async function createPlay(
 
 /* ------------------------------------------------------------------ recording answers */
 
-type Recorded = { correct: boolean; timedOut: boolean; points: number; speedBonus: number; seconds: number }
+type Recorded = {
+  correct: boolean
+  timedOut: boolean
+  points: number
+  speedBonus: number
+  seconds: number
+}
 
 async function recordAnswer(
   payload: Payload,
@@ -339,7 +397,10 @@ async function finalizePlay(payload: Payload, round: any, now: Date, tooFastRoun
   ).rows[0]
   const score = Math.round(Number(totals.score) || 0)
   const timeTaken = Math.round(Number(totals.all_secs) || 0)
-  const tooFast = Number(totals.in_time) > 0 && tooFastRoundSeconds > 0 && Number(totals.secs) < tooFastRoundSeconds
+  const tooFast =
+    Number(totals.in_time) > 0 &&
+    tooFastRoundSeconds > 0 &&
+    Number(totals.secs) < tooFastRoundSeconds
   const claimed = await sql(payload).query(
     `UPDATE quiz_rounds SET status = 'completed', score = $2, completed_at = $3, time_taken = $4, correct_answers = $5,
             too_fast = $6, served_at = NULL, updated_at = now()
@@ -376,7 +437,14 @@ function timeoutRecord(): Recorded {
 }
 
 /** Records time-outs for every question left and closes the play (a play left open on an earlier day). */
-async function closeStalePlay(payload: Payload, round: any, quiz: any, now: Date, tooFastRoundSeconds: number, timers: any) {
+async function closeStalePlay(
+  payload: Payload,
+  round: any,
+  quiz: any,
+  now: Date,
+  tooFastRoundSeconds: number,
+  timers: any,
+) {
   const ids = ((round.questions || []) as any[]).map(relId).filter((x) => x !== null) as Id[]
   const slots = slotsOf(round, quiz)
   const docs = await questionDocs(payload, ids)
@@ -386,7 +454,12 @@ async function closeStalePlay(payload: Payload, round: any, quiz: any, now: Date
     const limit = (timers[q.gameType] || 20) + extraFor(slotAt(slots, p))
     const r = timeoutRecord()
     r.seconds = limit
-    await recordAnswer(payload, { ...round, position: p }, p, q, slotAt(slots, p), { ...r, text: '', servedAt: null, answeredAt: now })
+    await recordAnswer(payload, { ...round, position: p }, p, q, slotAt(slots, p), {
+      ...r,
+      text: '',
+      servedAt: null,
+      answeredAt: now,
+    })
   }
   await finalizePlay(payload, round, now, tooFastRoundSeconds)
 }
@@ -394,10 +467,17 @@ async function closeStalePlay(payload: Payload, round: any, quiz: any, now: Date
 /* ------------------------------------------------------------------ the state the browser asks for */
 
 export type PlayState =
-  | { state: 'not_started' | 'closed' }
+  | { state: 'not_started'; startsAt: string | null }
+  | { state: 'closed'; endsAt: string | null }
   | { state: 'cooloff'; opensAt: string }
   | { state: 'empty'; opensAt: string }
-  | { state: 'done'; todayScore: number; opensAt: string; otherQuiz?: string | null; answers: AnsweredSummary[] }
+  | {
+      state: 'done'
+      todayScore: number
+      opensAt: string
+      otherQuiz?: string | null
+      answers: AnsweredSummary[]
+    }
   | {
       state: 'playing'
       roundId: Id
@@ -411,7 +491,12 @@ export type PlayState =
       scoring: ScoringSettings
     }
 
-export type AnsweredSummary = { position: number; correct: boolean; timedOut: boolean; points: number }
+export type AnsweredSummary = {
+  position: number
+  correct: boolean
+  timedOut: boolean
+  points: number
+}
 
 async function answeredSummary(payload: Payload, roundId: Id): Promise<AnsweredSummary[]> {
   const rows = (
@@ -420,20 +505,32 @@ async function answeredSummary(payload: Payload, roundId: Id): Promise<AnsweredS
       [roundId],
     )
   ).rows
-  return rows.map((r: any) => ({ position: r.position, correct: r.correct, timedOut: r.timed_out, points: r.points }))
+  return rows.map((r: any) => ({
+    position: r.position,
+    correct: r.correct,
+    timedOut: r.timed_out,
+    points: r.points,
+  }))
 }
 
 /**
  * The player's play for today: creates it on the first call, sends the current question (starting
  * its timer), and records a time-out for a question whose time ran out while the page was closed.
  */
-export async function getPlay(payload: Payload, quizIdRaw: Id, userIdRaw: Id, ctx: PlayCtx): Promise<PlayState> {
+export async function getPlay(
+  payload: Payload,
+  quizIdRaw: Id,
+  userIdRaw: Id,
+  ctx: PlayCtx,
+): Promise<PlayState> {
   const quizId = toId(quizIdRaw)
   const userId = toId(userIdRaw)
   const now = ctx.now
   const quiz: any = await payload.findByID({ collection: 'quizzes', id: quizId, ...QUIZ_FIELDS })
-  if (quiz.quizDate && now < new Date(quiz.quizDate)) return { state: 'not_started' }
-  if (quiz.quizEndDate && now > new Date(quiz.quizEndDate)) return { state: 'closed' }
+  if (quiz.quizDate && now < new Date(quiz.quizDate))
+    return { state: 'not_started', startsAt: new Date(quiz.quizDate).toISOString() }
+  if (quiz.quizEndDate && now > new Date(quiz.quizEndDate))
+    return { state: 'closed', endsAt: new Date(quiz.quizEndDate).toISOString() }
 
   const settings = await getGameSettings(payload)
   const opensAt = formatStartHour(settings.gameDay)
@@ -451,18 +548,42 @@ export async function getPlay(payload: Payload, quizIdRaw: Id, userIdRaw: Id, ct
   ).docs as any[]
 
   // A play left open on an earlier day: close it, so the answers it has count
-  for (const old of mine.filter((r) => r.status !== 'completed' && r.day < day && (Number(r.position) || 0) > 0)) {
-    const oldQuiz = same(old.quiz, quizId) ? quiz : await payload.findByID({ collection: 'quizzes', id: relId(old.quiz)!, ...QUIZ_FIELDS }).catch(() => quiz)
-    await closeStalePlay(payload, old, oldQuiz, now, settings.safety.tooFastRoundSeconds, settings.timers)
+  for (const old of mine.filter(
+    (r) => r.status !== 'completed' && r.day < day && (Number(r.position) || 0) > 0,
+  )) {
+    const oldQuiz = same(old.quiz, quizId)
+      ? quiz
+      : await payload
+          .findByID({ collection: 'quizzes', id: relId(old.quiz)!, ...QUIZ_FIELDS })
+          .catch(() => quiz)
+    await closeStalePlay(
+      payload,
+      old,
+      oldQuiz,
+      now,
+      settings.safety.tooFastRoundSeconds,
+      settings.timers,
+    )
   }
 
   const today = mine.filter((r) => r.day === day)
   const elsewhere = today.find((r) => !same(r.quiz, quizId))
   if (elsewhere) {
     const other: any = await payload
-      .findByID({ collection: 'quizzes', id: relId(elsewhere.quiz)!, depth: 0, overrideAccess: true })
+      .findByID({
+        collection: 'quizzes',
+        id: relId(elsewhere.quiz)!,
+        depth: 0,
+        overrideAccess: true,
+      })
       .catch(() => null)
-    return { state: 'done', todayScore: Number(elsewhere.score) || 0, opensAt, otherQuiz: other?.quizTitle ?? null, answers: [] }
+    return {
+      state: 'done',
+      todayScore: Number(elsewhere.score) || 0,
+      opensAt,
+      otherQuiz: other?.quizTitle ?? null,
+      answers: [],
+    }
   }
   const here = today.filter((r) => same(r.quiz, quizId)).sort((a, b) => a.round - b.round)
   let current = here.find((r) => r.status !== 'completed')
@@ -477,7 +598,15 @@ export async function getPlay(payload: Payload, quizIdRaw: Id, userIdRaw: Id, ct
   }
   if (!current) {
     if (isCoolOff(now, settings.gameDay)) return { state: 'cooloff', opensAt }
-    current = await createPlay(payload, quiz, userId, day, here.length + 1, ctx, settings.safety.linkedWindowMinutes)
+    current = await createPlay(
+      payload,
+      quiz,
+      userId,
+      day,
+      here.length + 1,
+      ctx,
+      settings.safety.linkedWindowMinutes,
+    )
     if (!current) return { state: 'empty', opensAt }
   }
 
@@ -501,7 +630,13 @@ export async function getPlay(payload: Payload, quizIdRaw: Id, userIdRaw: Id, ct
       continue
     }
     if (servedAt && now.getTime() - servedAt.getTime() > (limit + GRACE_SECONDS) * 1000) {
-      await recordAnswer(payload, current, position, q, slotAt(slots, position), { ...timeoutRecord(), seconds: limit, text: '', servedAt, answeredAt: now })
+      await recordAnswer(payload, current, position, q, slotAt(slots, position), {
+        ...timeoutRecord(),
+        seconds: limit,
+        text: '',
+        servedAt,
+        answeredAt: now,
+      })
       position++
       servedAt = null
       continue
@@ -511,8 +646,18 @@ export async function getPlay(payload: Payload, quizIdRaw: Id, userIdRaw: Id, ct
 
   if (position >= ids.length) {
     await finalizePlay(payload, current, now, settings.safety.tooFastRoundSeconds)
-    const fresh: any = await payload.findByID({ collection: 'quiz-rounds' as any, id: current.id, depth: 0, overrideAccess: true })
-    return { state: 'done', todayScore: Number(fresh.score) || 0, opensAt, answers: await answeredSummary(payload, current.id) }
+    const fresh: any = await payload.findByID({
+      collection: 'quiz-rounds' as any,
+      id: current.id,
+      depth: 0,
+      overrideAccess: true,
+    })
+    return {
+      state: 'done',
+      todayScore: Number(fresh.score) || 0,
+      opensAt,
+      answers: await answeredSummary(payload, current.id),
+    }
   }
 
   const q = docs.get(String(ids[position]))
@@ -524,7 +669,9 @@ export async function getPlay(payload: Payload, quizIdRaw: Id, userIdRaw: Id, ct
       [current.id, position, now.toISOString()],
     )
     if (!set.rowCount) {
-      const r = await sql(payload).query('SELECT served_at FROM quiz_rounds WHERE id = $1', [current.id])
+      const r = await sql(payload).query('SELECT served_at FROM quiz_rounds WHERE id = $1', [
+        current.id,
+      ])
       if (r.rows[0]?.served_at) servedAt = new Date(r.rows[0].served_at)
     }
   }
@@ -535,7 +682,13 @@ export async function getPlay(payload: Payload, quizIdRaw: Id, userIdRaw: Id, ct
     roundId: current.id,
     position,
     total: ids.length,
-    question: clientQuestion(q, timeLimit, slotAt(slots, position), current.id, settings.safety.shuffleOptions),
+    question: clientQuestion(
+      q,
+      timeLimit,
+      slotAt(slots, position),
+      current.id,
+      settings.safety.shuffleOptions,
+    ),
     timeLimit,
     secondsLeft: Math.max(0, Math.round((timeLimit - elapsed) * 10) / 10),
     answers,
@@ -569,15 +722,31 @@ export async function answerQuestion(
 ): Promise<AnswerResult> {
   const now = ctx.now
   const round: any = await payload
-    .findByID({ collection: 'quiz-rounds' as any, id: toId(args.roundId), depth: 0, overrideAccess: true })
+    .findByID({
+      collection: 'quiz-rounds' as any,
+      id: toId(args.roundId),
+      depth: 0,
+      overrideAccess: true,
+    })
     .catch(() => null)
-  if (!round || !same(round.user, args.userId)) return { ok: false, status: 404, error: 'Play not found.' }
-  if (round.status === 'completed') return { ok: false, status: 409, error: 'This play is already finished.' }
+  if (!round || !same(round.user, args.userId))
+    return { ok: false, status: 404, error: 'Play not found.' }
+  if (round.status === 'completed')
+    return { ok: false, status: 409, error: 'This play is already finished.' }
   const position = Number(round.position) || 0
-  if (Number(args.position) !== position) return { ok: false, status: 409, error: 'That question was already answered. Reload to continue.' }
+  if (Number(args.position) !== position)
+    return {
+      ok: false,
+      status: 409,
+      error: 'That question was already answered. Reload to continue.',
+    }
   if (!round.servedAt) return { ok: false, status: 409, error: 'Reload to get the question.' }
 
-  const quiz: any = await payload.findByID({ collection: 'quizzes', id: relId(round.quiz)!, ...QUIZ_FIELDS })
+  const quiz: any = await payload.findByID({
+    collection: 'quizzes',
+    id: relId(round.quiz)!,
+    ...QUIZ_FIELDS,
+  })
   const settings = await getGameSettings(payload)
   const ids = ((round.questions || []) as any[]).map(relId).filter((x) => x !== null) as Id[]
   const slots = slotsOf(round, quiz)
@@ -609,7 +778,10 @@ export async function answerQuestion(
   let bonus = 0
   if (correct) {
     if (slot.points === 'fixed') {
-      points = slot.fixedPoints !== null && slot.fixedPoints !== undefined ? Number(slot.fixedPoints) : Number(q.points) || 10
+      points =
+        slot.fixedPoints !== null && slot.fixedPoints !== undefined
+          ? Number(slot.fixedPoints)
+          : Number(q.points) || 10
     } else {
       const tooQuick = seconds < settings.safety.speedFloorSeconds
       const scored = questionScore({
@@ -638,14 +810,29 @@ export async function answerQuestion(
     servedAt,
     answeredAt: now,
   })
-  if (rec.duplicate) return { ok: false, status: 409, error: 'That question was already answered. Reload to continue.' }
+  if (rec.duplicate)
+    return {
+      ok: false,
+      status: 409,
+      error: 'That question was already answered. Reload to continue.',
+    }
 
   const finished = position + 1 >= ids.length
   let result: { todayScore: number; totalXP: number; title: any } | undefined
   if (finished) {
     const closed = await finalizePlay(payload, round, now, settings.safety.tooFastRoundSeconds)
-    const fresh: any = await payload.findByID({ collection: 'quiz-rounds' as any, id: round.id, depth: 0, overrideAccess: true })
-    const user: any = await payload.findByID({ collection: 'quiz-users', id: relId(round.user)!, depth: 0, overrideAccess: true })
+    const fresh: any = await payload.findByID({
+      collection: 'quiz-rounds' as any,
+      id: round.id,
+      depth: 0,
+      overrideAccess: true,
+    })
+    const user: any = await payload.findByID({
+      collection: 'quiz-users',
+      id: relId(round.user)!,
+      depth: 0,
+      overrideAccess: true,
+    })
     const totalXP = closed?.totalXP ?? (Number(user?.totalXP) || 0)
     const t = getTitleForXP(totalXP, await getQuizTitles(payload))
     result = {

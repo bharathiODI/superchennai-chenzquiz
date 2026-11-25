@@ -8,7 +8,16 @@ type Status = {
   nowIndia: string
   gameDay: string | null
   dayNumber: number | null
-  quiz: { title: string } | null
+  quiz: {
+    title: string
+    health?: {
+      endsAtIndia: string | null
+      closed: boolean
+      general: number
+      sponsored: number
+      warnings: string[]
+    }
+  } | null
   testPlayers: string[]
   error?: string
 }
@@ -70,7 +79,10 @@ export function DemoToolsPanel() {
 
   if (!status?.enabled) return null
   const moved = status.offsetMs !== 0
-  const btn = 'px-2.5 py-1.5 rounded-lg bg-slate-800 text-white text-xs font-bold disabled:opacity-50'
+  const health = status.quiz?.health
+  const quizTitle = String(status.quiz?.title || 'The quiz').trim()
+  const btn =
+    'px-2.5 py-1.5 rounded-lg bg-slate-800 text-white text-xs font-bold disabled:opacity-50'
   const input = 'px-2 py-1.5 rounded-lg border border-slate-300 text-xs w-full'
 
   return (
@@ -79,11 +91,22 @@ export function DemoToolsPanel() {
         <div className="fixed top-0 inset-x-0 z-[2147483001] bg-yellow-300 text-slate-900 text-center text-xs font-bold py-1 shadow">
           DEMO CLOCK: {status.nowIndia} (India) · game day {status.gameDay}
           {status.dayNumber ? ` · day ${status.dayNumber}` : ''}
+          {health?.closed ? (
+            <span className="text-red-700">
+              {' '}
+              · {quizTitle} has ended (End date {health.endsAtIndia}): change it in the CMS or go
+              Back to today
+            </span>
+          ) : null}
         </div>
       )}
       <div className="fixed right-3 bottom-28 md:bottom-3 z-[2147483001] text-left">
         {!open ? (
-          <button type="button" onClick={() => setOpen(true)} className="px-3 py-2 rounded-full bg-yellow-300 text-slate-900 text-xs font-black shadow-lg">
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="px-3 py-2 rounded-full bg-yellow-300 text-slate-900 text-xs font-black shadow-lg"
+          >
             Demo tools
           </button>
         ) : (
@@ -96,35 +119,90 @@ export function DemoToolsPanel() {
             </div>
             <p className="text-[11px] text-slate-500">
               Now: {status.nowIndia} · game day {status.gameDay}
-              {status.dayNumber ? ` (day ${status.dayNumber} of ${status.quiz?.title})` : ''}
+              {status.dayNumber ? ` (day ${status.dayNumber} of ${quizTitle})` : ''}
             </p>
+            {health && (
+              <p className="text-[11px] text-slate-500">
+                {quizTitle} {health.closed ? 'ended' : 'open until'}{' '}
+                {health.endsAtIndia ?? '(no end date)'} · in play: {health.general} General,{' '}
+                {health.sponsored} Sponsored
+              </p>
+            )}
+            {health?.warnings?.length ? (
+              <ul className="text-[11px] text-red-700 bg-red-50 border border-red-200 rounded-lg p-2 space-y-1 list-disc pl-5">
+                {health.warnings.map((w) => (
+                  <li key={w}>{w}</li>
+                ))}
+              </ul>
+            ) : null}
             <label className="block text-[11px] font-bold">
               Demo key
-              <input className={input} type="password" value={key} onChange={(e) => setKey(e.target.value)} placeholder="DEMO_TOOLS_KEY" />
+              <input
+                className={input}
+                type="password"
+                value={key}
+                onChange={(e) => setKey(e.target.value)}
+                placeholder="DEMO_TOOLS_KEY"
+              />
             </label>
 
             <div className="space-y-1.5">
               <div className="text-[11px] font-bold uppercase text-slate-500">Test clock</div>
               <div className="flex gap-1.5 flex-wrap">
-                <button type="button" disabled={busy} className={btn} onClick={() => call('clock', { op: 'prev' }, true)}>
+                <button
+                  type="button"
+                  disabled={busy}
+                  className={btn}
+                  onClick={() => call('clock', { op: 'prev' }, true)}
+                >
                   ← Day
                 </button>
-                <button type="button" disabled={busy} className={btn} onClick={() => call('clock', { op: 'next' }, true)}>
+                <button
+                  type="button"
+                  disabled={busy}
+                  className={btn}
+                  onClick={() => call('clock', { op: 'next' }, true)}
+                >
                   Next day →
                 </button>
-                <button type="button" disabled={busy} className={btn} onClick={() => call('clock', { op: 'today' }, true)}>
+                <button
+                  type="button"
+                  disabled={busy}
+                  className={btn}
+                  onClick={() => call('clock', { op: 'today' }, true)}
+                >
                   Back to today
                 </button>
               </div>
               <div className="flex gap-1.5">
-                <input className={input} placeholder="Day N" value={day} onChange={(e) => setDay(e.target.value)} />
-                <button type="button" disabled={busy || !day} className={btn} onClick={() => call('clock', { op: 'day', value: day }, true)}>
+                <input
+                  className={input}
+                  placeholder="Day N"
+                  value={day}
+                  onChange={(e) => setDay(e.target.value)}
+                />
+                <button
+                  type="button"
+                  disabled={busy || !day}
+                  className={btn}
+                  onClick={() => call('clock', { op: 'day', value: day }, true)}
+                >
                   Jump
                 </button>
               </div>
               <div className="flex gap-1.5">
-                <input className={input} placeholder="HH:MM" value={time} onChange={(e) => setTime(e.target.value)} />
-                <button type="button" disabled={busy} className={btn} onClick={() => call('clock', { op: 'time', value: time }, true)}>
+                <input
+                  className={input}
+                  placeholder="HH:MM"
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                />
+                <button
+                  type="button"
+                  disabled={busy}
+                  className={btn}
+                  onClick={() => call('clock', { op: 'time', value: time }, true)}
+                >
                   Set time
                 </button>
               </div>
@@ -156,17 +234,33 @@ export function DemoToolsPanel() {
                 >
                   Log in as
                 </button>
-                <button type="button" disabled={busy || !phone} className={btn} onClick={async () => (await call('reset-player', { phone })) && setMsg('Player reset')}>
+                <button
+                  type="button"
+                  disabled={busy || !phone}
+                  className={btn}
+                  onClick={async () =>
+                    (await call('reset-player', { phone })) && setMsg('Player reset')
+                  }
+                >
                   Reset player
                 </button>
-                <button type="button" disabled={busy} className={btn} onClick={async () => (await call('reset-test-players')) && setMsg('All test players reset')}>
+                <button
+                  type="button"
+                  disabled={busy}
+                  className={btn}
+                  onClick={async () =>
+                    (await call('reset-test-players')) && setMsg('All test players reset')
+                  }
+                >
                   Reset all 10
                 </button>
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <div className="text-[11px] font-bold uppercase text-slate-500">Simulated players</div>
+              <div className="text-[11px] font-bold uppercase text-slate-500">
+                Simulated players
+              </div>
               <div className="flex gap-1.5">
                 <input className={input} value={count} onChange={(e) => setCount(e.target.value)} />
                 <button
@@ -175,21 +269,30 @@ export function DemoToolsPanel() {
                   className={btn}
                   onClick={async () => {
                     const d = await call('simulate', { count: Number(count) })
-                    if (d) setMsg(`${d.played} played today, ${d.alreadyPlayed} had already played (${d.seconds}s)`)
+                    if (d)
+                      setMsg(
+                        `${d.played} played today, ${d.alreadyPlayed} had already played (${d.seconds}s)`,
+                      )
                   }}
                 >
                   Play today
                 </button>
               </div>
-              <button type="button" disabled={busy} className={btn} onClick={async () => {
-                const d = await call('remove-sim')
-                if (d) setMsg(`${d.removed} simulated players removed`)
-              }}>
+              <button
+                type="button"
+                disabled={busy}
+                className={btn}
+                onClick={async () => {
+                  const d = await call('remove-sim')
+                  if (d) setMsg(`${d.removed} simulated players removed`)
+                }}
+              >
                 Remove simulated players
               </button>
             </div>
             <p className="text-[11px] text-slate-500">
-              Full reset from live data: on the server, <code>bash chenzquiz-site.sh demo-db copy-live</code>.
+              Full reset from live data: on the server,{' '}
+              <code>bash chenzquiz-site.sh demo-db copy-live</code>.
             </p>
             {msg && <p className="text-xs font-semibold text-indigo-700">{msg}</p>}
           </div>

@@ -66,17 +66,43 @@ function deviceId(): string {
 
 const celebrate = () => {
   confetti({ particleCount: 100, spread: 80, startVelocity: 45, origin: { x: 0.5, y: 0.65 } })
-  setTimeout(() => confetti({ particleCount: 80, angle: 60, spread: 70, startVelocity: 50, origin: { x: 0, y: 0.65 } }), 200)
-  setTimeout(() => confetti({ particleCount: 80, angle: 120, spread: 70, startVelocity: 50, origin: { x: 1, y: 0.65 } }), 400)
+  setTimeout(
+    () =>
+      confetti({
+        particleCount: 80,
+        angle: 60,
+        spread: 70,
+        startVelocity: 50,
+        origin: { x: 0, y: 0.65 },
+      }),
+    200,
+  )
+  setTimeout(
+    () =>
+      confetti({
+        particleCount: 80,
+        angle: 120,
+        spread: 70,
+        startVelocity: 50,
+        origin: { x: 1, y: 0.65 },
+      }),
+    400,
+  )
 }
 
 export default function GameEngineClient({ quiz }: { quiz: any }) {
   const router = useRouter()
-  const [phase, setPhase] = useState<'loading' | 'notice' | 'playing' | 'feedback' | 'finished' | 'done'>('loading')
+  const [phase, setPhase] = useState<
+    'loading' | 'notice' | 'playing' | 'feedback' | 'finished' | 'done'
+  >('loading')
   const [play, setPlay] = useState<Play | null>(null)
   const [feedback, setFeedback] = useState<Feedback | null>(null)
   const [notice, setNotice] = useState<{ title?: string; text: string } | null>(null)
-  const [done, setDone] = useState<{ todayScore: number; opensAt: string | null; otherQuiz?: string | null } | null>(null)
+  const [done, setDone] = useState<{
+    todayScore: number
+    opensAt: string | null
+    otherQuiz?: string | null
+  } | null>(null)
   const [currentUser, setCurrentUser] = useState<any>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -84,13 +110,19 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
   const deadlineRef = useRef(0)
   const busyRef = useRef(false)
 
-  const headers = useCallback((): HeadersInit => ({ 'Content-Type': 'application/json', 'x-device-id': deviceId() }), [])
+  const headers = useCallback(
+    (): HeadersInit => ({ 'Content-Type': 'application/json', 'x-device-id': deviceId() }),
+    [],
+  )
 
   /** Today's state from the server: the current question, or why there is none. */
   const load = useCallback(async () => {
     setError(null)
     try {
-      const res = await fetch(`/api/quiz-round?quizId=${quiz.id}`, { cache: 'no-store', headers: headers() })
+      const res = await fetch(`/api/quiz-round?quizId=${quiz.id}`, {
+        cache: 'no-store',
+        headers: headers(),
+      })
       if (res.status === 401) {
         router.push('/login')
         return
@@ -103,21 +135,60 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         setTimeLeft(Math.ceil(Number(data.secondsLeft)))
         setPhase('playing')
       } else if (data?.state === 'done') {
-        setDone({ todayScore: Number(data.todayScore) || 0, opensAt: data.opensAt ?? null, otherQuiz: data.otherQuiz ?? null })
+        setDone({
+          todayScore: Number(data.todayScore) || 0,
+          opensAt: data.opensAt ?? null,
+          otherQuiz: data.otherQuiz ?? null,
+        })
         setPhase('done')
       } else {
+        const when = (iso?: string | null) =>
+          iso
+            ? new Date(iso).toLocaleString('en-IN', {
+                timeZone: 'Asia/Kolkata',
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+              })
+            : ''
         const texts: Record<string, { title?: string; text: string }> = {
-          not_started: { text: 'This challenge has not started yet. Check back soon!' },
-          closed: { text: 'This challenge has ended. Thanks for playing!' },
-          maintenance: { title: 'Back in a few minutes', text: data.message || 'Chenz Quiz is being updated. Please try again in a few minutes.' },
-          cooloff: { title: "Today's round has closed", text: `Today's round has closed. New questions open at ${data.opensAt || '12:30 AM'}.` },
-          empty: { text: `You've played all the questions available right now. New questions open at ${data.opensAt || '12:30 AM'}.` },
+          not_started: {
+            title: 'Starting soon',
+            text: data.startsAt
+              ? `This quiz opens on ${when(data.startsAt)}. Check back then!`
+              : 'This quiz has not started yet. Check back soon!',
+          },
+          closed: {
+            title: 'This quiz has ended',
+            text: data.endsAt
+              ? `It closed on ${when(data.endsAt)}. Thanks for playing!`
+              : 'Thanks for playing!',
+          },
+          maintenance: {
+            title: 'Back in a few minutes',
+            text: data.message || 'Chenz Quiz is being updated. Please try again in a few minutes.',
+          },
+          cooloff: {
+            title: "Today's round has closed",
+            text: `Today's round has closed. New questions open at ${data.opensAt || '12:30 AM'}.`,
+          },
+          empty: {
+            text: `You've played all the questions available right now. New questions open at ${data.opensAt || '12:30 AM'}.`,
+          },
         }
-        setNotice(texts[data?.state] || { text: 'We could not load your questions. Please reload the page.' })
+        setNotice(
+          texts[data?.state] || {
+            text: 'We could not load your questions. Please reload the page.',
+          },
+        )
         setPhase('notice')
       }
     } catch {
-      setNotice({ text: 'We could not load your questions. Please check your connection and reload.' })
+      setNotice({
+        text: 'We could not load your questions. Please check your connection and reload.',
+      })
       setPhase('notice')
     }
   }, [quiz.id, headers, router])
@@ -202,7 +273,14 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
     const type = play?.question?.gameType
     if (type === 'mcq') sendAnswer({ optionId: res.optionId }, res.optionId)
     else if (type === 'dropdown') sendAnswer({ value: res.value ?? res.answerDetail })
-    else sendAnswer({ correct: Boolean(res?.isCorrect), detail: typeof res?.answerDetail === 'string' ? res.answerDetail : JSON.stringify(res?.answerDetail ?? '') })
+    else
+      sendAnswer({
+        correct: Boolean(res?.isCorrect),
+        detail:
+          typeof res?.answerDetail === 'string'
+            ? res.answerDetail
+            : JSON.stringify(res?.answerDetail ?? ''),
+      })
   }
 
   const next = () => {
@@ -220,12 +298,26 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
       <div className="relative flex flex-col items-center justify-center p-12 bg-slate-900/90 backdrop-blur-xl border border-slate-800 rounded-3xl shadow-2xl overflow-hidden max-w-md mx-auto my-12">
         <div className="relative flex items-center justify-center mb-6">
           <svg className="w-16 h-16 animate-spin text-indigo-500" viewBox="0 0 100 100" fill="none">
-            <circle className="opacity-15" cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" />
-            <path d="M50 10 A 40 40 0 0 1 90 50" stroke="#7c3aed" strokeWidth="8" strokeLinecap="round" />
+            <circle
+              className="opacity-15"
+              cx="50"
+              cy="50"
+              r="40"
+              stroke="currentColor"
+              strokeWidth="8"
+            />
+            <path
+              d="M50 10 A 40 40 0 0 1 90 50"
+              stroke="#7c3aed"
+              strokeWidth="8"
+              strokeLinecap="round"
+            />
           </svg>
         </div>
         <h3 className="text-lg font-bold text-white tracking-wide mb-1">Loading your question</h3>
-        <p className="text-slate-400 text-sm font-medium">Getting today&apos;s challenge ready...</p>
+        <p className="text-slate-400 text-sm font-medium">
+          Getting today&apos;s challenge ready...
+        </p>
       </div>
     )
   }
@@ -241,10 +333,14 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
         </h2>
         <p className="text-slate-600 text-sm leading-relaxed mb-6">
           {done.otherQuiz ? `You've played today's questions in ${done.otherQuiz}. ` : ''}
-          {done.opensAt ? `New questions open at ${done.opensAt}.` : 'Come back tomorrow for a fresh set of questions.'}
+          {done.opensAt
+            ? `New questions open at ${done.opensAt}.`
+            : 'Come back tomorrow for a fresh set of questions.'}
         </p>
         <div className="bg-amber-50/80 border border-amber-200/60 rounded-2xl p-4 max-w-xs mx-auto mb-8">
-          <span className="text-xs font-bold text-amber-700 uppercase tracking-wider block mb-0.5">Today&apos;s Score</span>
+          <span className="text-xs font-bold text-amber-700 uppercase tracking-wider block mb-0.5">
+            Today&apos;s Score
+          </span>
           <span className="text-3xl font-black text-amber-900">+{done.todayScore} XP</span>
         </div>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -279,7 +375,9 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
   if (phase === 'notice' || !play) {
     return (
       <div className="relative overflow-hidden bg-white/80 backdrop-blur-xl border border-slate-200/80 rounded-3xl p-8 md:p-12 text-center shadow-xl shadow-slate-100/50 max-w-lg mx-auto">
-        <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">{notice?.title || 'No Questions Available'}</h3>
+        <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">
+          {notice?.title || 'No Questions Available'}
+        </h3>
         <p className="text-slate-500 text-sm md:text-base leading-relaxed mb-8 max-w-sm mx-auto">
           {notice?.text || 'We could not find any questions right now.'}
         </p>
@@ -315,7 +413,9 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
   const gameData = { ...q, initialAnswer: null }
   const sponsorText =
     slot.sponsorLine ||
-    (slot.extraSeconds && slot.sponsorName ? `+${slot.extraSeconds} seconds on this question, courtesy of ${slot.sponsorName}` : '')
+    (slot.extraSeconds && slot.sponsorName
+      ? `+${slot.extraSeconds} seconds on this question, courtesy of ${slot.sponsorName}`
+      : '')
 
   return (
     <div className="relative bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-xs">
@@ -336,7 +436,9 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
           {phase === 'playing' && (
             <span
               className={`px-3 py-1 font-bold text-[18px] rounded-full transition-colors ${
-                isTimeLow ? 'bg-rose-100 text-rose-700 animate-pulse' : 'bg-slate-100 text-slate-700'
+                isTimeLow
+                  ? 'bg-rose-100 text-rose-700 animate-pulse'
+                  : 'bg-slate-100 text-slate-700'
               }`}
             >
               ⏱️ {shownLeft}s
@@ -367,44 +469,112 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
       {/* Sponsored question */}
       {slot.sponsored && (
         <div className="mb-5 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3">
-          {slot.sponsorLogo && <img src={slot.sponsorLogo} alt={slot.sponsorName || 'Sponsor'} className="h-10 w-auto max-w-[120px] object-contain" />}
+          {slot.sponsorLogo && (
+            <img
+              src={slot.sponsorLogo}
+              alt={slot.sponsorName || 'Sponsor'}
+              className="h-10 w-auto max-w-[120px] object-contain"
+            />
+          )}
           <div className="text-left">
             <span className="block text-xs font-bold uppercase tracking-wider text-amber-700">
               Sponsored{slot.sponsorName ? ` by ${slot.sponsorName}` : ''}
             </span>
-            {sponsorText && <span className="block text-sm font-semibold text-amber-900">{sponsorText}</span>}
+            {sponsorText && (
+              <span className="block text-sm font-semibold text-amber-900">{sponsorText}</span>
+            )}
           </div>
         </div>
       )}
 
       {q?.heroImage && (
         <div className="mb-6 overflow-hidden rounded-2xl border border-slate-100 max-h-72">
-          <img src={q.heroImage} alt={q?.questionTitle || 'Question'} className="w-full h-full object-cover quizzzimagesectionnn " />
+          <img
+            src={q.heroImage}
+            alt={q?.questionTitle || 'Question'}
+            className="w-full h-full object-cover quizzzimagesectionnn "
+          />
         </div>
       )}
 
       <h2 className="text-2xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#03045e] via-[#7000ff] to-[#ff007a] mb-2">
         {q?.questionTitle || q?.title || 'Challenge'}
       </h2>
-      {q?.content && <p className="text-slate-600 text-sm leading-relaxed mb-6 whitespace-pre-line">{q.content}</p>}
+      {q?.content && (
+        <p className="text-slate-600 text-sm leading-relaxed mb-6 whitespace-pre-line">
+          {q.content}
+        </p>
+      )}
 
-      <div className={`min-h-[250px] mt-4 ${locked && gameType !== 'mcq' ? 'pointer-events-none opacity-70' : ''}`}>
+      <div
+        className={`min-h-[250px] mt-4 ${locked && gameType !== 'mcq' ? 'pointer-events-none opacity-70' : ''}`}
+      >
         {gameType === 'mcq' && (
           <MCQGame
             key={`${play.roundId}-${play.position}`}
             data={gameData}
             onComplete={onGameAnswer}
             locked={locked}
-            reveal={feedback ? { pickedId: feedback.pickedId ?? null, correctOptionId: feedback.reveal?.correctOptionId ?? null } : null}
+            reveal={
+              feedback
+                ? {
+                    pickedId: feedback.pickedId ?? null,
+                    correctOptionId: feedback.reveal?.correctOptionId ?? null,
+                  }
+                : null
+            }
           />
         )}
-        {gameType === 'dropdown' && <DropdownGame key={`${play.roundId}-${play.position}`} data={gameData} onComplete={onGameAnswer} locked={locked} />}
-        {gameType === 'wordle' && <WordleGame key={`${play.roundId}-${play.position}`} data={gameData} onComplete={onGameAnswer} />}
-        {gameType === 'word_finder' && <WordFinderGame key={`${play.roundId}-${play.position}`} data={gameData} onComplete={onGameAnswer} />}
-        {gameType === 'match_following' && <MatchGame key={`${play.roundId}-${play.position}`} data={gameData} onComplete={onGameAnswer} />}
-        {gameType === 'spot_lie' && <SpotLieGame key={`${play.roundId}-${play.position}`} data={gameData} onSelect={onGameAnswer} />}
-        {gameType === 'reorder' && <ReorderGame key={`${play.roundId}-${play.position}`} data={gameData} onComplete={onGameAnswer} />}
-        {gameType === 'drag_drop' && <DragDropGame key={`${play.roundId}-${play.position}`} data={gameData} onComplete={onGameAnswer} />}
+        {gameType === 'dropdown' && (
+          <DropdownGame
+            key={`${play.roundId}-${play.position}`}
+            data={gameData}
+            onComplete={onGameAnswer}
+            locked={locked}
+          />
+        )}
+        {gameType === 'wordle' && (
+          <WordleGame
+            key={`${play.roundId}-${play.position}`}
+            data={gameData}
+            onComplete={onGameAnswer}
+          />
+        )}
+        {gameType === 'word_finder' && (
+          <WordFinderGame
+            key={`${play.roundId}-${play.position}`}
+            data={gameData}
+            onComplete={onGameAnswer}
+          />
+        )}
+        {gameType === 'match_following' && (
+          <MatchGame
+            key={`${play.roundId}-${play.position}`}
+            data={gameData}
+            onComplete={onGameAnswer}
+          />
+        )}
+        {gameType === 'spot_lie' && (
+          <SpotLieGame
+            key={`${play.roundId}-${play.position}`}
+            data={gameData}
+            onSelect={onGameAnswer}
+          />
+        )}
+        {gameType === 'reorder' && (
+          <ReorderGame
+            key={`${play.roundId}-${play.position}`}
+            data={gameData}
+            onComplete={onGameAnswer}
+          />
+        )}
+        {gameType === 'drag_drop' && (
+          <DragDropGame
+            key={`${play.roundId}-${play.position}`}
+            data={gameData}
+            onComplete={onGameAnswer}
+          />
+        )}
       </div>
 
       {error && (
@@ -423,17 +593,22 @@ export default function GameEngineClient({ quiz }: { quiz: any }) {
             feedback.correct ? 'border-emerald-200 bg-emerald-50' : 'border-rose-200 bg-rose-50'
           }`}
         >
-          <p className={`text-lg font-black ${feedback.correct ? 'text-emerald-800' : 'text-rose-800'}`}>
+          <p
+            className={`text-lg font-black ${feedback.correct ? 'text-emerald-800' : 'text-rose-800'}`}
+          >
             {feedback.correct ? '✅ Correct!' : feedback.timedOut ? "⏱️ Time's up" : '❌ Not quite'}
             {feedback.points !== 0 && (
               <span className="ml-2 text-base font-bold">
                 {feedback.points > 0 ? '+' : ''}
-                {feedback.points} XP{feedback.speedBonus ? ` (⚡ +${feedback.speedBonus} speed)` : ''}
+                {feedback.points} XP
+                {feedback.speedBonus ? ` (⚡ +${feedback.speedBonus} speed)` : ''}
               </span>
             )}
           </p>
           {!feedback.correct && feedback.reveal?.correctAnswer && (
-            <p className="mt-1 text-sm font-semibold text-slate-700">Answer: {feedback.reveal.correctAnswer}</p>
+            <p className="mt-1 text-sm font-semibold text-slate-700">
+              Answer: {feedback.reveal.correctAnswer}
+            </p>
           )}
           {feedback.explanation && (
             <p className="mt-2 text-sm text-slate-700">
