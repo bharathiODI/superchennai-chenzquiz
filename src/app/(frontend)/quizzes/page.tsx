@@ -6,8 +6,11 @@ import QuizHeader from './QuizHeader'
 import { generateMeta } from '@/utilities/generateMeta'
 import { cache } from 'react'
 import { getQuizSiteSettings } from '@/globals/QuizSiteSettings/getQuizSiteSettings'
+import { getNow } from '@/utilities/clock'
 
-export const revalidate = 600
+// Always fresh: the quiz shown depends on its status and dates, and they change.
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 const queryTodayQuiz = cache(async () => {
   const payload = await getPayload({ config: configPromise })
@@ -57,6 +60,7 @@ export default async function QuizzesPage() {
   const todayQuiz = await queryTodayQuiz()
   // Header and "no quiz" text come from CMS > Globals > Quiz Site Settings > Quizzes page
   const { quizzesPage: text } = await getQuizSiteSettings()
+  const serverNow = (await getNow(await getPayload({ config: configPromise }))).toISOString()
 
   return (
     <div className="relative min-h-screen text-slate-800 pt-16 pb-24 border-t border-slate-100 bg-cover bg-center bg-no-repeat bg-fixed bg-[url('/app-images/background-one.png')] padddingtopppp">
@@ -69,6 +73,7 @@ export default async function QuizzesPage() {
             slug={todayQuiz.slug}
             questionCount={todayQuiz.questions?.length || 0}
             quizTitle={todayQuiz.quizTitle}
+            serverNow={serverNow}
           />
         ) : (
           <div className="relative overflow-hidden bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border border-slate-800/80 rounded-3xl p-10 md:p-14 text-center shadow-2xl mb-12">
@@ -117,9 +122,7 @@ export default async function QuizzesPage() {
               <h3 className="text-2xl md:text-3xl font-black text-white mb-3 tracking-tight">
                 {text.emptyHeading}
               </h3>
-              <p className="text-slate-400 text-base leading-relaxed mb-8">
-                {text.emptyText}
-              </p>
+              <p className="text-slate-400 text-base leading-relaxed mb-8">{text.emptyText}</p>
             </div>
           </div>
         )}

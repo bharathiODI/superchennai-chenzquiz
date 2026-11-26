@@ -19,7 +19,13 @@ import { getQuizTitles } from './getQuizTitles'
 import { getTitleForXP } from './quizTitles'
 
 export type Id = number | string
-export type PlayCtx = { now: Date; deviceId?: string | null; ip?: string | null }
+export type PlayCtx = {
+  now: Date
+  deviceId?: string | null
+  ip?: string | null
+  /** Maintenance mode: an open play can be finished, but no new play starts. */
+  noNewPlays?: { message?: string }
+}
 
 /** Seconds an answer may arrive after the timer ends (network delay) and still count. */
 export const GRACE_SECONDS = 2
@@ -467,6 +473,7 @@ async function closeStalePlay(
 /* ------------------------------------------------------------------ the state the browser asks for */
 
 export type PlayState =
+  | { state: 'maintenance'; message?: string }
   | { state: 'not_started'; startsAt: string | null }
   | { state: 'closed'; endsAt: string | null }
   | { state: 'cooloff'; opensAt: string }
@@ -597,6 +604,7 @@ export async function getPlay(
     }
   }
   if (!current) {
+    if (ctx.noNewPlays) return { state: 'maintenance', message: ctx.noNewPlays.message }
     if (isCoolOff(now, settings.gameDay)) return { state: 'cooloff', opensAt }
     current = await createPlay(
       payload,

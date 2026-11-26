@@ -16,20 +16,31 @@ export async function GET(req: Request) {
     const quizId = new URL(req.url).searchParams.get('quizId')
     if (!quizId) return NextResponse.json({ error: 'quizId is required' }, { status: 400 })
 
-    // Maintenance mode: no new plays
+    // Maintenance mode: no new plays, but a play already on screen can be finished
     const flags = readSiteFlags()
-    if (flags.maintenance) {
-      return NextResponse.json({ state: 'maintenance', message: flags.message }, { headers: noStore })
-    }
+    const maintenance = { state: 'maintenance', message: flags.message }
 
     const payload = await getPayload({ config: configPromise })
     const userId = await sessionPlayerId(payload)
-    if (!userId) return NextResponse.json({ state: 'login', error: 'Login required' }, { status: 401, headers: noStore })
+    if (!userId) {
+      if (flags.maintenance) return NextResponse.json(maintenance, { headers: noStore })
+      return NextResponse.json(
+        { state: 'login', error: 'Login required' },
+        { status: 401, headers: noStore },
+      )
+    }
 
-    const result = await getPlay(payload, quizId, userId, { now: await getNow(payload), ...(await requestDevice()) })
+    const result = await getPlay(payload, quizId, userId, {
+      now: await getNow(payload),
+      ...(await requestDevice()),
+      ...(flags.maintenance ? { noNewPlays: { message: flags.message } } : {}),
+    })
     return NextResponse.json(result, { headers: noStore })
   } catch (error: any) {
     console.error('quiz-round error:', error?.message || error)
-    return NextResponse.json({ error: 'Could not load your questions' }, { status: 500, headers: noStore })
+    return NextResponse.json(
+      { error: 'Could not load your questions' },
+      { status: 500, headers: noStore },
+    )
   }
 }

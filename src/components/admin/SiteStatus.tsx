@@ -5,7 +5,13 @@ import { useAuth } from '@payloadcms/ui'
 import { useCallback, useEffect, useState } from 'react'
 import { ADMINS, userHas } from '@/access/roles'
 
-type Playing = { player: string; phone: string; quiz: string; startedAt: string; minutesAgo: number }
+type Playing = {
+  player: string
+  phone: string
+  quiz: string
+  startedAt: string
+  minutesAgo: number
+}
 type Status = {
   maintenance: boolean
   message: string
@@ -52,7 +58,14 @@ export function SiteStatus() {
 
   const toggle = async () => {
     const on = !s.maintenance
-    if (!window.confirm(on ? 'Switch maintenance ON? Players cannot start new games or log in until you switch it off.' : 'Switch maintenance OFF and let players play again?')) return
+    if (
+      !window.confirm(
+        on
+          ? 'Switch maintenance ON? Players cannot start new games or log in until you switch it off.'
+          : 'Switch maintenance OFF and let players play again?',
+      )
+    )
+      return
     setBusy(true)
     await fetch('/api/site-status', {
       method: 'POST',
@@ -83,11 +96,46 @@ export function SiteStatus() {
         >
           {s.maintenance ? 'MAINTENANCE ON - new games paused' : 'Open - players can play'}
         </span>
-        <span style={{ fontWeight: 600 }}>
-          Playing now: {playing.length}
-          {typeof s.finishedLast5Min === 'number' ? ` · finished in the last 5 min: ${s.finishedLast5Min}` : ''}
+        <span
+          title="Plays started in the last 15 minutes and not finished"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '4px 12px',
+            borderRadius: 999,
+            fontSize: 14,
+            fontWeight: 800,
+            color: playing.length ? '#7c2d12' : '#14532d',
+            background: playing.length ? '#fed7aa' : '#dcfce7',
+            border: `1px solid ${playing.length ? '#fb923c' : '#86efac'}`,
+          }}
+        >
+          <span
+            className={playing.length ? 'ss-live-dot' : undefined}
+            style={{
+              width: 9,
+              height: 9,
+              borderRadius: 999,
+              background: playing.length ? '#ea580c' : '#16a34a',
+            }}
+          />
+          {playing.length} playing now
         </span>
-        <button type="button" className="btn btn--style-secondary btn--size-small" style={{ margin: 0 }} onClick={load}>
+        {s.maintenance ? (
+          <span style={{ fontWeight: 700, color: playing.length ? '#b45309' : '#15803d' }}>
+            {playing.length ? 'Wait: players are finishing their plays' : 'Safe to deploy now'}
+          </span>
+        ) : null}
+        {typeof s.finishedLast5Min === 'number' ? (
+          <span style={{ fontWeight: 600 }}>finished in the last 5 min: {s.finishedLast5Min}</span>
+        ) : null}
+        <button
+          type="button"
+          className="btn btn--style-secondary btn--size-small"
+          style={{ margin: 0 }}
+          onClick={load}
+        >
           Refresh
         </button>
         <span style={{ color: 'var(--theme-elevation-500)', fontSize: 12 }}>
@@ -119,12 +167,21 @@ export function SiteStatus() {
         </table>
       )}
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, marginTop: 12 }}>
+      <div
+        style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, marginTop: 12 }}
+      >
         <input
           value={msg}
           onChange={(e) => setMsg(e.target.value)}
           placeholder="Message players see during maintenance"
-          style={{ flex: '1 1 320px', padding: '6px 8px', background: 'var(--theme-input-bg)', color: 'var(--theme-text)', border: '1px solid var(--theme-elevation-150)', borderRadius: 4 }}
+          style={{
+            flex: '1 1 320px',
+            padding: '6px 8px',
+            background: 'var(--theme-input-bg)',
+            color: 'var(--theme-text)',
+            border: '1px solid var(--theme-elevation-150)',
+            borderRadius: 4,
+          }}
         />
         <button
           type="button"
@@ -137,9 +194,12 @@ export function SiteStatus() {
         </button>
       </div>
       <p style={{ margin: '8px 0 0', fontSize: 12, color: 'var(--theme-elevation-500)' }}>
-        {s.maintenance && s.since ? `On since ${new Date(s.since).toLocaleString('en-GB', { timeZone: 'Asia/Kolkata' })}${s.by ? ` by ${s.by}` : ''}. ` : ''}
-        Safe deploy: switch ON, wait until Playing now is 0, deploy, then switch OFF. Rounds already on screen can still
-        be finished. &quot;Playing now&quot; = rounds started in the last {s.playingWindowMin ?? 15} minutes and not finished.
+        {s.maintenance && s.since
+          ? `On since ${new Date(s.since).toLocaleString('en-GB', { timeZone: 'Asia/Kolkata' })}${s.by ? ` by ${s.by}` : ''}. `
+          : ''}
+        Safe deploy: switch ON, wait until Playing now is 0, deploy, then switch OFF. Rounds already
+        on screen can still be finished. &quot;Playing now&quot; = rounds started in the last{' '}
+        {s.playingWindowMin ?? 15} minutes and not finished.
       </p>
     </div>
   )

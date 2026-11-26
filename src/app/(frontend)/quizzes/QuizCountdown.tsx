@@ -45,6 +45,8 @@ import { useEffect, useState } from 'react'
 interface QuizCountdownProps {
   quizDate: string
   quizEndDate: string
+  /** The server's time when the page was made (the demo test clock on the demo site). */
+  serverNow?: string
   slug: string
   questionCount: number
   quizTitle: string
@@ -56,6 +58,7 @@ export default function QuizCountdown({
   slug,
   questionCount,
   quizTitle,
+  serverNow,
 }: QuizCountdownProps) {
   const [timeLeft, setTimeLeft] = useState<{
     days: number
@@ -67,8 +70,11 @@ export default function QuizCountdown({
   const [status, setStatus] = useState<'UPCOMING' | 'LIVE' | 'EXPIRED'>('UPCOMING')
 
   useEffect(() => {
+    // Count from the server's clock, so a phone with the wrong time (or the demo test clock) still
+    // shows the right state without a refresh.
+    const offset = serverNow ? Date.parse(serverNow) - Date.now() : 0
     const updateTimer = () => {
-      const now = new Date().getTime()
+      const now = Date.now() + offset
       const startTime = new Date(quizDate).getTime()
       const endTime = new Date(quizEndDate).getTime() /* 👈 Dynamic End Time Logic */
 
@@ -97,7 +103,7 @@ export default function QuizCountdown({
     const interval = setInterval(updateTimer, 1000)
 
     return () => clearInterval(interval)
-  }, [quizDate, quizEndDate])
+  }, [quizDate, quizEndDate, serverNow])
 
   // Hydration Placeholder
   if (timeLeft === null && status === 'UPCOMING') {
