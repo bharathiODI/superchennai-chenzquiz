@@ -12,6 +12,7 @@ import { isTestPhone, realPlayersWhere } from '@/utilities/testPlayers'
 import { getQuizSiteSettings } from '@/globals/QuizSiteSettings/getQuizSiteSettings'
 import { getTitleForXP, type QuizTitle } from '@/utilities/quizTitles'
 import { computeStreaks } from '@/utilities/quizStreak'
+import { dayKeyOf, playDaysByUser } from '@/utilities/playDays'
 import { gameDayKey } from '@/utilities/gameDay'
 import { getGameDaySettings } from '@/utilities/getGameTimers'
 
@@ -216,19 +217,25 @@ export default async function LeaderboardPage({
   const playDates = new Map<string, string[]>()
 
   if (visibleIds.length) {
-    const attempts = await payload.find({
-      collection: 'quiz-attempts',
-      where: { user: { in: visibleIds } },
-      limit: 10000,
-      depth: 0,
-      overrideAccess: true,
-    })
-    for (const a of attempts.docs as any[]) {
-      const userId = relId(a.user)
-      if (!userId || !a.completedAt) continue
-      const list = playDates.get(userId) ?? []
-      list.push(a.completedAt)
-      playDates.set(userId, list)
+    // The game day saved on each finished play (not the finish time: see utilities/playDays)
+    for (const [userId, days] of await playDaysByUser(payload, visibleIds))
+      playDates.set(userId, days)
+    const missing = visibleIds.filter((id) => !playDates.has(String(id)))
+    if (missing.length) {
+      const attempts = await payload.find({
+        collection: 'quiz-attempts',
+        where: { user: { in: missing } },
+        limit: 10000,
+        depth: 0,
+        overrideAccess: true,
+      })
+      for (const a of attempts.docs as any[]) {
+        const userId = relId(a.user)
+        if (!userId || !a.completedAt) continue
+        const list = playDates.get(String(userId)) ?? []
+        list.push(a.completedAt)
+        playDates.set(String(userId), list)
+      }
     }
   }
 
@@ -243,7 +250,7 @@ export default async function LeaderboardPage({
       rank,
       avatarUrl: avatarOf(user),
       overallXP,
-      streak: computeStreaks(playDates.get(row.id) ?? [], now, (d) => gameDayKey(d, gameDay)).current,
+      streak: computeStreaks(playDates.get(String(row.id)) ?? [], now, dayKeyOf(gameDay)).current,
       title: getTitleForXP(overallXP, titles),
     }
   }

@@ -17,6 +17,7 @@ import { getQuizTitles } from '@/utilities/getQuizTitles'
 import { getTitleForXP } from '@/utilities/quizTitles'
 import { LogoutButton } from './components/ClientActions'
 import { calculateUserStats } from './lib/profile-stats'
+import { playDaysByUser } from '@/utilities/playDays'
 import { realPlayersWhere } from '@/utilities/testPlayers'
 
 export const metadata = {
@@ -58,7 +59,14 @@ export default async function ProfilePage() {
   // Rank = Higher XP Users + 1
   const currentRank = higherXPUsers.totalDocs + 1
   const attempts = attemptsRes.docs as any[]
-  const userStats = calculateUserStats(attempts, userXP, await getGameDaySettings(payload), await getNow(payload))
+  const playedDays = (await playDaysByUser(payload, [user.id])).get(String(user.id))
+  const userStats = calculateUserStats(
+    attempts,
+    userXP,
+    await getGameDaySettings(payload),
+    await getNow(payload),
+    playedDays,
+  )
 
   // Title (tier) from total XP - tiers are editable in admin (Globals > Quiz Titles)
   const titles = await getQuizTitles(payload)

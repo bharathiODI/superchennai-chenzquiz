@@ -329,27 +329,39 @@ export async function queryRows(
                FROM quiz_attempts a
               WHERE ${quizCond('a')} AND ${inPeriod('a')}
               GROUP BY a.user_id),
-           pd AS (SELECT DISTINCT a.user_id, ${DAY('a', s)} AS d FROM quiz_attempts a
-                   WHERE ${quizCond('a')} AND a.completed_at IS NOT NULL),
+           -- Days played and streaks: the game day saved on each finished play (quiz_rounds.day),
+           -- not the finish time (the day start was 8 AM until 23 Nov). Players without any saved
+           -- play (very old data) fall back to the finish time.
+           rd AS (SELECT r.user_id, NULLIF(r.day, '')::date AS d FROM quiz_rounds r
+                   WHERE r.status = 'completed' AND ${quizCond('r')} AND NULLIF(r.day, '') IS NOT NULL),
+           pd AS (SELECT DISTINCT user_id, d FROM rd
+                  UNION
+                  SELECT DISTINCT a.user_id, ${DAY('a', s)} FROM quiz_attempts a
+                   WHERE ${quizCond('a')} AND a.completed_at IS NOT NULL
+                     AND NOT EXISTS (SELECT 1 FROM rd WHERE rd.user_id = a.user_id)),
+           dp AS (SELECT user_id, count(*)::int AS days FROM pd
+                   WHERE ${[opt(f.from, '::date', (p) => `d >= ${p}`), opt(f.to, '::date', (p) => `d <= ${p}`)].join(' AND ')}
+                   GROUP BY user_id),
            isl AS (SELECT user_id, d, d - (row_number() OVER (PARTITION BY user_id ORDER BY d))::int AS g FROM pd),
            runs AS (SELECT user_id, count(*)::int AS len, max(d) AS last_d FROM isl GROUP BY user_id, g),
            stk AS (SELECT user_id, max(len)::int AS best,
                           coalesce(max(len) FILTER (WHERE last_d >= ${P.add(ctx.today, '::date')} - 1), 0)::int AS cur
                      FROM runs GROUP BY user_id)
          SELECT u.id, u.name, u.phone, u.email, u.created_at,
-                coalesce(att.rounds, 0) AS rounds, coalesce(att.days, 0) AS days,
+                coalesce(att.rounds, 0) AS rounds, coalesce(dp.days, 0) AS days,
                 coalesce(att.points, 0) AS points, coalesce(att.secs, 0) AS secs, att.last_at,
                 coalesce(stk.cur, 0) AS streak, coalesce(stk.best, 0) AS best,
                 count(*) OVER()::int AS total
            FROM quiz_users u
            LEFT JOIN att ON att.user_id = u.id
+           LEFT JOIN dp ON dp.user_id = u.id
            LEFT JOIN stk ON stk.user_id = u.id
           WHERE ${REAL()} AND ${SEARCH()} AND ${quizPlayers} AND ${playedCond}
             AND ${opt(f.regFrom, '::date', (p) => `${JOINED} >= ${p}`)}
             AND ${opt(f.regTo, '::date', (p) => `${JOINED} <= ${p}`)}
             AND ${opt(f.minPoints, '::float', (p) => `coalesce(att.points, 0) >= ${p}`)}
             AND ${opt(f.maxPoints, '::float', (p) => `coalesce(att.points, 0) <= ${p}`)}
-            AND ${opt(f.minDays, '::int', (p) => `coalesce(att.days, 0) >= ${p}`)}
+            AND ${opt(f.minDays, '::int', (p) => `coalesce(dp.days, 0) >= ${p}`)}
             AND ${opt(f.minStreak, '::int', (p) => `coalesce(stk.cur, 0) >= ${p}`)}
             AND ${opt(f.minBest, '::int', (p) => `coalesce(stk.best, 0) >= ${p}`)}
           ORDER BY ${order[f.sort] ?? order.points}

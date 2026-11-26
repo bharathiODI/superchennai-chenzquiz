@@ -1,5 +1,6 @@
 import { computeStreaks } from '@/utilities/quizStreak'
-import { DEFAULT_GAME_DAY, gameDayKey, type GameDaySettings } from '@/utilities/gameDay'
+import { DEFAULT_GAME_DAY, type GameDaySettings } from '@/utilities/gameDay'
+import { dayKeyOf } from '@/utilities/playDays'
 
 export interface QuizAttempt {
   id: number | string
@@ -24,6 +25,8 @@ export function calculateUserStats(
   userTotalXP?: number,
   gameDay: GameDaySettings = DEFAULT_GAME_DAY,
   now: Date = new Date(),
+  /** Game days saved on the player's finished plays; streaks use these when given. */
+  playedDays?: string[],
 ) {
   const totalPlayed = attempts.length
   if (totalPlayed === 0) {
@@ -40,8 +43,12 @@ export function calculateUserStats(
   }
 
   const correctAnswers = attempts.reduce((acc, curr) => acc + Number(curr.correctAnswers || 0), 0)
-  const totalQuestionsSum = attempts.reduce((acc, curr) => acc + Number(curr.totalQuestions || 0), 0)
-  const accuracy = totalQuestionsSum > 0 ? Math.round((correctAnswers / totalQuestionsSum) * 100) : 0
+  const totalQuestionsSum = attempts.reduce(
+    (acc, curr) => acc + Number(curr.totalQuestions || 0),
+    0,
+  )
+  const accuracy =
+    totalQuestionsSum > 0 ? Math.round((correctAnswers / totalQuestionsSum) * 100) : 0
 
   const attemptsScoreSum = attempts.reduce((acc, curr) => acc + Number(curr.score || 0), 0)
   const totalScore = userTotalXP !== undefined ? userTotalXP : attemptsScoreSum
@@ -52,9 +59,9 @@ export function calculateUserStats(
 
   // Streaks: consecutive game days (they start at the Quiz Settings time, 12:30 AM by default)
   const { current: currentStreak, best: bestStreak } = computeStreaks(
-    attempts.map((a) => a.completedAt).filter(Boolean),
+    playedDays?.length ? playedDays : attempts.map((a) => a.completedAt).filter(Boolean),
     now,
-    (d) => gameDayKey(d, gameDay),
+    dayKeyOf(gameDay),
   )
 
   return {
