@@ -135,6 +135,7 @@ scp D:\kavi\superchennai\server-conf\chenzquiz-site.sh D:\kavi\superchennai\serv
 | 010-011 | WordPress roles (Super Admin ... Viewer); admins -> Super Admin, old "client" -> Viewer; "Created by" on questions and posts |
 | 012 | Lean setup, new columns and tables only: Use in, Round layout, answers, play fields, Disqualified, fair-play settings |
 | 013 | Lean setup, data: questions in the sponsored schedule -> Sponsored; pool questions -> that quiz; published questions in no pool and no schedule -> Not in play; Round layout from the old settings. Nothing is deleted |
+| 014 | DRA questions 22, 29, 35 (DRA banner image, tagged General by 013) -> Sponsored, only while they still carry the banner |
 
 **On any machine** (it uses `DATABASE_URI` from that machine's `.env`):
 ```bash
